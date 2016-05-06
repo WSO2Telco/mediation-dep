@@ -30,7 +30,7 @@
 
         var state =  "<%=st%>";
         var code  = "<%=cd%>";
-        var redirect_uri="http://localhost:8080/demo/callback.jsp";
+        var redirect_uri="http://104.197.223.199/demo/callback.jsp";
         var client_id="XjMkcrFwcC7QRIRxMmwo89u9yhga";
         var client_secret="DOY01WdfDYyBdpJQlBqlPlFOoGMa";
         var token_endpoint="https://identity.qa.example.com:443/oauth2/token";
