@@ -14,6 +14,7 @@
   <script language="JavaScript" src="Base64Utils.js" type="text/javascript"></script>
   <script language="JavaScript" src="OpenIdConnectSDK.js" type="text/javascript"></script>
   <script language="JavaScript" src="jwt-decode.js" type="text/javascript"></script>
+  <script language="JavaScript" src="gibberish-aes-1.0.0.js" type="text/javascript"></script>
   <script src="//code.jquery.com/jquery-1.11.0.min.js"></script>
 </head>
 <body>
