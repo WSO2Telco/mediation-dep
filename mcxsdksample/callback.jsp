@@ -34,7 +34,7 @@
         var redirect_uri="http://104.197.223.199:8080/demo/callback.jsp";
         var client_id="pa6qa3JS5R_8iZjdyAWU1hkOOoQa";
         var client_secret="9REoHdeZ7ByN8Vym5OPMfWlEbpka";
-        var token_endpoint="http://india.gateway.wso2telco.com/token/v1/airtel/oauth2/token";
+        var token_endpoint="https://india.gateway.wso2telco.com/token/v1/airtel/oauth2/token";
 
         document.getElementById("status").innerHTML =  "Authorized";        
         discoveryDetails=getCacheDiscoveryItem();
