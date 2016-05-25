@@ -31,15 +31,21 @@
         <div class="row">
           <div class="col-md-6">
             <div class="embed-responsive embed-responsive-16by9">
-              <iframe width="560" height="315" src="https://www.youtube.com/embed/cYwxDlP1vBM" frameborder="0" allowfullscreen></iframe>
+              <iframe width="560" height="315" src="https://www.youtube.com/embed/cYwxDlP1vBM" frameborder="0" allowfullscreen=""></iframe>
             </div>
           </div>
           <div class="col-md-6">
-            <div>PCR COOKIE VALUE : <p id="cookie"></p></div>            
+            <div>PCR COOKIE VALUE :
+              <p id="cookie"></p>
+            </div>
           </div>
           <form name="myform" action="javascript:runAuthorization()">
             <input type="image" name="Submit" src="https://mobileconnect.io/wp-content/themes/roots-master/assets/img/button.png" value="Update">
           </form>
+          <br>         
+          <button onclick="authenticateWithPCR()">Authenticate with PCR</button>
+Step 2
+
         </div>
       </div>
     </div>
@@ -77,48 +83,57 @@
         </div>
       </div>
     </footer>
-  
-<script language="JavaScript">
-
-    window.onload = function() {         
-      var x = getCookie("pcr_encoded");
-      
-      if (x == null) {
-           document.getElementById("cookie").innerHTML = "Cookie not Found"; 
-      }else{
-           document.getElementById("cookie").innerHTML = x; 
-      }     
-      
-    }
-    
-      function runAuthorization() {
-
-      var url="http://india.gateway.wso2telco.com/authorize/v1/airtel/oauth2/authorize";
-      var nonce="nonceOWFlMTE5NjUyN";
-      var state="stateNjgwZjRhMzdlO";
-      var scope="openid";
-      var response_type="code";
-      var redirect_uri="https://staging.mconnect.wso2telco.com/demo/callback.jsp";
-      var client_id="pa6qa3JS5R_8iZjdyAWU1hkOOoQa";
-      var acr_values="2";
-      //var login_hint="919205614914";
-      var login_hint=null;
-
-      var prompt="none";
-      var max_age=3600;
-        var authorizationOptions=null;
-        var callbackFunction=null;
-
-        authorize(url, client_id, scope, redirect_uri, response_type, state, nonce, prompt, max_age, acr_values, authorizationOptions,callbackFunction);        
+    <script language="JavaScript">
+      window.onload = function() {         
+              var x = getCookie("pcr_encoded");
+              
+              if (x == null) {
+                   document.getElementById("cookie").innerHTML = "Cookie not Found"; 
+              }else{
+                   document.getElementById("cookie").innerHTML = x; 
+              }     
+              
+            }
+            
+              function runAuthorization() {
         
-    }
-    
+              var url="http://india.gateway.wso2telco.com/authorize/v1/airtel/oauth2/authorize";
+              var nonce="nonceOWFlMTE5NjUyN";
+              var state="stateNjgwZjRhMzdlO";
+              var scope="openid";
+              var response_type="code";
+              var redirect_uri="https://staging.mconnect.wso2telco.com/demo/callback.jsp";
+              var client_id="pa6qa3JS5R_8iZjdyAWU1hkOOoQa";
+              var acr_values="2";
+              //var login_hint="919205614914";
+              var login_hint=null;
+        
+              var prompt="none";
+              var max_age=3600;
+                var authorizationOptions=null;
+                var callbackFunction=null;
+        
+                authorize(url, client_id, scope, redirect_uri, response_type, state, nonce, prompt, max_age, acr_values, authorizationOptions,callbackFunction);        
+                
+            }      
+            
 
-    function getCookie(name) {
-      var value = "; " + document.cookie;
-      var parts = value.split("; " + name + "=");
-      if (parts.length == 2) return parts.pop().split(";").shift();
-    }
+            function authenticateWithPCR(){
+              var x = getCookie("pcr_encoded");
+              var xmlHttp = new XMLHttpRequest();
+              var url = "http://india.gateway.wso2telco.com/authorize/v1/vodafone/oauth2/authorize?nonce=nonceOWFlMTE5NjUyN&state=stateNjgwZjRhMzdlO&scope=openid&response_type=code&redirect_uri=https://staging.mconnect.wso2telco.com/demo/callback.jsp&client_id=BjHCNHnoJN46X1JEKt6HW_kI0rMa&acr_values=2&login_hint="+x;
+              
+              xmlHttp.open( "GET", url, false );
+              xmlHttp.send( null );
+            }
 
-  </script>
+            function getCookie(name) {
+              var value = "; " + document.cookie;
+              var parts = value.split("; " + name + "=");
+              if (parts.length == 2) return parts.pop().split(";").shift();
+            }
+
+    </script>
+  
+
 </body></html>
