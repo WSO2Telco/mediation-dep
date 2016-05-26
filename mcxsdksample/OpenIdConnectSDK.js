@@ -239,6 +239,8 @@ function tokenFromAuthorizationCode(url, code, client_id, client_secret, redirec
 
     		var pcrCookie = getCookie("pcr_encoded");    		
 
+    		console.log("pcr value: "+pcr);
+
 			if (pcrCookie == null && isMobile == true) {
 		       document.cookie = "pcr_encoded="+pcr_cookie_enc;
 		    }		    			
