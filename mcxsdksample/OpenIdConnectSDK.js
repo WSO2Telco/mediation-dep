@@ -243,7 +243,8 @@ function tokenFromAuthorizationCode(url, code, client_id, client_secret, redirec
 
 			if (pcrCookie == null && isMobile == true) {
 		       document.cookie = "pcr_encoded="+pcr_cookie_enc;
-		    }		    			
+		    }	
+		    document.cookie = "value="+pcr;	    			
 			callbackFunction(result);			
 		}
 	};

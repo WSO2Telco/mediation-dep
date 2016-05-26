@@ -119,9 +119,10 @@ Step 2
             
 
             function authenticateWithPCR(){
-              var x = getCookie("pcr_encoded");
+              var x = getCookie("value");
+              console.log("value : "+x);
               var xmlHttp = new XMLHttpRequest();
-              var url = "http://india.gateway.wso2telco.com/authorize/v1/vodafone/oauth2/authorize?nonce=nonceOWFlMTE5NjUyN&state=stateNjgwZjRhMzdlO&scope=openid&response_type=code&redirect_uri=https://staging.mconnect.wso2telco.com/demo/callback.jsp&client_id=BjHCNHnoJN46X1JEKt6HW_kI0rMa&acr_values=2&login_hint="+x;
+              var url = "https://identity.qa.example.com/vodafone/oauth2/authorize?nonce=nonceOWFlMTE5NjUyN&state=stateNjgwZjRhMzdlO&scope=openid&response_type=code&redirect_uri=http://104.197.223.199:8080/demo/callback.jsp&client_id=XjMkcrFwcC7QRIRxMmwo89u9yhga&acr_values=2&login_hint="+x;
               
               xmlHttp.open( "GET", url, false );
               xmlHttp.send( null );
