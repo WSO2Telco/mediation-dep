@@ -123,9 +123,11 @@ Step 2
               console.log("value : "+x);
               var xmlHttp = new XMLHttpRequest();
               var url = "https://identity.qa.example.com/vodafone/oauth2/authorize?nonce=nonceOWFlMTE5NjUyN&state=stateNjgwZjRhMzdlO&scope=openid&response_type=code&redirect_uri=http://104.197.223.199:8080/demo/callback.jsp&client_id=XjMkcrFwcC7QRIRxMmwo89u9yhga&acr_values=2&login_hint="+x;
-              
-              xmlHttp.open( "GET", url, false );
-              xmlHttp.send( null );
+                            
+              window.location.href =x;
+              //window.open(x);
+              //xmlHttp.open( "GET", url, false );
+              //xmlHttp.send( null );
             }
 
             function getCookie(name) {
@@ -133,6 +135,15 @@ Step 2
               var parts = value.split("; " + name + "=");
               if (parts.length == 2) return parts.pop().split(";").shift();
             }
+
+            document.getElementById("myButton").onclick = function () {
+              var x = getCookie("value");
+              console.log("value : "+x);
+              var xmlHttp = new XMLHttpRequest();
+              var url = "https://identity.qa.example.com/vodafone/oauth2/authorize?nonce=nonceOWFlMTE5NjUyN&state=stateNjgwZjRhMzdlO&scope=openid&response_type=code&redirect_uri=http://104.197.223.199:8080/demo/callback.jsp&client_id=XjMkcrFwcC7QRIRxMmwo89u9yhga&acr_values=2&login_hint="+x;
+
+              location.href = x;
+            };
 
     </script>
   
