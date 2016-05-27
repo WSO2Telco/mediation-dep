@@ -47,15 +47,13 @@
         if (!!token.refresh_token) $('#refresh_token').val(token.refresh_token);
         if (!!token.expires_in) $('#expires_in').val(token.expires_in);
         if (!!token.token_type) $('#token_type').val(token.token_type);
-
-        /*
+        
         window.onunload = refreshParent;
         function refreshParent() {
             window.opener.location.reload();
         }
         window.close();
-        */
-
+        
         if (!!token.access_token) {
             $('#access_token').val(token.access_token);
             discoveryDetails=getCacheDiscoveryItem();
