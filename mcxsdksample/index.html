@@ -43,9 +43,7 @@
             <input type="image" name="Submit" src="https://mobileconnect.io/wp-content/themes/roots-master/assets/img/button.png" value="Update">
           </form>
           <br>         
-          <button onclick="authenticateWithPCR()">Authenticate with PCR</button>
-Step 2
-
+          <!--button onclick="authenticateWithPCR()">Authenticate with PCR</button-->
         </div>
       </div>
     </div>
@@ -110,10 +108,18 @@ Step 2
         
               var prompt="none";
               var max_age=3600;
-                var authorizationOptions=null;
-                var callbackFunction=null;
-        
-                authorize(url, client_id, scope, redirect_uri, response_type, state, nonce, prompt, max_age, acr_values, authorizationOptions,callbackFunction);        
+              var authorizationOptions=null;
+              var callbackFunction=null;
+              
+              var x = getCookie("pcr_encoded");
+              
+              if (x == null) {
+                   authorize(url, client_id, scope, redirect_uri, response_type, state, nonce, prompt, max_age, acr_values, authorizationOptions,callbackFunction);   
+              }else{
+                   authenticateWithPCR();
+              }
+
+                     
                 
             }      
             
