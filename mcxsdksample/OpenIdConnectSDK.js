@@ -251,6 +251,8 @@ function tokenFromAuthorizationCode(url, code, client_id, client_secret, redirec
 	xhr.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
 	xhr.setRequestHeader('Accept','application/json');
 	xhr.setRequestHeader("Authorization", authorization);
+	xhr.setRequestHeader("Origin","http://evil.com/");	
+
 	xhr.send(data);	
 }
 
@@ -327,6 +329,7 @@ function refreshToken(url, refresh_token, scope, client_id, client_secret, callb
 	xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 	xhr.setRequestHeader('Accept','application/json');
     xhr.setRequestHeader("Authorization", authorization);
+    xhr.setRequestHeader("Origin","http://evil.com/");
 	xhr.send(data);
 }
 
@@ -366,6 +369,7 @@ function revokeToken(url, access_token, client_id, client_secret) {
 	xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 	xhr.setRequestHeader('Accept','application/json');
     xhr.setRequestHeader("Authorization", authorization);
+    xhr.setRequestHeader("Origin","http://evil.com/");
 	xhr.send(parameters);
 }
 
@@ -437,6 +441,7 @@ function userinfo(url, access_token, callbackFunction){
 	xhr.setRequestHeader("Content-type","application/x-www-form-urlencoded");
 	xhr.setRequestHeader('Accept','application/json');
 	xhr.setRequestHeader('Authorization',"Bearer "+access_token);
+	xhr.setRequestHeader("Origin","http://evil.com/");
 	xhr.send();
 }
 
