@@ -31,7 +31,7 @@
 
         var state =  "<%=st%>";
         var code  = "<%=cd%>";
-        var redirect_uri="https://staging.mconnect.wso2telco.com/demo/callback.jsp";
+        var redirect_uri="https://sandbox.mconnect.wso2telco.com/demo/callback.jsp";
         var client_id="pa6qa3JS5R_8iZjdyAWU1hkOOoQa";
         var client_secret="9REoHdeZ7ByN8Vym5OPMfWlEbpka";
         var token_endpoint="https://india.gateway.wso2telco.com/token/v1/airtel/oauth2/token";
@@ -47,13 +47,13 @@
         if (!!token.refresh_token) $('#refresh_token').val(token.refresh_token);
         if (!!token.expires_in) $('#expires_in').val(token.expires_in);
         if (!!token.token_type) $('#token_type').val(token.token_type);
-
+        
         window.onunload = refreshParent;
         function refreshParent() {
             window.opener.location.reload();
         }
         window.close();
-
+        
         if (!!token.access_token) {
             $('#access_token').val(token.access_token);
             discoveryDetails=getCacheDiscoveryItem();

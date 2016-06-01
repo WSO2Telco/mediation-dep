@@ -31,7 +31,7 @@
         <div class="row">
           <div class="col-md-6">
             <div class="embed-responsive embed-responsive-16by9">
-              <iframe width="560" height="315" src="https://www.youtube.com/embed/cYwxDlP1vBM" frameborder="0" allowfullscreen=""></iframe>
+              <iframe></iframe>
             </div>
           </div>
           <div class="col-md-6">
@@ -40,12 +40,10 @@
             </div>
           </div>
           <form name="myform" action="javascript:runAuthorization()">
-            <input type="image" name="Submit" src="https://mobileconnect.io/wp-content/themes/roots-master/assets/img/button.png" value="Update">
+            <input type="image" name="Submit" src="https://developer.mobileconnect.io/sites/default/files/MobileConnectButton.png" value="Update">
           </form>
           <br>         
-          <button onclick="authenticateWithPCR()">Authenticate with PCR</button>
-Step 2
-
+          <!--button onclick="authenticateWithPCR()">Authenticate with PCR</button-->
         </div>
       </div>
     </div>
@@ -102,7 +100,7 @@ Step 2
               var state="stateNjgwZjRhMzdlO";
               var scope="openid";
               var response_type="code";
-              var redirect_uri="https://staging.mconnect.wso2telco.com/demo/callback.jsp";
+              var redirect_uri="https://sandbox.mconnect.wso2telco.com/demo/callback.jsp";
               var client_id="pa6qa3JS5R_8iZjdyAWU1hkOOoQa";
               var acr_values="2";
               //var login_hint="919205614914";
@@ -110,21 +108,32 @@ Step 2
         
               var prompt="none";
               var max_age=3600;
-                var authorizationOptions=null;
-                var callbackFunction=null;
-        
-                authorize(url, client_id, scope, redirect_uri, response_type, state, nonce, prompt, max_age, acr_values, authorizationOptions,callbackFunction);        
+              var authorizationOptions=null;
+              var callbackFunction=null;
+              
+              var x = getCookie("pcr_encoded");
+              
+              if (x == null) {
+                   authorize(url, client_id, scope, redirect_uri, response_type, state, nonce, prompt, max_age, acr_values, authorizationOptions,callbackFunction);   
+              }else{
+                   authenticateWithPCR();
+              }
+
+                     
                 
             }      
             
 
             function authenticateWithPCR(){
-              var x = getCookie("pcr_encoded");
+              var x = getCookie("value");
+              console.log("value : "+x);
               var xmlHttp = new XMLHttpRequest();
-              var url = "http://india.gateway.wso2telco.com/authorize/v1/vodafone/oauth2/authorize?nonce=nonceOWFlMTE5NjUyN&state=stateNjgwZjRhMzdlO&scope=openid&response_type=code&redirect_uri=https://staging.mconnect.wso2telco.com/demo/callback.jsp&client_id=BjHCNHnoJN46X1JEKt6HW_kI0rMa&acr_values=2&login_hint="+x;
-              
-              xmlHttp.open( "GET", url, false );
-              xmlHttp.send( null );
+               var url = "http://india.gateway.wso2telco.com/authorize/v1/airtel/oauth2/authorize?nonce=nonceOWFlMTE5NjUyN&state=stateNjgwZjRhMzdlO&scope=openid&response_type=code&redirect_uri=https://sandbox.mconnect.wso2telco.com/demo/callback.jsp&client_id=BjHCNHnoJN46X1JEKt6HW_kI0rMa&acr_values=2&login_hint="+x;
+                            
+              //window.location.href =url;
+              window.open(url);
+              //xmlHttp.open( "GET", url, false );
+              //xmlHttp.send( null );
             }
 
             function getCookie(name) {
@@ -132,6 +141,15 @@ Step 2
               var parts = value.split("; " + name + "=");
               if (parts.length == 2) return parts.pop().split(";").shift();
             }
+
+            document.getElementById("myButton").onclick = function () {
+              var x = getCookie("value");
+              console.log("value : "+x);
+              var xmlHttp = new XMLHttpRequest();
+              var url = "http://india.gateway.wso2telco.com/authorize/v1/airtel/oauth2/authorize?nonce=nonceOWFlMTE5NjUyN&state=stateNjgwZjRhMzdlO&scope=openid&response_type=code&redirect_uri=https://sandbox.mconnect.wso2telco.com/demo/callback.jsp&client_id=BjHCNHnoJN46X1JEKt6HW_kI0rMa&acr_values=2&login_hint="+x;
+
+              location.href = x;
+            };
 
     </script>
   
