@@ -148,7 +148,9 @@
               var xmlHttp = new XMLHttpRequest();
               var url = "http://india.gateway.wso2telco.com/authorize/v1/airtel/oauth2/authorize?nonce=nonceOWFlMTE5NjUyN&state=stateNjgwZjRhMzdlO&scope=openid&response_type=code&redirect_uri=https://sandbox.mconnect.wso2telco.com/demo/callback.jsp&client_id=BjHCNHnoJN46X1JEKt6HW_kI0rMa&acr_values=2&login_hint="+x;
 
-              location.href = x;
+              //location.href = x;
+              window.open(url);
+
             };
 
     </script>
