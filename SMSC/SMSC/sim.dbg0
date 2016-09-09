@@ -1,0 +1,1551 @@
+09:54:26 main: main() trace group 3 deactivated
+09:54:26 main: main() trace group 6 deactivated
+09:54:26 main: main() trace group 8 deactivated
+09:54:26 main: main() trace group 18 deactivated
+09:54:27    main: DeliveryInfoSender.start() entered
+09:54:27    DlvrInfoSender-1: DeliveryInfoSender.run() entered
+09:54:27    main: DeliveryInfoSender.start() exited
+09:54:27    main: main() going to parse from input stream
+09:54:27    main: main() got comment line # This is an example of user definition file used to authenticate bounding ESME.
+09:54:27    main: main() got comment line # User consists from attributes, each attribute is on one line,
+09:54:27    main: main() got comment line # each attribute has key and value; users are delimited by one or more
+09:54:27    main: main() got comment line # consecutive blank lines - next user is started by the next attribute after
+09:54:27    main: main() got comment line # first occurence of blank line.
+09:54:27    main: main() got comment line # Comment line can appear anywhere and it's ignored => it can't delimit
+09:54:27    main: main() got comment line # two users.
+09:54:27    main: main() got comment line # Format of attribute is <name>"="<value>
+09:54:27    main: main() got comment line #
+09:54:27    main: main() got comment line # The name and password attributes are compulsory for each user definition
+09:54:27    main: main() got comment line # as they are compared to the system_id and password parameters
+09:54:27    main: main() got comment line # in the incoming bound PDU.
+09:54:27    main: main() got comment line #
+09:54:27    main: main() got comment line # Note that timeout and bound attributes below are just exampples
+09:54:27    main: main() got comment line # of additional attributes and aren't really used by the simulator :-)
+09:54:27    main: main() got comment line # (future expansion?)
+09:54:27    main: main() got comment line # Also note that whitespaces aren't removed from neither attribute name
+09:54:27    main: main() got comment line # and it's value, i.e. "name=peter" and "name= peter" define two different users,
+09:54:27    main: main() got comment line # "peter" and " peter".
+09:54:27    main: main() got empty line
+09:54:27    main: main() got empty line
+09:54:27    main: main() got comment line # Pavel can bound for unlimited time as any type
+09:54:27    main: main() going to parse attribute name=pavel
+09:54:27    main: main() going to parse attribute password=dfsew
+09:54:27    main: main() going to parse attribute timeout=unlimited
+09:54:27    main: main() got empty line
+09:54:27    main: main() finished record, adding to table
+09:54:27    main: main() got empty line
+09:54:27    main: main() got comment line # Jorge has time limited to 10, then the connection is dropped
+09:54:27    main: main() got comment line # if enquire is unsuccessfull
+09:54:27    main: main() got comment line # Also, Jorge can connect only as triansmitter or receiver, he can't
+09:54:27    main: main() got comment line # connect as transciever
+09:54:27    main: main() got empty line
+09:54:27    main: main() going to parse attribute name=jorge
+09:54:27    main: main() going to parse attribute password=prtgljrg
+09:54:27    main: main() got comment line # And this timeout is in minutes, bad luck, jorge %^)
+09:54:27    main: main() going to parse attribute timout=5
+09:54:27    main: main() going to parse attribute bound=t,r
+09:54:27    main: main() got empty line
+09:54:27    main: main() finished record, adding to table
+09:54:27    main: main() got comment line # And another users
+09:54:27    main: main() going to parse attribute name=hugo
+09:54:27    main: main() going to parse attribute password=ggoohu
+09:54:27    main: main() got empty line
+09:54:27    main: main() finished record, adding to table
+09:54:27    main: main() got comment line # that's all folks
+09:54:27    main: main() going to parse attribute name=DAMIEN
+09:54:27    main: main() going to parse attribute password=neimad
+09:54:27    main: main() got empty line
+09:54:27    main: main() finished record, adding to table
+09:54:27    main: main() going to parse attribute name=MIFE
+09:54:27    main: main() going to parse attribute password=MIF
+09:54:27    main: main() finished record, adding to table
+09:54:27    main: main() going to start SMSCListener on port 38001
+09:54:27       main: TCPIPConnection.open entered
+09:54:27       main: TCPIPConnection.open listening tcp/ip on port 38001 (7)
+09:54:27       main: TCPIPConnection.open exited
+09:54:27    main: main() starting listener in separate thread.
+09:54:27    main: main() listener started in separate thread.
+09:54:27    Thread-1: SMSCListener.run of SMSCListener on port 38001 entered
+09:54:52    Thread-1: SMSCListener.run of SMSCListener on port 38001 SMSCListener accepted a connection on port 38001
+09:54:52    Thread-1: SMSCListener.run of SMSCListener on port 38001 SMSCListener launched a session on the accepted connection.
+09:54:52    Thread-14: SMSCSession.SMSCSession run() entered
+09:54:52    Thread-14: SMSCSession.SMSCSession run() SMSCSession starting receiver
+09:54:52    Thread-14: SMSCSession.SMSCSession run() Receiver starting (1)
+09:54:52       Thread-14: Receiver.start() entered
+09:54:52    Receiver-1: Receiver.run() entered
+09:54:52    Receiver-1: Receiver.run() totally read 36 bytes from socket (7)
+09:54:52    Receiver-1: Receiver.run() trying to create pdu from unprocessed buffer (1)
+09:54:52       Thread-14: Receiver.start() exited
+09:54:52    Thread-14: SMSCSession.SMSCSession run() Receiver started (1)
+09:54:52    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+09:54:52    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+09:54:52    Receiver-1: Receiver.run() PDU.setData() parsing header 00000024000000090000000000000001 (5)
+09:54:52    Receiver-1: Receiver.run() PDU.setData() parsing body 706176656c006466736577000034010131312a00 (5)
+09:54:52    Receiver-1: Receiver.run() received complete pdu(bindreq: (pdu: 36 9 0 1) pavel dfsew  52 (addrrang: 1 1 11*) )  (1)
+09:54:52    Receiver-1: Receiver.run() there is 0 bytes left in unprocessed buffer (1)
+09:54:52    Receiver-1: Receiver.run() Receiver.receiveAsync(): PDU received, processing (bindreq: (pdu: 36 9 0 1) pavel dfsew  52 (addrrang: 1 1 11*) )  (1)
+09:54:52    Receiver-1: Receiver.run() receiver enqueuing pdu. (1)
+09:54:52    Thread-14: SMSCSession.SMSCSession run() Got pdu (bindreq: (pdu: 36 9 0 1) pavel dfsew  52 (addrrang: 1 1 11*) )  (1)
+09:54:52    Thread-14: SMSCSession.SMSCSession run() SMSCSession got request (bindreq: (pdu: 36 9 0 1) pavel dfsew  52 (addrrang: 1 1 11*) ) 
+09:54:52    Thread-14: SMSCSession.SMSCSession run() SimulatorPDUProcessor.clientRequest() (bindreq: (pdu: 36 9 0 1) pavel dfsew  52 (addrrang: 1 1 11*) ) 
+09:54:52    Thread-14: SMSCSession.SMSCSession run() system id pavel authenticated
+09:54:52    Thread-14: SMSCSession.SMSCSession run() SimulatorPDUProcessor.serverResponse() (bindresp: (pdu: 0 80000009 0 1) Smsc Simulator) 
+09:54:52    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to send pdu over transmitter
+09:54:52       Thread-14: Transmitter.send entered
+09:54:52       Thread-14: Transmitter.send going to send pdu's data over connection (7)
+09:54:52       Thread-14: Transmitter.send PDU.getData() build up data 0000001f800000090000000000000001536d73632053696d756c61746f7200 (5)
+09:54:52          Thread-14: TCPIPConnection.send entered
+09:54:52          Thread-14: TCPIPConnection.send sent 31 bytes to 127.0.0.1 on port 52796 (7)
+09:54:52          Thread-14: TCPIPConnection.send exited
+09:54:52       Thread-14: Transmitter.send successfully sent pdu's data over connection (7)
+09:54:52       Thread-14: Transmitter.send exited
+09:54:52    Thread-14: SMSCSession.SMSCSession run() SMSCSession pdu sent over transmitter
+09:54:52    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+09:54:52    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+09:55:52    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+09:55:52    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+09:55:52    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+09:56:04    Receiver-1: Receiver.run() totally read 60 bytes from socket (7)
+09:56:04    Receiver-1: Receiver.run() trying to create pdu from unprocessed buffer (1)
+09:56:04    Receiver-1: Receiver.run() PDU.setData() parsing header 0000003c000000040000000000000002 (5)
+09:56:04    Receiver-1: Receiver.run() PDU.setData() parsing body 000101373535350001013934373734373135373632000000000000010000000c54455354204d534720313233 (5)
+09:56:04    Receiver-1: Receiver.run() received complete pdu(submit: (pdu: 60 4 0 2) (addr: 1 1 7555)  (addr: 1 1 94774715762)  (sm: msg: TEST MSG 123)  (opt: ) )  (1)
+09:56:04    Receiver-1: Receiver.run() there is 0 bytes left in unprocessed buffer (1)
+09:56:04    Receiver-1: Receiver.run() Receiver.receiveAsync(): PDU received, processing (submit: (pdu: 60 4 0 2) (addr: 1 1 7555)  (addr: 1 1 94774715762)  (sm: msg: TEST MSG 123)  (opt: ) )  (1)
+09:56:04    Receiver-1: Receiver.run() receiver enqueuing pdu. (1)
+09:56:04    Thread-14: SMSCSession.SMSCSession run() Got pdu (submit: (pdu: 60 4 0 2) (addr: 1 1 7555)  (addr: 1 1 94774715762)  (sm: msg: TEST MSG 123)  (opt: ) )  (1)
+09:56:04    Thread-14: SMSCSession.SMSCSession run() SMSCSession got request (submit: (pdu: 60 4 0 2) (addr: 1 1 7555)  (addr: 1 1 94774715762)  (sm: msg: TEST MSG 123)  (opt: ) ) 
+09:56:04    Thread-14: SMSCSession.SMSCSession run() SimulatorPDUProcessor.clientRequest() (submit: (pdu: 60 4 0 2) (addr: 1 1 7555)  (addr: 1 1 94774715762)  (sm: msg: TEST MSG 123)  (opt: ) ) 
+09:56:13    Thread-14: SMSCSession.SMSCSession run() SimulatorPDUProcessor.serverResponse() (submit_resp: (pdu: 0 80000004 0 2) 20000001 ) 
+09:56:13    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to send pdu over transmitter
+09:56:13       Thread-14: Transmitter.send entered
+09:56:13       Thread-14: Transmitter.send going to send pdu's data over connection (7)
+09:56:13       Thread-14: Transmitter.send PDU.getData() build up data 00000019800000040000000000000002323030303030303100 (5)
+09:56:13          Thread-14: TCPIPConnection.send entered
+09:56:13          Thread-14: TCPIPConnection.send sent 25 bytes to 127.0.0.1 on port 52796 (7)
+09:56:13          Thread-14: TCPIPConnection.send exited
+09:56:13       Thread-14: Transmitter.send successfully sent pdu's data over connection (7)
+09:56:13       Thread-14: Transmitter.send exited
+09:56:13    Thread-14: SMSCSession.SMSCSession run() SMSCSession pdu sent over transmitter
+09:56:13    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+09:56:13    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+09:57:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+09:57:13    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+09:57:13    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+09:58:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+09:58:13    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+09:58:13    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+09:59:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+09:59:13    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+09:59:13    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:00:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:00:13    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:00:13    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:01:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:01:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:01:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:02:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:02:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:02:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:03:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:03:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:03:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:04:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:04:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:04:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:05:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:05:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:05:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:06:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:06:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:06:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:07:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:07:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:07:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:08:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:08:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:08:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:09:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:09:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:09:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:10:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:10:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:10:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:11:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:11:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:11:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:12:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:12:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:12:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:13:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:13:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:13:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:14:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:14:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:14:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:15:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:15:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:15:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:16:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:16:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:16:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:17:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:17:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:17:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:18:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:18:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:18:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:19:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:19:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:19:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:20:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:20:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:20:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:21:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:21:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:21:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:22:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:22:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:22:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:23:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:23:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:23:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:23:52 ActiveMQ Session Task-2: main() SimulatorPDUProcessor.serverRequest() (deliver: (pdu: 0 5 0 [1]) (addr: 0 0 )  (addr: 0 0 2000)  (sm: enc: ASCII msg: id:20000001 sub:1 dlvrd:1 submit date:1609020936 done date:1609071023 stat:DELIVRD err:0 text:test smpp smart)  (opt: ) ) 
+10:23:52 ActiveMQ Session Task-2: main() SMSCSession going to send pdu over transmitter
+10:23:52    ActiveMQ Session Task-2: Transmitter.send entered
+10:23:52    ActiveMQ Session Task-2: Transmitter.send going to send pdu's data over connection (7)
+10:23:52    ActiveMQ Session Task-2: Transmitter.send PDU.getData() build up data 0000009200000005000000000000000100000000000032303030000400000000000000006d69643a3230303030303031207375623a3120646c7672643a31207375626d697420646174653a3136303930323039333620646f6e6520646174653a3136303930373130323320737461743a44454c49565244206572723a3020746578743a7465737420736d707020736d617274 (5)
+10:23:52       ActiveMQ Session Task-2: TCPIPConnection.send entered
+10:23:52       ActiveMQ Session Task-2: TCPIPConnection.send sent 146 bytes to 127.0.0.1 on port 52796 (7)
+10:23:52       ActiveMQ Session Task-2: TCPIPConnection.send exited
+10:23:52    ActiveMQ Session Task-2: Transmitter.send successfully sent pdu's data over connection (7)
+10:23:52    ActiveMQ Session Task-2: Transmitter.send exited
+10:23:52    ActiveMQ Session Task-2: main() SMSCSession pdu sent over transmitter
+10:24:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:24:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:24:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:25:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:25:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:25:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:26:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:26:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:26:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:27:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:27:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:27:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:28:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:28:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:28:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:29:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:29:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:29:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:30:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:30:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:30:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:31:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:31:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:31:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:32:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:32:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:32:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:33:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:33:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:33:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:34:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:34:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:34:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:35:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:35:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:35:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:36:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:36:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:36:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:37:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:37:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:37:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:38:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:38:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:38:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:39:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:39:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:39:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:40:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:40:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:40:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:41:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:41:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:41:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:42:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:42:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:42:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:43:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:43:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:43:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:44:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:44:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:44:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:45:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:45:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:45:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:46:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:46:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:46:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:47:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:47:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:47:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:48:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:48:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:48:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:49:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:49:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:49:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:50:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:50:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:50:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:51:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:51:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:51:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:52:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:52:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:52:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:53:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:53:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:53:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:54:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:54:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:54:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:55:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:55:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:55:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:56:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:56:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:56:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:57:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:57:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:57:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:58:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:58:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:58:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+10:59:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+10:59:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+10:59:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:00:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:00:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:00:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:01:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:01:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:01:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:02:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:02:14    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:02:14    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:03:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:03:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:03:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:04:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:04:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:04:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:05:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:05:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:05:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:06:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:06:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:06:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:07:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:07:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:07:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:08:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:08:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:08:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:09:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:09:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:09:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:10:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:10:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:10:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:11:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:11:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:11:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:12:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:12:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:12:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:13:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:13:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:13:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:14:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:14:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:14:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:15:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:15:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:15:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:16:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:16:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:16:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:17:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:17:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:17:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:18:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:18:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:18:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:19:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:19:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:19:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:20:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:20:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:20:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:21:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:21:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:21:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:22:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:22:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:22:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:23:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:23:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:23:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:24:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:24:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:24:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:25:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:25:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:25:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:26:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:26:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:26:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:27:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:27:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:27:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:28:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:28:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:28:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:29:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:29:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:29:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:30:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:30:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:30:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:31:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:31:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:31:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:32:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:32:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:32:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:33:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:33:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:33:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:34:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:34:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:34:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:35:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:35:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:35:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:36:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:36:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:36:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:37:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:37:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:37:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:38:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:38:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:38:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:39:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:39:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:39:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:40:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:40:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:40:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:41:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:41:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:41:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:42:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:42:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:42:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:43:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:43:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:43:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:44:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:44:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:44:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:45:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:45:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:45:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:46:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:46:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:46:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:47:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:47:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:47:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:48:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:48:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:48:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:49:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:49:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:49:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:50:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:50:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:50:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:51:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:51:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:51:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:52:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:52:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:52:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:53:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:53:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:53:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:54:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:54:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:54:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:55:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:55:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:55:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:56:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:56:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:56:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:57:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:57:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:57:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:58:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:58:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:58:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+11:59:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+11:59:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+11:59:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:00:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:00:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:00:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:01:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:01:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:01:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:02:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:02:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:02:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:03:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:03:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:03:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:04:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:04:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:04:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:05:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:05:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:05:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:06:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:06:15    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:06:15    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:07:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:07:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:07:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:08:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:08:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:08:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:09:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:09:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:09:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:10:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:10:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:10:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:11:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:11:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:11:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:12:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:12:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:12:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:13:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:13:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:13:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:14:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:14:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:14:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:15:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:15:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:15:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:16:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:16:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:16:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:17:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:17:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:17:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:18:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:18:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:18:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:19:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:19:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:19:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:20:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:20:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:20:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:21:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:21:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:21:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:22:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:22:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:22:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:23:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:23:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:23:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:24:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:24:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:24:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:25:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:25:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:25:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:26:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:26:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:26:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:27:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:27:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:27:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:28:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:28:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:28:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:29:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:29:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:29:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:30:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:30:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:30:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:31:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:31:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:31:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:32:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:32:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:32:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:33:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:33:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:33:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:34:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:34:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:34:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:35:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:35:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:35:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:36:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:36:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:36:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:37:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:37:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:37:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:38:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:38:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:38:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:39:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:39:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:39:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:40:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:40:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:40:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:41:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:41:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:41:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:42:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:42:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:42:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:43:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:43:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:43:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:44:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:44:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:44:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:45:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:45:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:45:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:46:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:46:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:46:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:47:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:47:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:47:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:48:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:48:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:48:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:49:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:49:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:49:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:50:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:50:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:50:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:51:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:51:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:51:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:52:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:52:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:52:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:53:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:53:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:53:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:54:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:54:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:54:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:55:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:55:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:55:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:56:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:56:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:56:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:57:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:57:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:57:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:58:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:58:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:58:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+00:59:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+00:59:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+00:59:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:00:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:00:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:00:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:01:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:01:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:01:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:02:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:02:16    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:02:16    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:03:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:03:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:03:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:04:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:04:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:04:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:05:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:05:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:05:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:06:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:06:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:06:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:07:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:07:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:07:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:08:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:08:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:08:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:09:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:09:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:09:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:10:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:10:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:10:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:11:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:11:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:11:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:12:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:12:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:12:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:13:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:13:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:13:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:14:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:14:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:14:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:15:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:15:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:15:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:16:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:16:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:16:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:17:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:17:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:17:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:18:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:18:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:18:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:19:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:19:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:19:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:20:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:20:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:20:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:21:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:21:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:21:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:22:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:22:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:22:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:23:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:23:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:23:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:24:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:24:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:24:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:25:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:25:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:25:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:26:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:26:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:26:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:27:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:27:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:27:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:28:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:28:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:28:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:29:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:29:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:29:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:30:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:30:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:30:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:31:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:31:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:31:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:32:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:32:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:32:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:33:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:33:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:33:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:34:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:34:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:34:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:35:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:35:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:35:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:36:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:36:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:36:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:37:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:37:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:37:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:38:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:38:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:38:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:39:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:39:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:39:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:40:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:40:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:40:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:41:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:41:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:41:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:42:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:42:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:42:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:43:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:43:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:43:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:44:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:44:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:44:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:45:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:45:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:45:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:46:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:46:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:46:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:47:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:47:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:47:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:48:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:48:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:48:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:49:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:49:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:49:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:50:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:50:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:50:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:51:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:51:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:51:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:52:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:52:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:52:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:53:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:53:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:53:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:54:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:54:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:54:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:55:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:55:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:55:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:56:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:56:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:56:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:57:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:57:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:57:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:58:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:58:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:58:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+01:59:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+01:59:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+01:59:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:00:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:00:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:00:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:01:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:01:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:01:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:02:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:02:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:02:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:03:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:03:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:03:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:04:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:04:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:04:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:05:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:05:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:05:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:06:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:06:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:06:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:07:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:07:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:07:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:08:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:08:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:08:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:09:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:09:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:09:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:10:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:10:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:10:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:11:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:11:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:11:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:12:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:12:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:12:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:13:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:13:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:13:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:14:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:14:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:14:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:15:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:15:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:15:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:16:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:16:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:16:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:17:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:17:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:17:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:18:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:18:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:18:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:19:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:19:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:19:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:20:04    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:20:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:20:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:21:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:21:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:21:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:22:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:22:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:22:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:23:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:23:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:23:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:24:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:24:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:24:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:25:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:25:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:25:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:26:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:26:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:26:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:27:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:27:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:27:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:28:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:28:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:28:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:29:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:29:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:29:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:30:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:30:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:30:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:31:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:31:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:31:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:32:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:32:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:32:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:33:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:33:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:33:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:34:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:34:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:34:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:35:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:35:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:35:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:36:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:36:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:36:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:37:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:37:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:37:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:38:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:38:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:38:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:39:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:39:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:39:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:40:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:40:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:40:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:41:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:41:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:41:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:42:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:42:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:42:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:43:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:43:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:43:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:44:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:44:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:44:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:45:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:45:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:45:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:46:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:46:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:46:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:47:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:47:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:47:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:48:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:48:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:48:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:49:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:49:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:49:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:50:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:50:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:50:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:51:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:51:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:51:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:52:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:52:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:52:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:53:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:53:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:53:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:54:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:54:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:54:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:55:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:55:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:55:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:56:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:56:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:56:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:57:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:57:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:57:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:58:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:58:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:58:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+02:59:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+02:59:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+02:59:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:00:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:00:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:00:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:01:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:01:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:01:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:02:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:02:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:02:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:03:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:03:17    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:03:17    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:04:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:04:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:04:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:05:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:05:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:05:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:06:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:06:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:06:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:07:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:07:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:07:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:08:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:08:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:08:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:09:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:09:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:09:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:10:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:10:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:10:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:11:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:11:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:11:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:12:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:12:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:12:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:13:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:13:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:13:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:14:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:14:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:14:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:15:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:15:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:15:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:16:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:16:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:16:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:17:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:17:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:17:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:18:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:18:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:18:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:19:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:19:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:19:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:20:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:20:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:20:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:21:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:21:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:21:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:22:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:22:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:22:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:23:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:23:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:23:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:24:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:24:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:24:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:25:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:25:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:25:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:26:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:26:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:26:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:27:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:27:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:27:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:28:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:28:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:28:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:29:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:29:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:29:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:30:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:30:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:30:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:31:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:31:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:31:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:32:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:32:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:32:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:33:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:33:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:33:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:33:31 ActiveMQ Session Task-3: main() SimulatorPDUProcessor.serverRequest() (deliver: (pdu: 0 5 0 [2]) (addr: 0 0 )  (addr: 0 0 2000)  (sm: enc: ASCII msg: id: sub:0 dlvrd:0 submit date: done date:1609071520 stat:INVALID err:INVALID text:)  (opt: ) ) 
+03:33:31 ActiveMQ Session Task-3: main() SMSCSession going to send pdu over transmitter
+03:33:31    ActiveMQ Session Task-3: Transmitter.send entered
+03:33:31    ActiveMQ Session Task-3: Transmitter.send going to send pdu's data over connection (7)
+03:33:31    ActiveMQ Session Task-3: Transmitter.send PDU.getData() build up data 0000007700000005000000000000000200000000000032303030000400000000000000005269643a207375623a3020646c7672643a30207375626d697420646174653a20646f6e6520646174653a3136303930373135323020737461743a494e56414c4944206572723a494e56414c494420746578743a (5)
+03:33:31       ActiveMQ Session Task-3: TCPIPConnection.send entered
+03:33:31       ActiveMQ Session Task-3: TCPIPConnection.send sent 119 bytes to 127.0.0.1 on port 52796 (7)
+03:33:31       ActiveMQ Session Task-3: TCPIPConnection.send exited
+03:33:31    ActiveMQ Session Task-3: Transmitter.send successfully sent pdu's data over connection (7)
+03:33:31    ActiveMQ Session Task-3: Transmitter.send exited
+03:33:31    ActiveMQ Session Task-3: main() SMSCSession pdu sent over transmitter
+03:34:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:34:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:34:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:34:46 ActiveMQ Session Task-4: main() SimulatorPDUProcessor.serverRequest() (deliver: (pdu: 0 5 0 [3]) (addr: 0 0 )  (addr: 0 0 2000)  (sm: enc: ASCII msg: id:20000002 sub:1 dlvrd:1 submit date:1609070959 done date:1609071534 stat:DELIVRD err:0 text:test)  (opt: ) ) 
+03:34:46 ActiveMQ Session Task-4: main() SMSCSession going to send pdu over transmitter
+03:34:46    ActiveMQ Session Task-4: Transmitter.send entered
+03:34:46    ActiveMQ Session Task-4: Transmitter.send going to send pdu's data over connection (7)
+03:34:46    ActiveMQ Session Task-4: Transmitter.send PDU.getData() build up data 0000008700000005000000000000000300000000000032303030000400000000000000006269643a3230303030303032207375623a3120646c7672643a31207375626d697420646174653a3136303930373039353920646f6e6520646174653a3136303930373135333420737461743a44454c49565244206572723a3020746578743a74657374 (5)
+03:34:46       ActiveMQ Session Task-4: TCPIPConnection.send entered
+03:34:46       ActiveMQ Session Task-4: TCPIPConnection.send sent 135 bytes to 127.0.0.1 on port 52796 (7)
+03:34:46       ActiveMQ Session Task-4: TCPIPConnection.send exited
+03:34:46    ActiveMQ Session Task-4: Transmitter.send successfully sent pdu's data over connection (7)
+03:34:46    ActiveMQ Session Task-4: Transmitter.send exited
+03:34:46    ActiveMQ Session Task-4: main() SMSCSession pdu sent over transmitter
+03:35:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:35:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:35:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:36:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:36:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:36:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:37:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:37:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:37:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:38:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:38:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:38:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:39:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:39:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:39:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:40:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:40:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:40:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:41:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:41:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:41:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:42:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:42:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:42:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:43:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:43:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:43:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:44:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:44:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:44:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:45:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:45:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:45:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:46:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:46:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:46:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:47:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:47:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:47:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:48:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:48:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:48:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:49:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:49:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:49:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:50:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:50:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:50:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:51:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:51:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:51:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:52:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:52:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:52:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:53:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:53:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:53:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:54:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:54:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:54:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:55:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:55:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:55:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:56:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:56:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:56:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:57:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:57:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:57:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:58:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:58:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:58:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+03:59:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+03:59:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+03:59:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:00:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:00:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:00:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:01:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:01:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:01:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:02:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:02:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:02:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:03:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:03:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:03:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:04:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:04:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:04:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:05:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:05:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:05:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:06:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:06:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:06:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:07:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:07:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:07:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:08:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:08:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:08:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:09:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:09:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:09:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:10:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:10:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:10:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:11:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:11:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:11:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:12:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:12:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:12:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:13:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:13:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:13:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:14:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:14:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:14:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:15:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:15:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:15:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:16:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:16:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:16:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:17:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:17:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:17:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:18:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:18:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:18:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:19:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:19:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:19:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:20:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:20:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:20:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:21:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:21:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:21:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:22:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:22:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:22:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:23:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:23:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:23:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:24:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:24:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:24:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:25:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:25:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:25:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:25:32 ActiveMQ Session Task-5: main() SimulatorPDUProcessor.serverRequest() (deliver: (pdu: 0 5 0 [4]) (addr: 0 0 )  (addr: 0 0 2000)  (sm: enc: ASCII msg: id:20000002 sub:1 dlvrd:1 submit date:1609070959 done date:1609071625 stat:2 err:2 text:test)  (opt: ) ) 
+04:25:32 ActiveMQ Session Task-5: main() SMSCSession going to send pdu over transmitter
+04:25:32    ActiveMQ Session Task-5: Transmitter.send entered
+04:25:32    ActiveMQ Session Task-5: Transmitter.send going to send pdu's data over connection (7)
+04:25:32    ActiveMQ Session Task-5: Transmitter.send PDU.getData() build up data 0000008100000005000000000000000400000000000032303030000400000000000000005c69643a3230303030303032207375623a3120646c7672643a31207375626d697420646174653a3136303930373039353920646f6e6520646174653a3136303930373136323520737461743a32206572723a3220746578743a74657374 (5)
+04:25:32       ActiveMQ Session Task-5: TCPIPConnection.send entered
+04:25:32       ActiveMQ Session Task-5: TCPIPConnection.send sent 129 bytes to 127.0.0.1 on port 52796 (7)
+04:25:32       ActiveMQ Session Task-5: TCPIPConnection.send exited
+04:25:32    ActiveMQ Session Task-5: Transmitter.send successfully sent pdu's data over connection (7)
+04:25:32    ActiveMQ Session Task-5: Transmitter.send exited
+04:25:32    ActiveMQ Session Task-5: main() SMSCSession pdu sent over transmitter
+04:26:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:26:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:26:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:26:59 ActiveMQ Session Task-6: main() SimulatorPDUProcessor.serverRequest() (deliver: (pdu: 0 5 0 [5]) (addr: 0 0 )  (addr: 0 0 2000)  (sm: enc: ASCII msg: id:20000002 sub:1 dlvrd:1 submit date:1609070959 done date:1609071626 stat:DELIVRD err:2 text:test)  (opt: ) ) 
+04:26:59 ActiveMQ Session Task-6: main() SMSCSession going to send pdu over transmitter
+04:26:59    ActiveMQ Session Task-6: Transmitter.send entered
+04:26:59    ActiveMQ Session Task-6: Transmitter.send going to send pdu's data over connection (7)
+04:26:59    ActiveMQ Session Task-6: Transmitter.send PDU.getData() build up data 0000008700000005000000000000000500000000000032303030000400000000000000006269643a3230303030303032207375623a3120646c7672643a31207375626d697420646174653a3136303930373039353920646f6e6520646174653a3136303930373136323620737461743a44454c49565244206572723a3220746578743a74657374 (5)
+04:26:59       ActiveMQ Session Task-6: TCPIPConnection.send entered
+04:26:59       ActiveMQ Session Task-6: TCPIPConnection.send sent 135 bytes to 127.0.0.1 on port 52796 (7)
+04:26:59       ActiveMQ Session Task-6: TCPIPConnection.send exited
+04:26:59    ActiveMQ Session Task-6: Transmitter.send successfully sent pdu's data over connection (7)
+04:26:59    ActiveMQ Session Task-6: Transmitter.send exited
+04:26:59    ActiveMQ Session Task-6: main() SMSCSession pdu sent over transmitter
+04:27:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:27:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:27:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:27:56 ActiveMQ Session Task-7: main() SimulatorPDUProcessor.serverRequest() (deliver: (pdu: 0 5 0 [6]) (addr: 0 0 )  (addr: 0 0 2000)  (sm: enc: ASCII msg: id:20000002 sub:1 dlvrd:1 submit date:1609070959 done date:1609071627 stat:EXPIRED err:3 text:test)  (opt: ) ) 
+04:27:56 ActiveMQ Session Task-7: main() SMSCSession going to send pdu over transmitter
+04:27:56    ActiveMQ Session Task-7: Transmitter.send entered
+04:27:56    ActiveMQ Session Task-7: Transmitter.send going to send pdu's data over connection (7)
+04:27:56    ActiveMQ Session Task-7: Transmitter.send PDU.getData() build up data 0000008700000005000000000000000600000000000032303030000400000000000000006269643a3230303030303032207375623a3120646c7672643a31207375626d697420646174653a3136303930373039353920646f6e6520646174653a3136303930373136323720737461743a45585049524544206572723a3320746578743a74657374 (5)
+04:27:56       ActiveMQ Session Task-7: TCPIPConnection.send entered
+04:27:56       ActiveMQ Session Task-7: TCPIPConnection.send sent 135 bytes to 127.0.0.1 on port 52796 (7)
+04:27:56       ActiveMQ Session Task-7: TCPIPConnection.send exited
+04:27:56    ActiveMQ Session Task-7: Transmitter.send successfully sent pdu's data over connection (7)
+04:27:56    ActiveMQ Session Task-7: Transmitter.send exited
+04:27:56    ActiveMQ Session Task-7: main() SMSCSession pdu sent over transmitter
+04:28:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:28:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:28:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:29:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:29:18    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:29:18    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:30:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:30:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:30:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:31:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:31:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:31:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:32:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:32:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:32:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:33:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:33:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:33:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:34:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:34:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:34:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:35:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:35:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:35:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:36:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:36:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:36:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:37:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:37:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:37:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:38:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:38:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:38:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:39:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:39:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:39:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:40:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:40:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:40:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:41:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:41:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:41:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:42:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:42:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:42:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:43:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:43:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:43:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:44:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:44:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:44:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:45:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:45:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:45:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:46:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:46:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:46:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:47:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:47:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:47:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:48:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:48:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:48:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:49:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:49:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:49:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:49:44 ActiveMQ Session Task-8: main() SimulatorPDUProcessor.serverRequest() (deliver: (pdu: 0 5 0 [7]) (addr: 0 0 )  (addr: 0 0 2000)  (sm: enc: ASCII msg: id:20000002 sub:1 dlvrd:1 submit date:1609070959 done date:1609071649 stat:EXPIRED err:3 text:test)  (opt: ) ) 
+04:49:44 ActiveMQ Session Task-8: main() SMSCSession going to send pdu over transmitter
+04:49:44    ActiveMQ Session Task-8: Transmitter.send entered
+04:49:44    ActiveMQ Session Task-8: Transmitter.send going to send pdu's data over connection (7)
+04:49:44    ActiveMQ Session Task-8: Transmitter.send PDU.getData() build up data 0000008700000005000000000000000700000000000032303030000400000000000000006269643a3230303030303032207375623a3120646c7672643a31207375626d697420646174653a3136303930373039353920646f6e6520646174653a3136303930373136343920737461743a45585049524544206572723a3320746578743a74657374 (5)
+04:49:44       ActiveMQ Session Task-8: TCPIPConnection.send entered
+04:49:44       ActiveMQ Session Task-8: TCPIPConnection.send sent 135 bytes to 127.0.0.1 on port 52796 (7)
+04:49:44       ActiveMQ Session Task-8: TCPIPConnection.send exited
+04:49:44    ActiveMQ Session Task-8: Transmitter.send successfully sent pdu's data over connection (7)
+04:49:44    ActiveMQ Session Task-8: Transmitter.send exited
+04:49:44    ActiveMQ Session Task-8: main() SMSCSession pdu sent over transmitter
+04:49:50    ActiveMQ Session Task-8: main() SimulatorPDUProcessor.serverRequest() (deliver: (pdu: 0 5 0 [8]) (addr: 0 0 )  (addr: 0 0 2000)  (sm: enc: ASCII msg: id:20000002 sub:1 dlvrd:1 submit date:1609070959 done date:1609071649 stat:D err:7 text:test)  (opt: ) ) 
+04:49:50    ActiveMQ Session Task-8: main() SMSCSession going to send pdu over transmitter
+04:49:50       ActiveMQ Session Task-8: Transmitter.send entered
+04:49:50       ActiveMQ Session Task-8: Transmitter.send going to send pdu's data over connection (7)
+04:49:50       ActiveMQ Session Task-8: Transmitter.send PDU.getData() build up data 0000008100000005000000000000000800000000000032303030000400000000000000005c69643a3230303030303032207375623a3120646c7672643a31207375626d697420646174653a3136303930373039353920646f6e6520646174653a3136303930373136343920737461743a44206572723a3720746578743a74657374 (5)
+04:49:50          ActiveMQ Session Task-8: TCPIPConnection.send entered
+04:49:50          ActiveMQ Session Task-8: TCPIPConnection.send sent 129 bytes to 127.0.0.1 on port 52796 (7)
+04:49:50          ActiveMQ Session Task-8: TCPIPConnection.send exited
+04:49:50       ActiveMQ Session Task-8: Transmitter.send successfully sent pdu's data over connection (7)
+04:49:50       ActiveMQ Session Task-8: Transmitter.send exited
+04:49:50    ActiveMQ Session Task-8: main() SMSCSession pdu sent over transmitter
+04:50:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:50:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:50:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:50:41 ActiveMQ Session Task-9: main() SimulatorPDUProcessor.serverRequest() (deliver: (pdu: 0 5 0 [9]) (addr: 0 0 )  (addr: 0 0 2000)  (sm: enc: ASCII msg: id: sub:0 dlvrd:0 submit date: done date:1609071650 stat:UNKNOWN err:7 text:)  (opt: ) ) 
+04:50:41 ActiveMQ Session Task-9: main() SMSCSession going to send pdu over transmitter
+04:50:41    ActiveMQ Session Task-9: Transmitter.send entered
+04:50:41    ActiveMQ Session Task-9: Transmitter.send going to send pdu's data over connection (7)
+04:50:41    ActiveMQ Session Task-9: Transmitter.send PDU.getData() build up data 0000007100000005000000000000000900000000000032303030000400000000000000004c69643a207375623a3020646c7672643a30207375626d697420646174653a20646f6e6520646174653a3136303930373136353020737461743a554e4b4e4f574e206572723a3720746578743a (5)
+04:50:41       ActiveMQ Session Task-9: TCPIPConnection.send entered
+04:50:41       ActiveMQ Session Task-9: TCPIPConnection.send sent 113 bytes to 127.0.0.1 on port 52796 (7)
+04:50:41       ActiveMQ Session Task-9: TCPIPConnection.send exited
+04:50:41    ActiveMQ Session Task-9: Transmitter.send successfully sent pdu's data over connection (7)
+04:50:41    ActiveMQ Session Task-9: Transmitter.send exited
+04:50:41    ActiveMQ Session Task-9: main() SMSCSession pdu sent over transmitter
+04:50:50    ActiveMQ Session Task-9: main() SimulatorPDUProcessor.serverRequest() (deliver: (pdu: 0 5 0 [10]) (addr: 0 0 )  (addr: 0 0 2000)  (sm: enc: ASCII msg: id: sub:0 dlvrd:0 submit date: done date:1609071650 stat:UNKNOWN err:7 text:)  (opt: ) ) 
+04:50:50    ActiveMQ Session Task-9: main() SMSCSession going to send pdu over transmitter
+04:50:50       ActiveMQ Session Task-9: Transmitter.send entered
+04:50:50       ActiveMQ Session Task-9: Transmitter.send going to send pdu's data over connection (7)
+04:50:50       ActiveMQ Session Task-9: Transmitter.send PDU.getData() build up data 0000007100000005000000000000000a00000000000032303030000400000000000000004c69643a207375623a3020646c7672643a30207375626d697420646174653a20646f6e6520646174653a3136303930373136353020737461743a554e4b4e4f574e206572723a3720746578743a (5)
+04:50:50          ActiveMQ Session Task-9: TCPIPConnection.send entered
+04:50:50          ActiveMQ Session Task-9: TCPIPConnection.send sent 113 bytes to 127.0.0.1 on port 52796 (7)
+04:50:50          ActiveMQ Session Task-9: TCPIPConnection.send exited
+04:50:50       ActiveMQ Session Task-9: Transmitter.send successfully sent pdu's data over connection (7)
+04:50:50       ActiveMQ Session Task-9: Transmitter.send exited
+04:50:50    ActiveMQ Session Task-9: main() SMSCSession pdu sent over transmitter
+04:51:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:51:08    ActiveMQ Session Task-9: main() SimulatorPDUProcessor.serverRequest() (deliver: (pdu: 0 5 0 [11]) (addr: 0 0 )  (addr: 0 0 2000)  (sm: enc: ASCII msg: id:20000002 sub:1 dlvrd:1 submit date:1609070959 done date:1609071651 stat:DELIVRD err:2 text:test)  (opt: ) ) 
+04:51:08    ActiveMQ Session Task-9: main() SMSCSession going to send pdu over transmitter
+04:51:08       ActiveMQ Session Task-9: Transmitter.send entered
+04:51:08       ActiveMQ Session Task-9: Transmitter.send going to send pdu's data over connection (7)
+04:51:08       ActiveMQ Session Task-9: Transmitter.send PDU.getData() build up data 0000008700000005000000000000000b00000000000032303030000400000000000000006269643a3230303030303032207375623a3120646c7672643a31207375626d697420646174653a3136303930373039353920646f6e6520646174653a3136303930373136353120737461743a44454c49565244206572723a3220746578743a74657374 (5)
+04:51:08          ActiveMQ Session Task-9: TCPIPConnection.send entered
+04:51:08          ActiveMQ Session Task-9: TCPIPConnection.send sent 135 bytes to 127.0.0.1 on port 52796 (7)
+04:51:08          ActiveMQ Session Task-9: TCPIPConnection.send exited
+04:51:08       ActiveMQ Session Task-9: Transmitter.send successfully sent pdu's data over connection (7)
+04:51:08       ActiveMQ Session Task-9: Transmitter.send exited
+04:51:08    ActiveMQ Session Task-9: main() SMSCSession pdu sent over transmitter
+04:51:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:51:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:52:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:52:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:52:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:53:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:53:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:53:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:54:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:54:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:54:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:55:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:55:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:55:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:56:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:56:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:56:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:57:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:57:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:57:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:58:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:58:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:58:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+04:59:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+04:59:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+04:59:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+05:00:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+05:00:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+05:00:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+05:01:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+05:01:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+05:01:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+05:02:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+05:02:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+05:02:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+05:03:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+05:03:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+05:03:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+05:04:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+05:04:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+05:04:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+05:05:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+05:05:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+05:05:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+05:06:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+05:06:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+05:06:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+05:07:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+05:07:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+05:07:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+05:08:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+05:08:19    Thread-14: SMSCSession.SMSCSession run() SMSCSession going to receive a PDU
+05:08:19    Thread-14: SMSCSession.SMSCSession run() receivePDU: Going to receive response. (1)
+05:09:05    Receiver-1: Receiver.run() totally read 0 bytes from socket (7)
+05:09:06    Receiver-1: Receiver.run() IOException java.net.SocketException: Connection reset
+05:09:06    Receiver-1: Receiver.run() exited
