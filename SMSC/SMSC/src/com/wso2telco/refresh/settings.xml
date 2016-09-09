@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE properties SYSTEM "http://java.sun.com/dtd/properties.dtd">
+<properties>
+	<entry key="refresh_offset">-200</entry><!-- in seconds -->
+	<entry key="token_endpoint"><![CDATA[https://localhost:9444/oauth2/token]]></entry>
+	<entry key="token_data"><![CDATA[grant_type=password&username={0}&password={1}&scope=PRODUCTION]]></entry>
+	<entry key="token_refresh"><![CDATA[grant_type=refresh_token&refresh_token={0}&scope=PRODUCTION]]></entry>
+	<entry key="app_key"><![CDATA[ALOt97DmqvVLEFbkivy8ZnC2wika]]></entry>
+	<entry key="app_secret"><![CDATA[XL9ma2hOdSjlaz8f3Tg5rMZCraka]]></entry>
+	<entry key="username"><![CDATA[admin]]></entry>
+	<entry key="password"><![CDATA[admin]]></entry>
+</properties>
+<!-- THIS IS EXTRA XML	-->
