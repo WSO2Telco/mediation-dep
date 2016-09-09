@@ -12,6 +12,8 @@ package com.logica.smscsim;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,6 +23,7 @@ import java.util.Map;
 import java.util.Random;
 
 import ie.omk.smpp.message.tlv.Tag;
+import lk.dialog.smsc.db.DBConnectionPool;
 import lk.dialog.smsc.db.DBLogger;
 import lk.dialog.smsc.mife.request.sendsms.MifeSMSRequest;
 import lk.dialog.smsc.services.i.IMIFEService;
@@ -61,6 +64,7 @@ import com.logica.smpp.pdu.WrongLengthOfStringException;
 import com.logica.smpp.util.ByteBuffer;
 import com.logica.smscsim.util.Record;
 import com.logica.smscsim.util.Table;
+import com.mysql.jdbc.Connection;
 import com.wso2telco.refresh.Refresher;
 
 /**
@@ -362,12 +366,20 @@ public class SimulatorPDUProcessor extends PDUProcessor
 //                            dbLogger.logSMSRequstToSmscsim(objSubmitRequest, false, (short)1);
                         	  
                         	  String outboundURI = PropertyReader.getPropertyValue(SMSCSIMProperties.OUTBOUND_URI);
-                        	  strURLParam = MessageFormat.format(outboundURI, objSubmitRequest.getSourceAddr().getAddress());
+                        	  //Get Sender address get from database
+                        	  
+                        	  Map<String,String> shortCord=this.getShortCode(objSubmitRequest.getSourceAddr().getAddress());
+                        	  
+                        	  if(shortCord.get("senderAddress")!=null){
+                                strURLParam = MessageFormat.format(outboundURI, shortCord.get("senderAddress"));
+                        	  }else{
+                        		strURLParam = MessageFormat.format(outboundURI,objSubmitRequest.getSourceAddr().getAddress()); 
+                        	  }
                               //strURLParam = "/outbound/tel:+"+objSubmitRequest.getSourceAddr().getAddress()+"/requests";
                               
                               objSubmitRequest = ( objLastPartial != null )? objLastPartial : objSubmitRequest;
                               //lk.dialog.smsc.mife.request.sendsms.OutboundSMSMessageRequest sendSMSRequest = JsonUtil.buildOutboundSMSMessageRequestAsRequest(objSubmitRequest, uniqueRefNumber, isLongMessage);
-                              lk.dialog.smsc.mife.request.sendsms.OutboundSMSMessageRequest sendSMSRequest = JsonUtil.buildOutboundSMSMessageRequestAsRequest(objSubmitRequest, cbUniqueRefNumber, isLongMessage);
+                              lk.dialog.smsc.mife.request.sendsms.OutboundSMSMessageRequest sendSMSRequest = JsonUtil.buildOutboundSMSMessageRequestAsRequest(objSubmitRequest, cbUniqueRefNumber, isLongMessage,shortCord);
 
                               MifeSMSRequest mifeSmsRequest = new MifeSMSRequest();
                               mifeSmsRequest.setOutboundSMSMessageRequest(sendSMSRequest);
@@ -379,8 +391,8 @@ public class SimulatorPDUProcessor extends PDUProcessor
                              dbLogger.logSMSRequstToHub(objSubmitRequest, strRequestJson);
                               
                              nextService = MIFEServicePool.getNextService(MIFEServicePool.TYPE_SEND_SMS);
-                             logger.info("HHHHHHHHHHHHH         strURLParam : "+strURLParam);
-                             logger.info("HHHHHHHHHHHHH         strRequestJson : "+strRequestJson);
+                             logger.info("strURLParam : "+strURLParam);
+                             logger.info("strRequestJson : "+strRequestJson);
                              
                              HttpResponse objSubmitResponse = nextService.handleRequest( strURLParam, strRequestJson, strAccessToken );
                              MIFEServicePool.releaseService(MIFEServicePool.TYPE_SEND_SMS, nextService);
@@ -389,7 +401,7 @@ public class SimulatorPDUProcessor extends PDUProcessor
                               
                               strResponseJson = EntityUtils.toString( objSubmitResponse.getEntity() );
                               //System.out.println( strResponseJson );
-                              logger.info("HHHHHHHHHHHHH         strResponseJson : "+strResponseJson); 
+                              logger.info("strResponseJson : "+strResponseJson); 
                               OutboundSMSMessageRequest sendSMSResponse = new Gson().fromJson( strResponseJson, OutboundSMSMessageRequest.class );
                               //logging response from mife to smscsim
                             dbLogger.logSMSResponseFromHub(sendSMSResponse);
@@ -826,5 +838,30 @@ public class SimulatorPDUProcessor extends PDUProcessor
             System.out.println(FileLog.getLineTimeStamp() + " ["+sysId+"] "+info);
         }
     }
+    
+   private Map<String,String> getShortCode(String shortCode){
+	   
+	   Map<String,String> shortCodeMap=new HashMap<String,String>();
+	   java.sql.Connection dbCon=null;
+	try {
+		dbCon = DBConnectionPool.getConnection();
+	
+	   String sqlQuery = "SELECT * FROM smpp_short_codes WHERE smpp_short_codes = ?";
+	   PreparedStatement prepStatement = dbCon.prepareStatement( sqlQuery );	
+ 	   prepStatement.setString(1, shortCode);
+ 	   ResultSet objResults = prepStatement.executeQuery();
+ 	  while (objResults.next()) {
+ 		 shortCodeMap.put("senderAddress",objResults.getString("sender_address"));
+ 		 shortCodeMap.put("senderName",objResults.getString("sender_name")); 		 
+     }
+ 	 DBConnectionPool.releaseConnection(dbCon);
+	 } catch (Exception e) {
+		DBConnectionPool.releaseConnection(dbCon);
+		logger.error("Exception while selecting data from smpp_short_codes", e );
+	 }
+ 	  	   
+	   return shortCodeMap;
+	   
+   }
     
 }

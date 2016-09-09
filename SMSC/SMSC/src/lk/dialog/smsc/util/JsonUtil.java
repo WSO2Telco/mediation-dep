@@ -5,25 +5,30 @@ import lk.dialog.smsc.mife.request.sendsms.OutboundSMSMessageRequest;
 import lk.dialog.smsc.mife.request.sendsms.OutboundSMSTextMessage;
 import lk.dialog.smsc.mife.request.sendsms.ReceiptRequest;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.logica.smpp.pdu.Address;
 import com.logica.smpp.pdu.SubmitMultiSM;
 import com.logica.smpp.pdu.SubmitSM;
 
+
 public class JsonUtil {
-  public static OutboundSMSMessageRequest buildOutboundSMSMessageRequestAsRequest(SubmitSM submitSM, String uniqueRefNumber, boolean isLongMessage) {
+  public static OutboundSMSMessageRequest buildOutboundSMSMessageRequestAsRequest(SubmitSM submitSM, String uniqueRefNumber, boolean isLongMessage,Map<String,String> shortCord) {
 	  
 	try {
 		
 	    OutboundSMSMessageRequest sendSMSRequest = new OutboundSMSMessageRequest();
 	    sendSMSRequest.setAddress(new String[] { "tel:+" + submitSM.getDestAddr().getAddress() });
-	    sendSMSRequest.setSenderAddress("tel:" + submitSM.getSourceAddr().getAddress());
+	    if(shortCord.get("senderAddress")!=null){
+	    sendSMSRequest.setSenderAddress("tel:" + shortCord.get("senderAddress"));
+	    }else{
+	    sendSMSRequest.setSenderAddress("tel:" +submitSM.getSourceAddr().getAddress());
+	    }
 
-	    if (PropertyReader.getPropertyValue(SMSCSIMProperties.SENDER_NAME)!=null) {
-	    	sendSMSRequest.setSenderName(PropertyReader.getPropertyValue(SMSCSIMProperties.SENDER_NAME));
-		}else {
-			sendSMSRequest.setSenderName(getSenderName(submitSM.getSourceAddr()));
+	    if (shortCord.get("senderName")!=null) {
+	    	sendSMSRequest.setSenderName(shortCord.get("senderName").toString());
 		}
-	    
 	    OutboundSMSTextMessage outboundSMSTextMessage = new OutboundSMSTextMessage();
 	    //Check if payload or short message
 	    if( SMSUtil.isShortMessageFieldSet( submitSM ) ){
