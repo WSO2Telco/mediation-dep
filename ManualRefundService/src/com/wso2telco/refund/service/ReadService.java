@@ -26,6 +26,7 @@ import org.apache.log4j.Logger;
 import com.wso2telco.refund.utils.AxataDBUtilException;
 import com.wso2telco.refund.utils.DbUtils;
 
+import org.json.JSONObject;
 
 /**
  * The Class ReadService.
@@ -51,21 +52,20 @@ public class ReadService {
 	 * @throws AxataDBUtilException the axata db util exception
 	 */
 	public ReadService(String id) throws SQLException, AxataDBUtilException{
-		String sql="SELECT jsonBody,consumerKey,operatorId from SB_API_RESPONSE_SUMMARY where api='payment'";		
-		Connection connection;
-
-		ApiInfoDao apiInfoDao = new ApiInfoDao();
-		String mapString = apiInfoDao.getMapString();
-		connection = DbUtils.getAxiataDBConnection();			
+		String sql="SELECT operatorRef,consumerKey,operatorId from SB_API_RESPONSE_SUMMARY where api='payment'";
+		Connection connection = DbUtils.getAxiataDBConnection();
 		Statement statement = connection.createStatement();			
 		statement.executeQuery(sql);		
+		ResultSet resultSet = statement.executeQuery(sql);
 		
-		ResultSet resultSet = statement.executeQuery(sql);	
-		
-		while(resultSet.next()){				
-			if(resultSet.getString(1).contains("\""+mapString+"\": \""+id+"\"")){
+		while(resultSet.next()){
+			String serverRefCode = resultSet.getString(1);
+
+			if(serverRefCode.equals(id)){
+				logger.info("Server Reference Code : " + serverRefCode);
 				consumerKey = resultSet.getString(2);
-				operatorId = resultSet.getString(3);			
+				operatorId = resultSet.getString(3);
+				break;
 			}
 		}
 		connection.close();	
