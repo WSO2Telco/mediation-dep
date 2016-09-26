@@ -154,6 +154,10 @@ public class ApiInfoDao {
 		return prop.getProperty("consumerKey");
 	}
 
+	public String getMapString(){
+		return prop.getProperty("MapString");
+	}
+
 	public Boolean isRefCodeIgnored(){
 		return Boolean.valueOf(prop.getProperty("ignore_ref_code"));
 	}

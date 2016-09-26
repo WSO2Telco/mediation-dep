@@ -20,6 +20,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+import com.wso2telco.refund.utils.ApiInfoDao;
 import org.apache.log4j.Logger;
 
 import com.wso2telco.refund.utils.AxataDBUtilException;
@@ -52,8 +53,9 @@ public class ReadService {
 	public ReadService(String id) throws SQLException, AxataDBUtilException{
 		String sql="SELECT jsonBody,consumerKey,operatorId from SB_API_RESPONSE_SUMMARY where api='payment'";		
 		Connection connection;
-		
-		
+
+		ApiInfoDao apiInfoDao = new ApiInfoDao();
+		String mapString = apiInfoDao.getMapString();
 		connection = DbUtils.getAxiataDBConnection();			
 		Statement statement = connection.createStatement();			
 		statement.executeQuery(sql);		
@@ -61,7 +63,7 @@ public class ReadService {
 		ResultSet resultSet = statement.executeQuery(sql);	
 		
 		while(resultSet.next()){				
-			if(resultSet.getString(1).contains(id)){
+			if(resultSet.getString(1).contains("\""+mapString+"\": \""+id+"\"")){
 				consumerKey = resultSet.getString(2);
 				operatorId = resultSet.getString(3);			
 			}
