@@ -70,12 +70,12 @@ public class RefundService{
 			logger.info("POST method called success");
 		} catch (SQLException e) {
 			logger.error(e.toString());
-			//response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.toString()).type(MediaType.TEXT_PLAIN).build();
-			throw new RefundException("SQL Exception Occurred");
+			response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.toString()).type(MediaType.TEXT_PLAIN).build();
+			//throw new RefundException("SQL Exception Occurred");
 		} catch (AxataDBUtilException e) {
 			logger.error(e.toString());
-			//response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.toString()).type(MediaType.TEXT_PLAIN).build();
-			throw new RefundException("Database Exception Occurred");
+			response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.toString()).type(MediaType.TEXT_PLAIN).build();
+			//throw new RefundException("Database Exception Occurred");
 		}
 		return response;		
 		
