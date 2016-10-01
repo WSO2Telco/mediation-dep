@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="userInfoSeq" onError="userInfoFaultSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+  <call>
+    <endpoint key="UserInfoEndpoint"/>
+  </call>
+  <property expression="json-eval($.getSubscriberTypeResponse.userType)"
+    name="packageType" scope="default" type="STRING"/>
+  <clone>
+    <target sequence="filterCheckLimitSeq"/>
+    <target sequence="dbAsyncInsertSeq"/>
+  </clone>
+</sequence>

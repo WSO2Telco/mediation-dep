@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="chargeRequestSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+  <property expression="get-property('query.param.oprendpoint')"
+    name="uri.var.operatorEndpoint" scope="default" type="STRING" xmlns:ns="http://org.apache.synapse/xsd"/>
+  <enrich>
+    <source clone="true" property="InitialMessage" type="property"/>
+    <target type="body"/>
+  </enrich>
+  <header name="Content-Type" scope="transport" value="application/json"/>
+  <header name="Accept" scope="transport" value="application/json"/>
+  <header name="Accept-Charset" scope="transport" value="UTF-8"/>
+  <header expression="get-property('auth-header')" name="Authorization" scope="transport"/>
+  <header expression="get-property('jwt-header')" name="x-jwt-assertion" scope="transport"/>
+  <send>
+    <endpoint>
+      <http method="post" trace="disable" uri-template="{uri.var.operatorEndpoint}"/>
+    </endpoint>
+  </send>
+</sequence>

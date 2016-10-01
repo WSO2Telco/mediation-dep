@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="userInfoAsyncSeq" onError="dbFaultError" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+  <send receive="dbAsyncInsertSeq">
+    <endpoint key="DBUserInfoEndpoint"/>
+  </send>
+</sequence>

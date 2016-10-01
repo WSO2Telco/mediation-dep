@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<api context="/celcom" name="PaymentAPI" xmlns="http://ws.apache.org/ns/synapse">
+  <resource methods="POST" protocol="http">
+    <inSequence>
+      <enrich>
+        <source clone="true" type="body"/>
+        <target property="InitialMessage" type="property"/>
+      </enrich>
+      <sequence key="dbLookupSeq"/>
+    </inSequence>
+    <outSequence>
+      <respond/>
+    </outSequence>
+    <faultSequence/>
+  </resource>
+</api>

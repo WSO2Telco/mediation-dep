@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?><artifacts>
+    <artifact name="PaymentAPI" groupId="com.example.Telco.api" version="1.0.0" type="synapse/api" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/api/PaymentAPI.xml</file>
+    </artifact>
+    <artifact name="UserInfoEndpoint" groupId="com.example.Telco.endpoint" version="1.0.0" type="synapse/endpoint" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/endpoints/UserInfoEndpoint.xml</file>
+    </artifact>
+    <artifact name="userInfoFaultSeq" groupId="com.example.Telco.sequence" version="1.0.0" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/userInfoFaultSeq.xml</file>
+    </artifact>
+    <artifact name="userInfoSeq" groupId="com.example.Telco.sequence" version="1.0.0" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/userInfoSeq.xml</file>
+    </artifact>
+    <artifact name="chargeRequestSeq" groupId="com.example.Telco.sequence" version="1.0.0" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/chargeRequestSeq.xml</file>
+    </artifact>
+    <artifact name="checkLimitSeq" groupId="com.example.Telco.sequence" version="1.0.0" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/checkLimitSeq.xml</file>
+    </artifact>
+    <artifact name="dbLookupSeq" groupId="com.example.Telco.sequence" version="1.0.0" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/dbLookupSeq.xml</file>
+    </artifact>
+    <artifact name="filterCheckLimitSeq" groupId="com.example.Telco.sequence" version="1.0.0" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/filterCheckLimitSeq.xml</file>
+    </artifact>
+    <artifact name="DBUserInfoEndpoint" groupId="com.example.Telco.endpoint" version="1.0.0" type="synapse/endpoint" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/endpoints/DBUserInfoEndpoint.xml</file>
+    </artifact>
+    <artifact name="userInfoAsyncSeq" groupId="com.example.Telco.sequence" version="1.0.0" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/userInfoAsyncSeq.xml</file>
+    </artifact>
+    <artifact name="dbAsyncInsertSeq" groupId="com.example.Telco.sequence" version="1.0.0" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/dbAsyncInsertSeq.xml</file>
+    </artifact>
+    <artifact name="checkLimitError" groupId="com.example.Telco.sequence" version="1.0.0" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/checkLimitError.xml</file>
+    </artifact>
+    <artifact name="dbFaultError" groupId="com.example.Telco.sequence" version="1.0.0" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/dbFaultError.xml</file>
+    </artifact>
+</artifacts>
