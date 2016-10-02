@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sequence name="userInfoFaultSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+  <log description="Fault Log" level="custom">
+    <property name="faultMessage" value="Some error occured"/>
+  </log>
   <clone>
     <target sequence="checkLimitSeq"/>
     <target sequence="userInfoAsyncSeq"/>
