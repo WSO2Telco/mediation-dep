@@ -52,12 +52,17 @@ public class ReadService {
 	 * @throws AxataDBUtilException the axata db util exception
 	 */
 	public ReadService(String id) throws SQLException, AxataDBUtilException{
-		String sql="SELECT operatorRef,consumerKey,operatorId from SB_API_RESPONSE_SUMMARY where api='payment'";
+		String sql="SELECT operatorRef,consumerKey,operatorId from SB_API_RESPONSE_SUMMARY where api='payment' AND operatorRef='"+id+"'";
 		Connection connection = DbUtils.getAxiataDBConnection();
 		Statement statement = connection.createStatement();			
 		statement.executeQuery(sql);		
 		ResultSet resultSet = statement.executeQuery(sql);
-		
+
+		if (!resultSet.next() ) {
+			logger.info(" No records found for the given Server Reference Code: " + id);
+			throw new AxataDBUtilException(" No records found for the given Server Reference Code: " + id);
+		}
+
 		while(resultSet.next()){
 			String serverRefCode = resultSet.getString(1);
 
