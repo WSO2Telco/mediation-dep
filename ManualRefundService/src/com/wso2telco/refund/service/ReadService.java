@@ -52,7 +52,7 @@ public class ReadService {
 	 * @throws AxataDBUtilException the axata db util exception
 	 */
 	public ReadService(String id) throws SQLException, AxataDBUtilException{
-		String sql="SELECT operatorRef,consumerKey,operatorId from SB_API_RESPONSE_SUMMARY where operatorRef='"+id+"'";
+		String sql="SELECT operatorRef,consumerKey,operatorId from SB_API_RESPONSE_SUMMARY where api='payment' AND operatorRef='"+id+"'";
 		Connection connection = DbUtils.getAxiataDBConnection();
 		Statement statement = connection.createStatement();			
 		statement.executeQuery(sql);		
