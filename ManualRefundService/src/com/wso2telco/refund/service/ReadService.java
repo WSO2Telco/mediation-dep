@@ -15,10 +15,7 @@
  ******************************************************************************/
 package com.wso2telco.refund.service;
 
-import java.sql.Connection;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 
 import com.wso2telco.refund.utils.ApiInfoDao;
 import org.apache.log4j.Logger;
@@ -52,16 +49,12 @@ public class ReadService {
 	 * @throws AxataDBUtilException the axata db util exception
 	 */
 	public ReadService(String id) throws SQLException, AxataDBUtilException{
-		String sql="SELECT operatorRef,consumerKey,operatorId from SB_API_RESPONSE_SUMMARY where api='payment' AND operatorRef='"+id+"'";
+		String sql="SELECT operatorRef,consumerKey,operatorId from SB_API_RESPONSE_SUMMARY where api=? AND operatorRef=?";
 		Connection connection = DbUtils.getAxiataDBConnection();
-		Statement statement = connection.createStatement();			
-		statement.executeQuery(sql);		
-		ResultSet resultSet = statement.executeQuery(sql);
-
-		if (!resultSet.next() ) {
-			logger.info(" No records found for the given Server Reference Code: " + id);
-			throw new AxataDBUtilException(" No records found for the given Server Reference Code: " + id);
-		}
+		PreparedStatement request = connection.prepareStatement(sql);
+		request.setString(1,"payment");
+		request.setString(2,id);
+		ResultSet resultSet = request.executeQuery();
 
 		while(resultSet.next()){
 			String serverRefCode = resultSet.getString(1);
