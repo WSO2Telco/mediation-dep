@@ -142,6 +142,6 @@ public  class CreateService extends ApiInfoDao {
 	}
 
 	private boolean isInvalidRefCode(String refCode) {
-		return (refCode.equals("") || refCode.isEmpty() || refCode == null);
+		return (refCode == null || refCode.isEmpty());
 	}
 }
