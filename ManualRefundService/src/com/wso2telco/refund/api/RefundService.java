@@ -59,7 +59,7 @@ public class RefundService{
 	@Path("/payment/refund")
 	@Consumes(MediaType.APPLICATION_JSON)
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response refund(String jsonBody) throws RefundException {
+	public Response refund(String jsonBody){
 		
 		Response response = null;
 		
@@ -76,6 +76,9 @@ public class RefundService{
 			logger.error(e.toString());
 			response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.toString()).type(MediaType.TEXT_PLAIN).build();
 			//throw new RefundException("Database Exception Occurred");
+		} catch (RefundException e) {
+			logger.error(e.toString());
+			response = Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(e.toString()).type(MediaType.TEXT_PLAIN).build();
 		}
 		return response;		
 		

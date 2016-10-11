@@ -69,6 +69,10 @@ public  class CreateService extends ApiInfoDao {
 			logger.info("operatorId : " + operatorId);
 		} else {
 			refCode = refundRequest.getAmountTransaction().getOriginalServerReferenceCode();
+			if(isInvalidRefCode(refCode)){
+				logger.error("ref code cannot be empty or null");
+				throw new RefundException("ref code cannot be empty or null");
+			}
 			logger.info("Original Ref Code : "+refCode);
 			ReadService readService = new ReadService(refCode);
 			consumerKey = readService.getConsumerKey();
@@ -135,5 +139,9 @@ public  class CreateService extends ApiInfoDao {
 			responseps.executeUpdate();
 			connection.close();			
 		}			
-	}		
+	}
+
+	private boolean isInvalidRefCode(String refCode) {
+		return (refCode == null || refCode.isEmpty());
+	}
 }
