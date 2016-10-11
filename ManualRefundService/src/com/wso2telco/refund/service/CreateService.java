@@ -70,6 +70,7 @@ public  class CreateService extends ApiInfoDao {
 		} else {
 			refCode = refundRequest.getAmountTransaction().getOriginalServerReferenceCode();
 			if(isInvalidRefCode(refCode)){
+				logger.error("ref code cannot be empty or null");
 				throw new RefundException("ref code cannot be empty or null");
 			}
 			logger.info("Original Ref Code : "+refCode);
