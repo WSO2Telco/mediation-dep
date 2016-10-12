@@ -50,7 +50,7 @@ public class LimitCheckMediator extends AbstractMediator {
     }
 
     public boolean checkSpendLimit(String msisdn, String operator, Double chargeAmount, String consumerKey) throws
-            com.axiata.dialog.dbutils.AxataDBUtilException, IOException, JAXBException, Exception {
+            com.axiata.dialog.dbutils.AxataDBUtilException, IOException, JAXBException {
 
         Double groupTotalDayAmount = 0.0;
         Double groupTotalMonthAmount = 0.0;

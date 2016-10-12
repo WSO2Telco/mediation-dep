@@ -32,12 +32,12 @@ public class GroupEventUnmarshaller {
         return instance;
     }
 
-    private GroupEventUnmarshaller() throws JAXBException {
+    private GroupEventUnmarshaller() throws JAXBException{
         init();
         unmarshall();
     }
 
-    public  static void startGroupEventUnmarshaller() throws JAXBException {
+    public  static void startGroupEventUnmarshaller() throws JAXBException{
         if(instance==null){
             instance = new GroupEventUnmarshaller();
         }
@@ -53,7 +53,7 @@ private  void init() throws JAXBException {
 
 }
 
-    private    void  unmarshall() throws JAXBException {
+    private    void  unmarshall() throws JAXBException{
 
 
         GroupList groupList = (GroupList) jaxbUnmarshaller.unmarshal(file);
@@ -65,6 +65,7 @@ private  void init() throws JAXBException {
                 gpDTO.setGroupName(group.getGroupName());
                 gpDTO.setMonthAmount(group.getMonthAmount());
                 gpDTO.setOperator(group.getOperator());
+                gpDTO.setUserInfoEnabled(group.getUserInfoEnabled());
 
                 oparatorGP.put(group.getOperator(),gpDTO);
 
@@ -98,7 +99,7 @@ private  void init() throws JAXBException {
         }
     }
 
-public ConsumerSecretWrapperDTO getGroupEventDetailDTO(final String consumerKey) throws Exception {
+public ConsumerSecretWrapperDTO getGroupEventDetailDTO(final String consumerKey) throws Exception{
     if(consumerKey==null|| consumerKey.trim().length()<=0){
         throw new Exception("Invalid consumerKey");
     }
