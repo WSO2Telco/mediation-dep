@@ -45,7 +45,7 @@
         <file>src/main/synapse-config/sequences/getCelcomAuthTokenSeq.xml</file>
     </artifact>
     <artifact name="setCelcomRegistryTokens" groupId="com.example.Telco.sequence" version="1.0.0" type="synapse/sequence" serverRole="EnterpriseServiceBus">
-        <file>src/main/synapse-config/sequences/setCelcomRegistryTokens.xml</file>
+        <file>src/main/synapse-config/sequences/setCelcomRegistryTokens.xml.xml</file>
     </artifact>
     <artifact name="celcomAuthCallSeq" groupId="com.example.Telco.sequence" version="1.0.0" type="synapse/sequence" serverRole="EnterpriseServiceBus">
         <file>src/main/synapse-config/sequences/celcomAuthCallSeq.xml</file>

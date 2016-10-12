@@ -1,14 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sequence name="dbLookupSeq"  onError="userInfoSeq" xmlns="http://ws.apache.org/ns/synapse">
-    <property expression="json-eval($.amountTransaction.endUserId)"
-        name="endUserId" scope="default" type="STRING" xmlns:ns="http://org.apache.synapse/xsd"/>
-    <property
-        expression="json-eval($.amountTransaction.paymentAmount.chargingInformation.amount)"
-        name="chargeAmount" scope="default" type="STRING" xmlns:ns="http://org.apache.synapse/xsd"/>
     <property expression="$trp:Authorization" name="auth-header"
         scope="default" type="STRING"/>
     <property expression="$trp:x-jwt-assertion" name="jwt-header"
-        scope="default" type="STRING" />    
+        scope="default" type="STRING" />
+    <property value="tel:0192098790" name="uri.var.userAddress"
+    scope="default" type="STRING"/>        
     <dblookup>
         <connection>
             <pool>	

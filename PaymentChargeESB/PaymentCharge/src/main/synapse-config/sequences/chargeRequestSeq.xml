@@ -2,13 +2,19 @@
 <sequence name="chargeRequestSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
   <property expression="get-property('query.param.oprendpoint')"
     name="uri.var.operatorEndpoint" scope="default" type="STRING" xmlns:ns="http://org.apache.synapse/xsd"/>
-  <enrich>
-    <source clone="true" property="InitialMessage" type="property"/>
-    <target type="body"/>
-  </enrich>
+  <filter regex="DIALOG" source="get-property('query.param.operator')">
+    <then>
+      <enrich>
+        <source clone="true" property="InitialMessage" type="property"/>
+        <target type="body"/>
+      </enrich>
+    </then>
+    <else/>
+  </filter>
   <header name="Content-Type" scope="transport" value="application/json"/>
   <header name="Accept" scope="transport" value="application/json"/>
   <header name="Accept-Charset" scope="transport" value="UTF-8"/>
+  <header name="sandbox" scope="transport" value="admin"/>
   <header expression="get-property('auth-header')" name="Authorization" scope="transport"/>
   <header expression="get-property('jwt-header')" name="x-jwt-assertion" scope="transport"/>
   <send>

@@ -2,3 +2,4 @@
 <sequence name="dbFaultError" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
   <drop/>
 </sequence>
+	
