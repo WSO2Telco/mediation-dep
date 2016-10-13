@@ -2,6 +2,7 @@ package handler;
 
 import com.axiata.dialog.dbutils.AxataDBUtilException;
 import com.axiata.dialog.dbutils.AxiataDbService;
+import com.axiata.dialog.dbutils.dao.SpendLimitDAO;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
@@ -35,12 +36,27 @@ public class SpendLimitHandler {
         return props;
     }
 
-    public Double getGroupTotalDayAmount(String groupName, String operator, String msisdn) throws AxataDBUtilException {
-        return this.isEventsEnabled?this.dbservice.getGroupTotalDayAmount(groupName, operator, msisdn):Double.valueOf(0.0D);
+    public SpendLimitDAO getGroupTotalDayAmount(String groupName,String operator,String msisdn) throws AxataDBUtilException {
+
+        SpendLimitDAO spendLimitDAO = null;
+        if (isEventsEnabled) {
+            //            HazelcastInstance hazelcastInstance = MifeEventsDataHolder.getHazelcastInstance();
+            //            IMap<String, Object> cacheMap = hazelcastInstance.getMap(MifeEventsConstants.OPERATOR_HAZELCAST_MAP_NAME);
+            //            return cacheMap.containsKey(operatorId);
+            return dbservice.getGroupTotalDayAmount(groupName,operator,msisdn);
+        }
+        return spendLimitDAO;
     }
 
-    public Double getGroupTotalMonthAmount(String groupName, String operator, String msisdn) throws AxataDBUtilException {
-        return this.isEventsEnabled?this.dbservice.getGroupTotalMonthAmount(groupName, operator, msisdn):Double.valueOf(0.0D);
+    public SpendLimitDAO getGroupTotalMonthAmount(String groupName,String operator,String msisdn) throws AxataDBUtilException {
+
+        SpendLimitDAO spendLimitDAO = null;
+        if (isEventsEnabled) {
+
+            return dbservice.getGroupTotalMonthAmount(groupName,operator,msisdn);
+        }
+        return spendLimitDAO;
     }
+
 
 }

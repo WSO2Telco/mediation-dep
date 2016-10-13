@@ -16,6 +16,7 @@
 
 package mediator;
 
+import com.axiata.dialog.dbutils.dao.SpendLimitDAO;
 import exception.AxiataException;
 import unmashaller.OparatorNotinListException;
 import handler.SpendLimitHandler;
@@ -56,31 +57,56 @@ public class LimitCheckMediator extends AbstractMediator {
         Double groupTotalMonthAmount = 0.0;
 
 
-
         try {
             GroupDTO groupDTO= groupEventUnmarshaller.getGroupDTO(operator,consumerKey);
 
             Double groupdailyLimit = Double.parseDouble(groupDTO.getDayAmount());
             Double groupMonlthlyLimit = Double.parseDouble(groupDTO.getMonthAmount());
             SpendLimitHandler spendLimitHandler = new SpendLimitHandler();
+            SpendLimitDAO daySpendLimitObj = null;
+            SpendLimitDAO monthSpendLimitObj = null;
 
-            groupTotalDayAmount = spendLimitHandler.getGroupTotalDayAmount(groupDTO.getGroupName(), groupDTO.getOperator(), msisdn);
-            groupTotalMonthAmount = spendLimitHandler.getGroupTotalMonthAmount(groupDTO.getGroupName(), groupDTO.getOperator(), msisdn);
+            daySpendLimitObj = spendLimitHandler.getGroupTotalDayAmount(groupDTO.getGroupName(), groupDTO.getOperator(), msisdn);
+            monthSpendLimitObj = spendLimitHandler.getGroupTotalMonthAmount(groupDTO.getGroupName(), groupDTO.getOperator(), msisdn);
 
-            if ((groupdailyLimit > 0.0) && ((groupTotalDayAmount >= groupdailyLimit) || (groupTotalDayAmount + chargeAmount) > groupdailyLimit || chargeAmount > groupdailyLimit)) {
-                log.debug("group daily limit exceeded");
-                throw new AxiataException("POL1001", "The %1 charging limit for this user has been exceeded", new String[]{"daily"});
+            if(groupdailyLimit > 0.0) {
+                if(chargeAmount <= groupdailyLimit) {
+
+                    if(daySpendLimitObj!=null && ((daySpendLimitObj.getAmount() >= groupdailyLimit) || (daySpendLimitObj.getAmount() + chargeAmount) > groupdailyLimit  )){
+                        log.debug("group daily limit exceeded");
+                        throw new AxiataException("POL1001", "The %1 charging limit for this user has been exceeded", new String[]{"daily"});
+                    }
+
+                } else {
+                    log.debug("Charge Amount exceed the limit");
+                    throw new AxiataException("POL1001", "The %1 charging limit for this user has been exceeded", new String[]{"daily"});
+                }
             }
 
-            if ((groupMonlthlyLimit) >0.0 && ((groupTotalMonthAmount >= groupMonlthlyLimit) || (groupTotalMonthAmount + chargeAmount) > groupMonlthlyLimit || chargeAmount > groupMonlthlyLimit)) {
-                log.debug("group monthly limit exceeded");
-                throw new AxiataException("POL1001", "The %1 charging limit for this user has been exceeded", new String[]{"monthly"});
-            }
-            return true;
+            if(groupMonlthlyLimit > 0.0) {
 
-        } catch (OparatorNotinListException e){
+                if(chargeAmount < groupMonlthlyLimit) {
+
+                    if(monthSpendLimitObj!=null && (monthSpendLimitObj.getAmount() >= groupdailyLimit || monthSpendLimitObj.getAmount() + chargeAmount > groupdailyLimit) ){
+                        log.debug("group monthly limit exceeded");
+                        throw new AxiataException("POL1001", "The %1 charging limit for this user has been exceeded", new String[]{"monthly"});
+                    }
+
+                } else {
+                    log.debug("group monthly limit exceeded");
+                    throw new AxiataException("POL1001", "The %1 charging limit for this user has been exceeded", new String[]{"monthly"});
+                }
+
+            }
+
+        }catch (OparatorNotinListException e){
             return true;
+        }catch (Exception e) {
+
+            throw new AxiataException("POL1001", "Data retreving error", new String[]{"daily"});
         }
+
+        return true;
     }
 
 
