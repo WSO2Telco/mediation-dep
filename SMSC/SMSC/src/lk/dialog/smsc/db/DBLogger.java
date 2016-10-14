@@ -3,6 +3,7 @@ package lk.dialog.smsc.db;
 import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -355,7 +356,7 @@ public class DBLogger {
     DBConnectionPool.releaseConnection(connection);
   }
 
-public void logSMSRequstFromSME(SubmitSM objSubmitSM, boolean partialSMS, String uniqueRefNumber) throws Exception {
+public void logSMSRequstFromSME(SubmitSM objSubmitSM, boolean partialSMS, String uniqueRefNumber,String systemId) throws Exception {
     String msgBody = null;
     try {
         byte[] msgPayLoadArr = objSubmitSM.getMessagePayload().getBuffer();
@@ -376,11 +377,11 @@ public void logSMSRequstFromSME(SubmitSM objSubmitSM, boolean partialSMS, String
       sarRefNo = objSubmitSM.getSarMsgRefNum();
       sarTotalSegmants = objSubmitSM.getSarTotalSegments();
     }
-    logRequstFromSME(partialSMS, address, refNo, msgBody, needDelivReport, sarSegmantSeqNo, sarRefNo, sarTotalSegmants, PDU.SUBMIT_SM,uniqueRefNumber,recieveAddress);
+    logRequstFromSME(partialSMS, address, refNo, msgBody, needDelivReport, sarSegmantSeqNo, sarRefNo, sarTotalSegmants, PDU.SUBMIT_SM,uniqueRefNumber,recieveAddress,systemId);
   }
 
 	private void logRequstFromSME(boolean partialSMS, String address, String refNo, String body, boolean needDelivReport, short sarSegmantSeqNo
-	      , short sarRefNo, short sarTotalSegmants, PDU pdu, String uniqueRefNumber,String recieveAddress) throws Exception  {
+	      , short sarRefNo, short sarTotalSegmants, PDU pdu, String uniqueRefNumber,String recieveAddress,String systemId) throws Exception  {
 	    Connection connection = DBConnectionPool.getConnection();
 	    String sql = "INSERT INTO smse_req_resp_log "
 	        + "(sender_addr, ref_num, body, type_request, sme_id, need_delivery_report, sar_seq_num, sar_ref_num, sar_total_segmants, pdu, logged_at,callback,address) "
@@ -390,7 +391,7 @@ public void logSMSRequstFromSME(SubmitSM objSubmitSM, boolean partialSMS, String
 	    stmt.setString(2, refNo);
 	    stmt.setString(3, body);
 	    stmt.setInt(4, 1);
-	    stmt.setInt(5, 1);
+	    stmt.setInt(5, Integer.valueOf(systemId));
 	    stmt.setBoolean(6, needDelivReport);
 	    stmt.setInt(7, sarSegmantSeqNo);
 	    stmt.setInt(8, sarRefNo);
@@ -413,5 +414,45 @@ public void logSMSRequstFromSME(SubmitSM objSubmitSM, boolean partialSMS, String
    * stmt = conn.createStatement(); } catch (Exception e) {
    * e.printStackTrace();// TODO have to handle } return stmt; }
    */
+
+	public String getUserIdFromName(String systemId) {
+		    String clientId = "";
+		    try {
+		      Connection connection = DBConnectionPool.getConnection();
+		      String sql = "SELECT id FROM sme where code= ?";
+		      PreparedStatement preparedStatement = connection.prepareStatement(sql);
+		      preparedStatement.setString(1, systemId);
+		      ResultSet rs = preparedStatement.executeQuery();
+		      while (rs.next()) {
+		        clientId = rs.getString("id");
+		      }
+		      preparedStatement.close();
+		      DBConnectionPool.releaseConnection(connection);
+		    } catch (Exception e) {
+		    	logger.error("Error in getUserIdFromName : " , e );
+		    	e.printStackTrace();
+		    }
+		    return clientId;
+		  }
+	
+	public String getNameFromId(int id) {
+	    String code = "";
+	    try {
+	      Connection connection = DBConnectionPool.getConnection();
+	      String sql = "SELECT code FROM sme where id= ?";
+	      PreparedStatement preparedStatement = connection.prepareStatement(sql);
+	      preparedStatement.setInt(1, id);
+	      ResultSet rs = preparedStatement.executeQuery();
+	      while (rs.next()) {
+	    	  code = rs.getString("code");
+	      }
+	      preparedStatement.close();
+	      DBConnectionPool.releaseConnection(connection);
+	    } catch (Exception e) {
+	    	logger.error("Error in getNameFromId : " , e );
+	    	e.printStackTrace();
+	    }
+	    return code;
+	  }
 
 }

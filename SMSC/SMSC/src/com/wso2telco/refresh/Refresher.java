@@ -21,16 +21,19 @@ import org.apache.http.conn.ssl.TrustSelfSignedStrategy;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.logica.smscsim.Simulator;
 
 /**
  * @author Charith_02380
  *
  */
 public class Refresher extends Thread {
-
+	static Logger logger = LoggerFactory.getLogger( Refresher.class );
 	private static AtomicReference<String> accessToken = new AtomicReference<String>();
 	private static String refreshToken = null;
 	private static int validityPeriod;
@@ -77,7 +80,22 @@ public class Refresher extends Thread {
 			refreshToken = settings.getProperty("refresh_token");
 			validityPeriod = Integer.valueOf(settings.getProperty("validity_period"));
 			
+			
+			logger.info("HHHHHHHHHHHHHHHHHHH		tokenEndpoint : "+tokenEndpoint);
+			logger.info("HHHHHHHHHHHHHHHHHHH		tokenData : "+tokenData);
+			logger.info("HHHHHHHHHHHHHHHHHHH		tokenRefreshData : "+tokenRefreshData);
+			logger.info("HHHHHHHHHHHHHHHHHHH		consumerKey : "+consumerKey);
+			logger.info("HHHHHHHHHHHHHHHHHHH		consumerSecret : "+consumerSecret);
+			logger.info("HHHHHHHHHHHHHHHHHHH		username : "+username);
+			logger.info("HHHHHHHHHHHHHHHHHHH		password : "+password);
+			logger.info("HHHHHHHHHHHHHHHHHHH		refreshOffset : "+refreshOffset);
+			logger.info("HHHHHHHHHHHHHHHHHHH		bearerToken : "+bearerToken);
+			logger.info("HHHHHHHHHHHHHHHHHHH		accessToken : "+accessToken);
+			logger.info("HHHHHHHHHHHHHHHHHHH		refreshToken : "+refreshToken);
+			logger.info("HHHHHHHHHHHHHHHHHHH		validityPeriod : "+validityPeriod);
+			
 			if(accessToken.get()== null) {
+				logger.info("HHHHHHHHHHHHHHHHHHH		Calling generateToken...");
 				generateToken();//generate access token
 			}
 			//===========================REFRESH TOKEN PATCH===========================
@@ -96,6 +114,7 @@ public class Refresher extends Thread {
 				post.addHeader("Authorization", "Basic "+bearerToken);				
 				Object[] args = {username, password};
 				String tokenCreatePostData = MessageFormat.format(tokenData, args);
+				logger.info("HHHHHHHHHHHHHHHHHHH		tokenCreatePostData : "+tokenCreatePostData);
 				StringEntity strEntity = new StringEntity(tokenCreatePostData, "UTF-8");
 				strEntity.setContentType("application/x-www-form-urlencoded");
 				post.setEntity(strEntity);
@@ -112,11 +131,17 @@ public class Refresher extends Thread {
 			        StringWriter writer = new StringWriter();
 			        IOUtils.copy(new InputStreamReader(instream), writer, 1024);
 			        String body = writer.toString();
+			        logger.info("HHHHHHHHHHHHHHHHHHH		body : "+body);
 			        TokenResponse resp = gson.fromJson(body, TokenResponse.class);
 			        accessToken.set(resp.getAccessToken());
 			        System.out.println("RECEIVED TOKEN(1)>" + resp.getAccessToken());
 			        refreshToken = resp.getRefreshToken();
 			        validityPeriod = resp.getExpiresIn();
+			        
+			        logger.info("HHHHHHHHHHHHHHHHHHH		accessToken_II : "+accessToken.toString());
+			        logger.info("HHHHHHHHHHHHHHHHHHH		refreshToken_II : "+refreshToken);
+			        logger.info("HHHHHHHHHHHHHHHHHHH		validityPeriod_II : "+String.valueOf(validityPeriod));
+			        
 				}		
 			} catch (UnknownHostException e) {
 			  e.printStackTrace();
@@ -132,9 +157,12 @@ public class Refresher extends Thread {
 	 * @return
 	 */
 	public static String getToken() {
+		logger.info("HHHHHHHHHHHHHHHHHHH	Calling getToken");
 		if(accessToken.get()  == null) {
+			logger.info("HHHHHHHHHHHHHHHHHHH	Calling  Refresher");
 			new Refresher();
 		}
+		logger.info("HHHHHHHHHHHHHHHHHHH	accessTokenIII : "+accessToken.get().toString());
 		return accessToken.get();
 	}
 	
@@ -143,7 +171,9 @@ public class Refresher extends Thread {
 		while(true) {
 			try {
 				  try {
-				    if(validityPeriod > refreshOffset) {
+					  logger.info("HHHHHHHHHHHHHHHHHHH	validityPeriodIII : "+validityPeriod);
+					  logger.info("HHHHHHHHHHHHHHHHHHH	refreshOffsetIII : "+refreshOffset);
+				    if(validityPeriod > refreshOffset) {				    	
 				      sleep((validityPeriod-refreshOffset)*1000);
 				    }
 				  } catch (InterruptedException e) {
@@ -163,11 +193,8 @@ public class Refresher extends Thread {
 				
 				SSLContextBuilder builder = new SSLContextBuilder();
 			    builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
-			    SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(
-			            builder.build());
-			    CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(
-			            sslsf).build();
-				
+			    SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
+			    CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
 				response = httpclient.execute(post);
 				HttpEntity entity = response.getEntity();
 				
@@ -177,13 +204,14 @@ public class Refresher extends Thread {
 	                IOUtils.copy(new InputStreamReader(instream), writer, 1024);
 	                String body = writer.toString();
 	                
-	                //System.out.println(body);
-	                
 	                TokenResponse resp = gson.fromJson(body, TokenResponse.class);
 	                accessToken.set(resp.getAccessToken());
 	                System.out.println("RECEIVED TOKEN(2)>" + resp.getAccessToken());
 	                refreshToken = resp.getRefreshToken();
 	                validityPeriod = resp.getExpiresIn();
+			        logger.info("HHHHHHHHHHHHHHHHHHH		accessToken_IV : "+accessToken.toString());
+			        logger.info("HHHHHHHHHHHHHHHHHHH		refreshToken_IV : "+refreshToken);
+			        logger.info("HHHHHHHHHHHHHHHHHHH		validityPeriod_IV : "+String.valueOf(validityPeriod));
 				}				
 			} catch (Exception e) {
 				e.printStackTrace();

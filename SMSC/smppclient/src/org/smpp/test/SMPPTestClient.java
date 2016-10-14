@@ -161,13 +161,13 @@ public class SMPPTestClient {
 	Address destAddress = new Address();
 	String scheduleDeliveryTime = "";
 	String validityPeriod = "";
-	String shortMessage = "";
+	String shortMessage = "TEST MSG 123";
 	int numberOfDestination = 1;
 	String messageId = "";
 	byte esmClass = 0;
 	byte protocolId = 0;
 	byte priorityFlag = 0;
-	byte registeredDelivery = 0;
+	byte registeredDelivery = 1;
 	byte replaceIfPresentFlag = 0;
 	byte dataCoding = 0;
 	byte smDefaultMsgId = 0;

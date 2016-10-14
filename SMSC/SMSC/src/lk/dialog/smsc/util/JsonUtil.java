@@ -12,7 +12,6 @@ import com.logica.smpp.pdu.Address;
 import com.logica.smpp.pdu.SubmitMultiSM;
 import com.logica.smpp.pdu.SubmitSM;
 
-
 public class JsonUtil {
   public static OutboundSMSMessageRequest buildOutboundSMSMessageRequestAsRequest(SubmitSM submitSM, String uniqueRefNumber, boolean isLongMessage,Map<String,String> shortCord) {
 	  
@@ -22,10 +21,10 @@ public class JsonUtil {
 	    sendSMSRequest.setAddress(new String[] { "tel:+" + submitSM.getDestAddr().getAddress() });
 	    if(shortCord.get("senderAddress")!=null){
 	    sendSMSRequest.setSenderAddress("tel:" + shortCord.get("senderAddress"));
-	    }else{
+		}else {
 	    sendSMSRequest.setSenderAddress("tel:" +submitSM.getSourceAddr().getAddress());
-	    }
-
+		}
+	    
 	    if (shortCord.get("senderName")!=null) {
 	    	sendSMSRequest.setSenderName(shortCord.get("senderName").toString());
 		}

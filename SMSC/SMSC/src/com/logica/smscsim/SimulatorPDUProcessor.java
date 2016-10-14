@@ -274,6 +274,7 @@ public class SimulatorPDUProcessor extends PDUProcessor
                       logger.info("SUBMIT_SM");
                       SubmitSM objSubmitRequest = (SubmitSM)request;
                       boolean processImmediately = true;
+                      boolean successResponse=false;
                       boolean isLongMessage = SMSUtil.isPartialAvailable( objSubmitRequest );
                       if( !SMSUtil.isPayloadFieldSet( objSubmitRequest ) && !SMSUtil.isShortMessageFieldSet( objSubmitRequest ) ){
                     	  logger.info("Neither Short MSG or Payload were set!!");
@@ -297,8 +298,8 @@ public class SimulatorPDUProcessor extends PDUProcessor
                         
                           if(isLongMessage) {
                             uniqueRefNumber = String.valueOf(objSubmitRequest.getSarMsgRefNum());
-                        	  
-                            dbLogger.logSMSRequstFromSME(objSubmitRequest, true,cbUniqueRefNumber);
+                            String clientId=dbLogger.getUserIdFromName(getSystemId());  
+                            dbLogger.logSMSRequstFromSME(objSubmitRequest, true,cbUniqueRefNumber,clientId);
                             int iTotalNumberOfPartials = objSubmitRequest.getSarTotalSegments();
                             logger.info("Total number of partials in long SMS : "+iTotalNumberOfPartials);
                             
@@ -356,7 +357,8 @@ public class SimulatorPDUProcessor extends PDUProcessor
                                 }
                               }
                           } else {
-                            dbLogger.logSMSRequstFromSME(objSubmitRequest, false,cbUniqueRefNumber );
+                        	String clientId=dbLogger.getUserIdFromName(getSystemId());
+                            dbLogger.logSMSRequstFromSME(objSubmitRequest, false,cbUniqueRefNumber,clientId);
                             uniqueRefNumber = String.valueOf(objSubmitRequest.getSequenceNumber());
                           }
                           
@@ -373,7 +375,7 @@ public class SimulatorPDUProcessor extends PDUProcessor
                         	  if(shortCord.get("senderAddress")!=null){
                                 strURLParam = MessageFormat.format(outboundURI, shortCord.get("senderAddress"));
                         	  }else{
-                        		strURLParam = MessageFormat.format(outboundURI,objSubmitRequest.getSourceAddr().getAddress()); 
+                        	  strURLParam = MessageFormat.format(outboundURI, objSubmitRequest.getSourceAddr().getAddress());
                         	  }
                               //strURLParam = "/outbound/tel:+"+objSubmitRequest.getSourceAddr().getAddress()+"/requests";
                               
@@ -391,8 +393,8 @@ public class SimulatorPDUProcessor extends PDUProcessor
                              dbLogger.logSMSRequstToHub(objSubmitRequest, strRequestJson);
                               
                              nextService = MIFEServicePool.getNextService(MIFEServicePool.TYPE_SEND_SMS);
-                             logger.info("strURLParam : "+strURLParam);
-                             logger.info("strRequestJson : "+strRequestJson);
+                             logger.info("HHHHHHHHHHHHH         strURLParam : "+strURLParam);
+                             logger.info("HHHHHHHHHHHHH         strRequestJson : "+strRequestJson);
                              
                              HttpResponse objSubmitResponse = nextService.handleRequest( strURLParam, strRequestJson, strAccessToken );
                              MIFEServicePool.releaseService(MIFEServicePool.TYPE_SEND_SMS, nextService);
@@ -401,8 +403,13 @@ public class SimulatorPDUProcessor extends PDUProcessor
                               
                               strResponseJson = EntityUtils.toString( objSubmitResponse.getEntity() );
                               //System.out.println( strResponseJson );
-                              logger.info("strResponseJson : "+strResponseJson); 
+                              logger.info("HHHHHHHHHHHHH         strResponseJson : "+strResponseJson); 
                               OutboundSMSMessageRequest sendSMSResponse = new Gson().fromJson( strResponseJson, OutboundSMSMessageRequest.class );
+                            
+                              if (sendSMSResponse.getOutboundSMSMessageRequest()!=null) {
+                            	  successResponse=true;								
+                              }
+                              
                               //logging response from mife to smscsim
                             dbLogger.logSMSResponseFromHub(sendSMSResponse);
 
@@ -411,6 +418,10 @@ public class SimulatorPDUProcessor extends PDUProcessor
                       }
 
                       SubmitSMResp submitResponse = (SubmitSMResp)response;
+                      if (!successResponse) {
+                    	  submitResponse.setCommandStatus(Data.ESME_RSYSERR);//ERROR CODE ADDED
+                      }
+                      
                       submitResponse.setMessageId( assignMessageId() );
                       
                     

@@ -15,6 +15,7 @@ import javax.jms.Session;
 import javax.jms.TextMessage;
 
 import lk.dialog.smsc.db.DBConnectionPool;
+import lk.dialog.smsc.db.DBLogger;
 import lk.dialog.smsc.util.PropertyReader;
 import lk.dialog.smsc.util.SMSCSIMProperties;
 
@@ -89,6 +90,11 @@ public static void startNewListener(Simulator simulator) throws Exception {
               	String refNumber = requestParams[1];			//For DN it will be the row id of delivery_notif table
               	//NOT USED//boolean isLongMessage = Boolean.valueOf(requestParams[2]);
               	String strMsgBody = requestParams[2];
+              	
+              	String sme = "N";
+              	if (requestParams.length>3) {
+              		sme=requestParams[3];
+				}
               //===============================================================================================================
 
               
@@ -144,7 +150,14 @@ public static void startNewListener(Simulator simulator) throws Exception {
             	  DBConnectionPool.releaseConnection(dbCon);
 
             	  //Note ::Delivery send delivery report or SMS - DELIVER_SM
-            	  simulator.sendQuedMessage( messageType, strMsgBodyTemp, refNumber, strMsgBody );
+            	  DBLogger dbLogger=new DBLogger();
+            	  String smeUser="";
+            	  if (messageType.equalsIgnoreCase("DELIVERY_NOTIF") && !sme.equalsIgnoreCase("N")) {
+            		  smeUser=dbLogger.getNameFromId(Integer.valueOf(sme));  
+            	  }
+            	  
+            	  //SELECT code FROM sme s where id=1;
+            	  simulator.sendQuedMessage( messageType, strMsgBodyTemp, refNumber, strMsgBody,smeUser );
               }
 
             } else {

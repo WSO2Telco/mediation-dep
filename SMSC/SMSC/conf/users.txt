@@ -18,6 +18,10 @@
 # and it's value, i.e. "name=peter" and "name= peter" define two different users,
 # "peter" and " peter".
 
+# that's all folks
+name=MIFE
+password=MIFE
+
 
 # Pavel can bound for unlimited time as any type
 name=pavel
@@ -40,9 +44,5 @@ bound=t,r
 name=hugo
 password=ggoohu
 
-# that's all folks
-name=DAMIEN
-password=neimad
 
-name=MIFE
-password=MIFE
+

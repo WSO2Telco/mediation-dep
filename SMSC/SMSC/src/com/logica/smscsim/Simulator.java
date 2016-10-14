@@ -596,7 +596,7 @@ public class Simulator
     /*
      * Note :: Sending Delivery notification and MO messages
      * */
-    public void sendQuedMessage( String strMsgType, String requestParams, String refNumber, String requestBody ) throws IOException
+    public void sendQuedMessage( String strMsgType, String requestParams, String refNumber, String requestBody ,String sme) throws IOException
     {
         if (smscListener != null) {
             int procCount = processors.count();
@@ -607,8 +607,7 @@ public class Simulator
                 listClients();
                 
                 if (procCount > 1) {
-                    System.out.print("Type name of the destination> ");
-                    client = keyboard.readLine();
+                    client = sme;
                 } else {
                     proc = (SimulatorPDUProcessor)processors.get(0);
                     client = proc.getSystemId();
