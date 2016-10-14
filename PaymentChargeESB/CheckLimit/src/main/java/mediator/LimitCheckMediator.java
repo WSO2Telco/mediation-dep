@@ -16,62 +16,61 @@
 
 package mediator;
 
+import com.axiata.dialog.dbutils.AxataDBUtilException;
+import com.axiata.dialog.dbutils.AxiataDbService;
 import com.axiata.dialog.dbutils.dao.SpendLimitDAO;
 import exception.AxiataException;
+import org.apache.synapse.SynapseException;
 import unmashaller.OparatorNotinListException;
-import handler.SpendLimitHandler;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import unmashaller.GroupDTO;
 import unmashaller.GroupEventUnmarshaller;
 
 import javax.xml.bind.JAXBException;
-import java.io.IOException;
 
 
 public class LimitCheckMediator extends AbstractMediator {
 
     private static final GroupEventUnmarshaller groupEventUnmarshaller = loadGroupEventUnmashaller();
+    private AxiataDbService dbservice = new AxiataDbService();;
 
-    public boolean mediate(MessageContext mc) {
-
-        String endUserId = mc.getProperty("endUserId").toString();
-        String consumerKey = mc.getProperty("consumerKey").toString();
-        String chargeAmount = mc.getProperty("chargeAmount").toString();
-        String operator = mc.getProperty("operator").toString();
-
-        String msisdn = endUserId.substring(5);
+    public boolean mediate(MessageContext mc) throws AxiataException {
         try {
+            String endUserId = mc.getProperty("endUserId").toString();
+            String consumerKey = mc.getProperty("consumerKey").toString();
+            String chargeAmount = mc.getProperty("chargeAmount").toString();
+            String operator = mc.getProperty("operator").toString();
+            String msisdn = endUserId.substring(5);
             checkSpendLimit(msisdn,operator,Double.parseDouble(chargeAmount),consumerKey);
-        } catch (Exception axisFault) {
-            handleException("Unexpected error in LimitCheckMediator ", axisFault, mc);
+        } catch (AxiataException e) {
+            mc.setProperty("FAULT_CODE", e.getErrcode());
+            mc.setProperty("FAULT_MSG", e.getErrmsg());
+            mc.setProperty("FAULT_VARIABLE", e.getErrvar()[0]);
+            throw e;
+        } catch (AxataDBUtilException e) {
+            mc.setProperty("FAULT_CODE", "500");
+            mc.setProperty("FAULT_MSG", e.getMessage());
+            throw new SynapseException(e.getMessage());
         }
-
         return true;
     }
 
     public boolean checkSpendLimit(String msisdn, String operator, Double chargeAmount, String consumerKey) throws
-            com.axiata.dialog.dbutils.AxataDBUtilException, IOException, JAXBException {
-
-        Double groupTotalDayAmount = 0.0;
-        Double groupTotalMonthAmount = 0.0;
-
-
+            AxataDBUtilException , AxiataException{
         try {
             GroupDTO groupDTO= groupEventUnmarshaller.getGroupDTO(operator,consumerKey);
-
             Double groupdailyLimit = Double.parseDouble(groupDTO.getDayAmount());
             Double groupMonlthlyLimit = Double.parseDouble(groupDTO.getMonthAmount());
-            SpendLimitHandler spendLimitHandler = new SpendLimitHandler();
             SpendLimitDAO daySpendLimitObj = null;
             SpendLimitDAO monthSpendLimitObj = null;
 
-            daySpendLimitObj = spendLimitHandler.getGroupTotalDayAmount(groupDTO.getGroupName(), groupDTO.getOperator(), msisdn);
-            monthSpendLimitObj = spendLimitHandler.getGroupTotalMonthAmount(groupDTO.getGroupName(), groupDTO.getOperator(), msisdn);
+
 
             if(groupdailyLimit > 0.0) {
-                if(chargeAmount <= groupdailyLimit) {
 
+                if(chargeAmount <= groupdailyLimit) {
+                    daySpendLimitObj = getGroupTotalDayAmount(groupDTO.getGroupName(), groupDTO.getOperator(), msisdn);
                     if(daySpendLimitObj!=null && ((daySpendLimitObj.getAmount() >= groupdailyLimit) || (daySpendLimitObj.getAmount() + chargeAmount) > groupdailyLimit  )){
                         log.debug("group daily limit exceeded");
                         throw new AxiataException("POL1001", "The %1 charging limit for this user has been exceeded", new String[]{"daily"});
@@ -86,8 +85,8 @@ public class LimitCheckMediator extends AbstractMediator {
             if(groupMonlthlyLimit > 0.0) {
 
                 if(chargeAmount < groupMonlthlyLimit) {
-
-                    if(monthSpendLimitObj!=null && (monthSpendLimitObj.getAmount() >= groupdailyLimit || monthSpendLimitObj.getAmount() + chargeAmount > groupdailyLimit) ){
+                    monthSpendLimitObj = getGroupTotalMonthAmount(groupDTO.getGroupName(), groupDTO.getOperator(), msisdn);
+                    if(monthSpendLimitObj!=null && (monthSpendLimitObj.getAmount() >= groupMonlthlyLimit || monthSpendLimitObj.getAmount() + chargeAmount > groupMonlthlyLimit) ){
                         log.debug("group monthly limit exceeded");
                         throw new AxiataException("POL1001", "The %1 charging limit for this user has been exceeded", new String[]{"monthly"});
                     }
@@ -101,9 +100,8 @@ public class LimitCheckMediator extends AbstractMediator {
 
         }catch (OparatorNotinListException e){
             return true;
-        }catch (Exception e) {
-
-            throw new AxiataException("POL1001", "Data retreving error", new String[]{"daily"});
+        }catch (AxataDBUtilException e) {
+            throw new AxataDBUtilException("Data retreving error");
         }
 
         return true;
@@ -119,5 +117,15 @@ public class LimitCheckMediator extends AbstractMediator {
 
         return GroupEventUnmarshaller.getInstance();
     }
+
+    private SpendLimitDAO getGroupTotalDayAmount(String groupName,String operator,String msisdn) throws
+            AxataDBUtilException {
+        return dbservice.getGroupTotalDayAmount(groupName,operator,msisdn);
+    }
+
+    private SpendLimitDAO getGroupTotalMonthAmount(String groupName,String operator,String msisdn) throws AxataDBUtilException {
+        return dbservice.getGroupTotalMonthAmount(groupName,operator,msisdn);
+    }
+
 
 }
