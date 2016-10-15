@@ -35,8 +35,8 @@
     <artifact name="checkLimitError" groupId="com.example.Telco.sequence" version="1.0.0" type="synapse/sequence" serverRole="EnterpriseServiceBus">
         <file>src/main/synapse-config/sequences/checkLimitError.xml</file>
     </artifact>
-    <artifact name="dbFaultError" groupId="com.example.Telco.sequence" version="1.0.0" type="synapse/sequence" serverRole="EnterpriseServiceBus">
-        <file>src/main/synapse-config/sequences/dbFaultError.xml</file>
+    <artifact name="dropSeq" groupId="com.example.Telco.sequence" version="1.0.0" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/dropSeq.xml</file>
     </artifact>
     <artifact name="CelcomTokenEndpoint" groupId="com.example.Telco.endpoint" version="1.0.0" type="synapse/endpoint" serverRole="EnterpriseServiceBus">
         <file>src/main/synapse-config/endpoints/CelcomTokenEndpoint.xml</file>

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sequence name="userInfoSeq" onError="userInfoFaultSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
   <switch source="get-property('query.param.operator')">
-    <case regex="DIALOG">
+    <case regex="CELCOM">
       <property
         expression="get-property('registry','local:/Resource/celcomAuthToken')"
         name="Authorization" scope="transport" type="STRING" xmlns:ns="http://org.apache.synapse/xsd"/>
@@ -28,7 +28,7 @@
       </switch>
     </case>
     <default>
-      <respond/>
+      <sequence key="checkLimitSeq"/>
     </default>
   </switch>
   <clone>

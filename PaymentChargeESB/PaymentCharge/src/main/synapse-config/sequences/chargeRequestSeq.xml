@@ -2,7 +2,7 @@
 <sequence name="chargeRequestSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
   <property expression="get-property('query.param.oprendpoint')"
     name="uri.var.operatorEndpoint" scope="default" type="STRING" xmlns:ns="http://org.apache.synapse/xsd"/>
-  <filter regex="DIALOG" source="get-property('query.param.operator')">
+  <filter regex="true" source="get-property('isUserInfoEnabled')">
     <then>
       <enrich>
         <source clone="true" property="InitialMessage" type="property"/>

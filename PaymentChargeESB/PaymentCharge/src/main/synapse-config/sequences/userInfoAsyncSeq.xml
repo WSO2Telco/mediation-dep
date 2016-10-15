@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<sequence name="userInfoAsyncSeq" onError="dbFaultError" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+<sequence name="userInfoAsyncSeq" onError="dropSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
   <switch source="get-property('query.param.operator')">
-    <case regex="DIALOG">
+    <case regex="CELCOM">
       <property
         expression="get-property('registry','local:/Resource/celcomAuthToken')"
         name="Authorization" scope="transport" type="STRING" xmlns:ns="http://org.apache.synapse/xsd"/>
@@ -9,13 +9,6 @@
       <call>
         <endpoint key="CelcomDBUserInfoEndpoint"/>
       </call>
-      <property name="messageType" scope="axis2" type="STRING" value="application/json"/>
-      <filter regex="200" source="get-property('axis2', 'HTTP_SC')">
-        <then>
-          <sequence key="dbAsyncInsertSeq"/>
-        </then>
-        <else/>
-      </filter>
     </case>
     <default/>
   </switch>

@@ -2,7 +2,7 @@
 <endpoint name="CelcomDBUserInfoEndpoint" xmlns="http://ws.apache.org/ns/synapse">
   <http method="get" trace="disable" uri-template="https://celcom-test.apigee.net/oneapi/queryprofile/v1/{uri.var.userAddress}/subscribertype">
     <timeout>
-      <duration>3000</duration>
+      <duration>2000</duration>
       <responseAction>fault</responseAction>
     </timeout>
     <suspendOnFailure>

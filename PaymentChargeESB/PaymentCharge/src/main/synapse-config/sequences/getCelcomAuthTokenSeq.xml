@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<sequence name="getCelcomAuthTokenSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
-  <header name="Authorization" scope="transport" value="Basic UkdlOGk3MnBQZWhGMElFRzc1ZjVPUW5sNzFxSzlLSWE6d1AxWWpIblFBenN1RkEweQ=="/>
+<sequence name="getCelcomAuthTokenSeq" onError="dropSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+  <dblookup>
+    <connection>
+      <pool>
+        <dsName>jdbc/telco_ds</dsName>
+      </pool>
+    </connection>
+    <statement>
+      <sql><![CDATA[select authtoken from tokeninfo]]></sql>
+      <result column="authtoken" name="authHeaderTokenCall"/>
+    </statement>
+  </dblookup>
+  <header expression="get-property('authHeaderTokenCall')"
+    name="Authorization" scope="transport"/>
   <property
     expression="get-property('registry','local:/Resource/celcomRefreshToken')"
     name="refreshToken" scope="default" type="STRING"/>
@@ -36,13 +48,14 @@
       <sequence key="setCelcomRegistryTokens"/>
     </case>
     <default>
-      <header name="Authorization" scope="transport" value="Basic UkdlOGk3MnBQZWhGMElFRzc1ZjVPUW5sNzFxSzlLSWE6d1AxWWpIblFBenN1RkEweQ=="/>
+      <header expression="get-property('authHeaderTokenCall')"
+        name="Authorization" scope="transport"/>
       <sequence key="celcomAuthCallSeq"/>
       <property name="messageType" scope="axis2" type="STRING" value="application/x-www-form-urlencoded"/>
       <call>
         <endpoint key="CelcomTokenEndpoint"/>
       </call>
-      <sequence key="setCeclomRegistryTokens"/>
+      <sequence key="setCelcomRegistryTokens"/>
     </default>
   </switch>
   <drop/>

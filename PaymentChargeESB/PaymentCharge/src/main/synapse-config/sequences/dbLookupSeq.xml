@@ -4,7 +4,7 @@
         scope="default" type="STRING"/>
     <property expression="$trp:x-jwt-assertion" name="jwt-header"
         scope="default" type="STRING" />
-    <property value="tel:0192098790" name="uri.var.userAddress"
+    <property expression="get-property('endUserId')" name="uri.var.userAddress"
     scope="default" type="STRING"/>        
     <dblookup>
         <connection>
