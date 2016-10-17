@@ -311,7 +311,6 @@ public class Callbacks {
 		MessageSender.sendNotificationToSMSC( callbackDataArr[0] + "," + callbackDataArr[1] + "," + callbackDataArr[2]+ "," + callbackDataArr[3]  );
 	}
 
-
 	public static void main(String[] args) {
 		String settingsFile = "";
 		if(args!=null && args.length>0) {
