@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="filterCheckLimitSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+  <filter regex="Postpaid" source="get-property('packageType')">
+    <then>
+      <sequence key="checkLimitSeq"/>
+    </then>
+    <else>
+      <sequence key="chargeRequestSeq"/>
+    </else>
+  </filter>
+</sequence>
