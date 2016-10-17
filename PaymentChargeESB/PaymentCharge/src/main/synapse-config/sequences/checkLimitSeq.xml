@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="checkLimitSeq" onError="checkLimitError" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+  <property expression="get-property('query.param.consumerKey')"
+    name="consumerKey" scope="default" type="STRING"/>
+  <property expression="get-property('endUserId')" name="endUserId"
+    scope="default" type="STRING"/>
+  <property expression="get-property('query.param.operator')"
+    name="operator" scope="default" type="STRING"/>
+  <class name="mediator.LimitCheckMediator"/>
+  <sequence key="chargeRequestSeq"/>
+</sequence>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="userInfoAsyncSeq" onError="dropSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+  <switch source="get-property('query.param.operator')">
+    <case regex="CELCOM">
+      <property
+        expression="get-property('registry','local:/Resource/celcomAuthToken')"
+        name="Authorization" scope="transport" type="STRING" xmlns:ns="http://org.apache.synapse/xsd"/>
+      <property name="Content-Type" scope="transport" type="STRING" value=""/>
+      <call>
+        <endpoint key="CelcomDBUserInfoEndpoint"/>
+      </call>
+    </case>
+    <default/>
+  </switch>
+</sequence>
