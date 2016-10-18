@@ -26,27 +26,21 @@ import org.slf4j.LoggerFactory;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.logica.smscsim.Simulator;
 
-/**
- * @author Charith_02380
- *
- */
-public class Refresher extends Thread {
+public class Refresher {
 	static Logger logger = LoggerFactory.getLogger( Refresher.class );
 	private static AtomicReference<String> accessToken = new AtomicReference<String>();
 	private static String refreshToken = null;
-	private static int validityPeriod;
-	private int refreshOffset = 2500;
+	private static int validityPeriod; // in seconds
+	private int refreshOffset = 2500; // in seconds
 	private String tokenEndpoint = "";
 	private String tokenData = "";
 	private String tokenRefreshData = "";
-	private String consumerKey = "";
-	private String consumerSecret = "";
 	private Gson gson;
 	private String bearerToken = "";
 	private String username;
 	private String password;
+	private static long tokenExpiryTime = 0; // in milliseconds
 
 	/**
 	 * 
@@ -58,7 +52,7 @@ public class Refresher extends Thread {
 			Properties settings = new Properties();
 			
 			String defaultPath = new File("./conf/settings.xml").getCanonicalPath();
-			System.out.println("Looking for file in default location..."+new File("./conf").getCanonicalPath());
+			System.out.println("Looking for file in default location..." + new File("./conf").getCanonicalPath());
 			File file = new File(defaultPath);
 			file.getAbsoluteFile();
 			InputStream is = new FileInputStream(file);
@@ -68,19 +62,27 @@ public class Refresher extends Thread {
 			tokenEndpoint = settings.getProperty("token_endpoint");
 			tokenData = settings.getProperty("token_data");
 			tokenRefreshData = settings.getProperty("token_refresh");
-			consumerKey = settings.getProperty("app_key");
-			consumerSecret = settings.getProperty("app_secret");
+			String consumerKey = settings.getProperty("app_key");
+			String consumerSecret = settings.getProperty("app_secret");
 			username = settings.getProperty("username");
 			password = settings.getProperty("password");
 			refreshOffset = Integer.parseInt(settings.getProperty("refresh_offset"));
 			bearerToken = new String(Base64.encodeBase64((consumerKey+":"+consumerSecret).getBytes()));
 
-			//===========================REFRESH TOKEN PATCH===========================
-			accessToken.set(settings.getProperty("access_token"));//get access token from properties file
-			refreshToken = settings.getProperty("refresh_token");
-			validityPeriod = Integer.valueOf(settings.getProperty("validity_period"));
-			
-			
+			int validTime = Integer.valueOf(settings.getProperty("validity_period"));
+			tokenExpiryTime = Long.valueOf(settings.getProperty("token_created_timestamp")) + (validTime * 1000L) -
+					(refreshOffset * 1000L);
+			if (accessToken.get() == null && (tokenExpiryTime > System.currentTimeMillis())) {
+				accessToken.set(settings.getProperty("access_token"));//get access token from properties file
+				refreshToken = settings.getProperty("refresh_token");
+				validityPeriod = validTime;
+			} else if(accessToken.get() == null) {
+				logger.info("HHHHHHHHHHHHHHHHHHH		Calling generateToken...");
+				generateToken();//generate access token
+			} else {
+				generateTokenWithRefreshToken();
+			}
+
 			logger.info("HHHHHHHHHHHHHHHHHHH		tokenEndpoint : "+tokenEndpoint);
 			logger.info("HHHHHHHHHHHHHHHHHHH		tokenData : "+tokenData);
 			logger.info("HHHHHHHHHHHHHHHHHHH		tokenRefreshData : "+tokenRefreshData);
@@ -93,13 +95,6 @@ public class Refresher extends Thread {
 			logger.info("HHHHHHHHHHHHHHHHHHH		accessToken : "+accessToken);
 			logger.info("HHHHHHHHHHHHHHHHHHH		refreshToken : "+refreshToken);
 			logger.info("HHHHHHHHHHHHHHHHHHH		validityPeriod : "+validityPeriod);
-			
-			if(accessToken.get()== null) {
-				logger.info("HHHHHHHHHHHHHHHHHHH		Calling generateToken...");
-				generateToken();//generate access token
-			}
-			//===========================REFRESH TOKEN PATCH===========================
-			start();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -129,14 +124,15 @@ public class Refresher extends Thread {
 				if (entity != null) {
 			        InputStream instream = entity.getContent();
 			        StringWriter writer = new StringWriter();
-			        IOUtils.copy(new InputStreamReader(instream), writer, 1024);
+					IOUtils.copy(new InputStreamReader(instream), writer, 1024);
 			        String body = writer.toString();
-			        logger.info("HHHHHHHHHHHHHHHHHHH		body : "+body);
+					logger.info("HHHHHHHHHHHHHHHHHHH		body : " + body);
 			        TokenResponse resp = gson.fromJson(body, TokenResponse.class);
 			        accessToken.set(resp.getAccessToken());
 			        System.out.println("RECEIVED TOKEN(1)>" + resp.getAccessToken());
 			        refreshToken = resp.getRefreshToken();
 			        validityPeriod = resp.getExpiresIn();
+					tokenExpiryTime = System.currentTimeMillis() + ((validityPeriod - refreshOffset) * 1000L);
 			        
 			        logger.info("HHHHHHHHHHHHHHHHHHH		accessToken_II : "+accessToken.toString());
 			        logger.info("HHHHHHHHHHHHHHHHHHH		refreshToken_II : "+refreshToken);
@@ -158,80 +154,58 @@ public class Refresher extends Thread {
 	 */
 	public static String getToken() {
 		logger.info("HHHHHHHHHHHHHHHHHHH	Calling getToken");
-		if(accessToken.get()  == null) {
+		if(accessToken.get()  == null ||  tokenExpiryTime < System.currentTimeMillis()) {
 			logger.info("HHHHHHHHHHHHHHHHHHH	Calling  Refresher");
-			new Refresher();
-		}
-		logger.info("HHHHHHHHHHHHHHHHHHH	accessTokenIII : "+accessToken.get().toString());
-		return accessToken.get();
-	}
-	
-	@Override
-	public void run() {
-		while(true) {
-			try {
-				  try {
-					  logger.info("HHHHHHHHHHHHHHHHHHH	validityPeriodIII : "+validityPeriod);
-					  logger.info("HHHHHHHHHHHHHHHHHHH	refreshOffsetIII : "+refreshOffset);
-				    if(validityPeriod > refreshOffset) {				    	
-				      sleep((validityPeriod-refreshOffset)*1000);
-				    }
-				  } catch (InterruptedException e) {
-					  e.printStackTrace();
-				  }
-				HttpPost post = new HttpPost(tokenEndpoint);
-				post.addHeader("Authorization", "Basic "+bearerToken);
-				
-				Object[] args = {refreshToken, refreshToken};
-				String tokenRefreshPostData = MessageFormat.format(tokenRefreshData, args);
-				
-				StringEntity strEntity = new StringEntity(tokenRefreshPostData, "UTF-8");
-				strEntity.setContentType("application/x-www-form-urlencoded");
-				post.setEntity(strEntity);
-				
-				CloseableHttpResponse response = null;
-				
-				SSLContextBuilder builder = new SSLContextBuilder();
-			    builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
-			    SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
-			    CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
-				response = httpclient.execute(post);
-				HttpEntity entity = response.getEntity();
-				
-				if (entity != null) {
-	                InputStream instream = entity.getContent();
-	                StringWriter writer = new StringWriter();
-	                IOUtils.copy(new InputStreamReader(instream), writer, 1024);
-	                String body = writer.toString();
-	                
-	                TokenResponse resp = gson.fromJson(body, TokenResponse.class);
-	                accessToken.set(resp.getAccessToken());
-	                System.out.println("RECEIVED TOKEN(2)>" + resp.getAccessToken());
-	                refreshToken = resp.getRefreshToken();
-	                validityPeriod = resp.getExpiresIn();
-			        logger.info("HHHHHHHHHHHHHHHHHHH		accessToken_IV : "+accessToken.toString());
-			        logger.info("HHHHHHHHHHHHHHHHHHH		refreshToken_IV : "+refreshToken);
-			        logger.info("HHHHHHHHHHHHHHHHHHH		validityPeriod_IV : "+String.valueOf(validityPeriod));
-				}				
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	public static void main(String[] args) {
-		new Thread() {
-			@Override
-			public void run() {
-				while(true) {
-					try {
-						System.out.println(Refresher.getToken());
-						sleep(1000);
-					} catch (Exception e) {
-						e.printStackTrace();
-					}
+			synchronized (Refresher.class) {
+				if(accessToken.get()  == null ||  tokenExpiryTime < System.currentTimeMillis()) {
+					new Refresher();
 				}
 			}
-		}.start();
+
+		}
+		logger.info("HHHHHHHHHHHHHHHHHHH	accessTokenIII : "+accessToken.get());
+		return accessToken.get();
+	}
+
+	public void generateTokenWithRefreshToken() {
+		try {
+			HttpPost post = new HttpPost(tokenEndpoint);
+			post.addHeader("Authorization", "Basic "+bearerToken);
+
+			Object[] args = {refreshToken, refreshToken};
+			String tokenRefreshPostData = MessageFormat.format(tokenRefreshData, args);
+
+			StringEntity strEntity = new StringEntity(tokenRefreshPostData, "UTF-8");
+			strEntity.setContentType("application/x-www-form-urlencoded");
+			post.setEntity(strEntity);
+
+			CloseableHttpResponse response = null;
+
+			SSLContextBuilder builder = new SSLContextBuilder();
+			builder.loadTrustMaterial(null, new TrustSelfSignedStrategy());
+			SSLConnectionSocketFactory sslsf = new SSLConnectionSocketFactory(builder.build());
+			CloseableHttpClient httpclient = HttpClients.custom().setSSLSocketFactory(sslsf).build();
+			response = httpclient.execute(post);
+			HttpEntity entity = response.getEntity();
+
+			if (entity != null) {
+				InputStream instream = entity.getContent();
+				StringWriter writer = new StringWriter();
+				IOUtils.copy(new InputStreamReader(instream), writer, 1024);
+				String body = writer.toString();
+
+				TokenResponse resp = gson.fromJson(body, TokenResponse.class);
+				accessToken.set(resp.getAccessToken());
+				System.out.println("RECEIVED TOKEN(2)>" + resp.getAccessToken());
+				refreshToken = resp.getRefreshToken();
+				validityPeriod = resp.getExpiresIn();
+				tokenExpiryTime = System.currentTimeMillis() + (validityPeriod * 1000L) - (refreshOffset * 1000L);
+				logger.info("HHHHHHHHHHHHHHHHHHH		accessToken_IV : "+accessToken.toString());
+				logger.info("HHHHHHHHHHHHHHHHHHH		refreshToken_IV : "+refreshToken);
+				logger.info("HHHHHHHHHHHHHHHHHHH		validityPeriod_IV : "+String.valueOf(validityPeriod));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 }

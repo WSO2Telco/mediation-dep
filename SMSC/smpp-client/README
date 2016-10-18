@@ -1,0 +1,74 @@
+1) execute the jar.
+java -jar smppclient-1.0.0-SNAPSHOT.jar
+
+Sample Request/Response:
+java -jar smppclient-1.0.0-SNAPSHOT.jar
+Copyright (c) 1996-2001 Logica Mobile Networks Limited
+This product includes software developed by Logica by whom copyright
+and know-how are retained, all rights reserved.
+
+SMPP Open Source test & demonstration application, version 1.1
+
+Initialising...
+Charset used: UTF8
+Reading configuration file /Users/ayyoobhamza/Desktop/SMSC/customerPOC/SMSC/smppclient/target/smppclient-1.0.0-SNAPSHOT/conf/smpptest.cfg...
+Setting default parameters...
+
+-  1 bind
+-  2 submit (t/tr)
+-  3 submit multi (t/tr)
+-  4 data (t/tr)
+-  5 query (t/tr)
+-  6 replace (t/tr)
+-  7 cancel (t/tr)
+-  8 enquire link (t/tr)
+-  9 unbind
+- 10 receive message (tr/r)
+- 11 deliver (tr/r)
+-  0 exit
+> 1
+Asynchronous/Synchronnous Session? (a/s) [a]
+Transmitter/Receiver/Transciever (t/r/tr) [tr]
+IP address of SMSC [127.0.0.1]
+Port number [38002]
+Your system ID [MIFE]
+Your password [MIFE]
+Bind request (bindreq: (pdu: 0 9 0 [1]) MIFE MIFE  52 (addrrang: 1 1 11*) )
+Bind response (bindresp: (pdu: 31 80000009 0 1) Smsc Simulator)
+
+-  1 bind
+-  2 submit (t/tr)
+-  3 submit multi (t/tr)
+-  4 data (t/tr)
+-  5 query (t/tr)
+-  6 replace (t/tr)
+-  7 cancel (t/tr)
+-  8 enquire link (t/tr)
+-  9 unbind
+- 10 receive message (tr/r)
+- 11 deliver (tr/r)
+-  0 exit
+> 2
+Starting MSG SEQ number  [] 123
+Is long SMS (y/n)  [] n
+Is payload field set (y/n)  [] n
+Short message [] Test
+Service type []
+Source address TON [1]
+Source address NPI [1]
+Source address [7555]
+Destination address TON [1]
+Destination address NPI [1]
+Destination address [94774715762] 94777879623
+Replace if present flag [0]
+Schedule delivery time []
+Validity period []
+Esm class [0]
+Protocol id [0]
+Priority flag [0]
+Registered delivery [1]
+Data encoding [0]
+Sm default msg id [0]
+
+Short MSG [01] - Test
+Submit request (submit: (pdu: 0 4 0 123) (addr: 1 1 7555)  (addr: 1 1 94777879623)  (sm: enc: X-Gsm7Bit msg: Test)  (opt: ) )
