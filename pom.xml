@@ -10,6 +10,9 @@
   <description>mediation-dep</description>
   <url>http://wso2telco.com</url>
 
+<modules>
+	<module>hub-mediator</module>
+</modules>
     <distributionManagement>
         <snapshotRepository>
             <id>wso2Telco.snapshots</id>
