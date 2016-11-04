@@ -9,124 +9,124 @@
   <name>capp-mediation</name>
   <description>capp-mediation</description>
   <properties>
-    <com.example.Telco.sequence_._userInfoAsyncSeq>capp/EnterpriseServiceBus</com.example.Telco.sequence_._userInfoAsyncSeq>
-    <com.example.Telco.sequence_._chargeRequestSeq>capp/EnterpriseServiceBus</com.example.Telco.sequence_._chargeRequestSeq>
-    <com.example.Telco.sequence_._filterCheckLimitSeq>capp/EnterpriseServiceBus</com.example.Telco.sequence_._filterCheckLimitSeq>
-    <com.example.Telco.sequence_._userInfoSeq>capp/EnterpriseServiceBus</com.example.Telco.sequence_._userInfoSeq>
-    <com.example.Telco.sequence_._setCelcomRegistryTokens>capp/EnterpriseServiceBus</com.example.Telco.sequence_._setCelcomRegistryTokens>
-    <com.example.Telco.sequence_._checkLimitError>capp/EnterpriseServiceBus</com.example.Telco.sequence_._checkLimitError>
-    <com.example.Telco.sequence_._dbAsyncInsertSeq>capp/EnterpriseServiceBus</com.example.Telco.sequence_._dbAsyncInsertSeq>
-    <com.example.Telco.sequence_._dropSeq>capp/EnterpriseServiceBus</com.example.Telco.sequence_._dropSeq>
-    <com.example.Telco.sequence_._celcomAuthCallSeq>capp/EnterpriseServiceBus</com.example.Telco.sequence_._celcomAuthCallSeq>
-    <com.example.Telco.endpoint_._CelcomTokenEndpoint>capp/EnterpriseServiceBus</com.example.Telco.endpoint_._CelcomTokenEndpoint>
+    <com.wso2telco.dep.mediation.sequence_._userInfoAsyncSeq>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.sequence_._userInfoAsyncSeq>
+    <com.wso2telco.dep.mediation.sequence_._chargeRequestSeq>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.sequence_._chargeRequestSeq>
+    <com.wso2telco.dep.mediation.sequence_._filterCheckLimitSeq>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.sequence_._filterCheckLimitSeq>
+    <com.wso2telco.dep.mediation.sequence_._userInfoSeq>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.sequence_._userInfoSeq>
+    <com.wso2telco.dep.mediation.sequence_._setCelcomRegistryTokens>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.sequence_._setCelcomRegistryTokens>
+    <com.wso2telco.dep.mediation.sequence_._checkLimitError>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.sequence_._checkLimitError>
+    <com.wso2telco.dep.mediation.sequence_._dbAsyncInsertSeq>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.sequence_._dbAsyncInsertSeq>
+    <com.wso2telco.dep.mediation.sequence_._dropSeq>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.sequence_._dropSeq>
+    <com.wso2telco.dep.mediation.sequence_._celcomAuthCallSeq>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.sequence_._celcomAuthCallSeq>
+    <com.wso2telco.dep.mediation.endpoint_._CelcomTokenEndpoint>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.endpoint_._CelcomTokenEndpoint>
     <artifact.types>jaggery/app=zip,service/rule=aar,lib/library/bundle=jar,event/receiver=xml,synapse/message-processors=xml,synapse/endpointTemplate=xml,synapse/message-store=xml,synapse/proxy-service=xml,event/execution-plan=siddhiql,carbon/application=car,registry/resource=zip,lib/dataservice/validator=jar,synapse/endpoint=xml,web/application=war,synapse/inbound-endpoint=xml,synapse/sequence=xml,synapse/configuration=xml,lib/registry/handlers=jar,synapse/task=xml,service/meta=xml,webapp/jaxws=war,synapse/api=xml,synapse/lib=zip,bpel/workflow=zip,lib/registry/filter=jar,service/dataservice=dbs,event/publisher=xml,synapse/local-entry=xml,synapse/priority-executor=xml,synapse/event-source=xml,synapse/template=xml,event/stream=json,lib/carbon/ui=jar,service/axis2=aar,synapse/sequenceTemplate=xml,wso2/gadget=dar,lib/synapse/mediator=jar</artifact.types>
-    <com.example.Telco.sequence_._checkLimitSeq>capp/EnterpriseServiceBus</com.example.Telco.sequence_._checkLimitSeq>
-    <com.example.Telco.endpoint_._CelcomUserInfoEndpoint>capp/EnterpriseServiceBus</com.example.Telco.endpoint_._CelcomUserInfoEndpoint>
-    <com.example.Telco.sequence_._dbLookupSeq>capp/EnterpriseServiceBus</com.example.Telco.sequence_._dbLookupSeq>
-    <com.example.Telco.api_._PaymentAPI>capp/EnterpriseServiceBus</com.example.Telco.api_._PaymentAPI>
-    <com.example.Telco.sequence_._getCelcomAuthTokenSeq>capp/EnterpriseServiceBus</com.example.Telco.sequence_._getCelcomAuthTokenSeq>
-    <com.example.Telco.endpoint_._CelcomDBUserInfoEndpoint>capp/EnterpriseServiceBus</com.example.Telco.endpoint_._CelcomDBUserInfoEndpoint>
-    <com.example.Telco.sequence_._userInfoFaultSeq>capp/EnterpriseServiceBus</com.example.Telco.sequence_._userInfoFaultSeq>
+    <com.wso2telco.dep.mediation.sequence_._checkLimitSeq>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.sequence_._checkLimitSeq>
+    <com.wso2telco.dep.mediation.endpoint_._CelcomUserInfoEndpoint>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.endpoint_._CelcomUserInfoEndpoint>
+    <com.wso2telco.dep.mediation.sequence_._dbLookupSeq>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.sequence_._dbLookupSeq>
+    <com.wso2telco.dep.mediation.api_._PaymentAPI>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.api_._PaymentAPI>
+    <com.wso2telco.dep.mediation.sequence_._getCelcomAuthTokenSeq>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.sequence_._getCelcomAuthTokenSeq>
+    <com.wso2telco.dep.mediation.endpoint_._CelcomDBUserInfoEndpoint>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.endpoint_._CelcomDBUserInfoEndpoint>
+    <com.wso2telco.dep.mediation.sequence_._userInfoFaultSeq>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.sequence_._userInfoFaultSeq>
   </properties>
   <dependencies>
     <dependency>
-      <groupId>com.example.Telco.sequence</groupId>
+      <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>checkLimitSeq</artifactId>
       <version>1.0.0</version>
       <type>xml</type>
     </dependency>
     <dependency>
-      <groupId>com.example.Telco.endpoint</groupId>
+      <groupId>com.wso2telco.dep.mediation.endpoint</groupId>
       <artifactId>CelcomTokenEndpoint</artifactId>
       <version>1.0.0</version>
       <type>xml</type>
     </dependency>
     <dependency>
-      <groupId>com.example.Telco.endpoint</groupId>
+      <groupId>com.wso2telco.dep.mediation.endpoint</groupId>
       <artifactId>CelcomUserInfoEndpoint</artifactId>
       <version>1.0.0</version>
       <type>xml</type>
     </dependency>
     <dependency>
-      <groupId>com.example.Telco.sequence</groupId>
+      <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>dbLookupSeq</artifactId>
       <version>1.0.0</version>
       <type>xml</type>
     </dependency>
     <dependency>
-      <groupId>com.example.Telco.sequence</groupId>
+      <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>dropSeq</artifactId>
       <version>1.0.0</version>
       <type>xml</type>
     </dependency>
     <dependency>
-      <groupId>com.example.Telco.sequence</groupId>
+      <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>celcomAuthCallSeq</artifactId>
       <version>1.0.0</version>
       <type>xml</type>
     </dependency>
     <dependency>
-      <groupId>com.example.Telco.sequence</groupId>
+      <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>getCelcomAuthTokenSeq</artifactId>
       <version>1.0.0</version>
       <type>xml</type>
     </dependency>
     <dependency>
-      <groupId>com.example.Telco.sequence</groupId>
+      <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>userInfoAsyncSeq</artifactId>
       <version>1.0.0</version>
       <type>xml</type>
     </dependency>
     <dependency>
-      <groupId>com.example.Telco.sequence</groupId>
+      <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>filterCheckLimitSeq</artifactId>
       <version>1.0.0</version>
       <type>xml</type>
     </dependency>
     <dependency>
-      <groupId>com.example.Telco.sequence</groupId>
+      <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>setCelcomRegistryTokens</artifactId>
       <version>1.0.0</version>
       <type>xml</type>
     </dependency>
     <dependency>
-      <groupId>com.example.Telco.api</groupId>
+      <groupId>com.wso2telco.dep.mediation.api</groupId>
       <artifactId>PaymentAPI</artifactId>
       <version>1.0.0</version>
       <type>xml</type>
     </dependency>
     <dependency>
-      <groupId>com.example.Telco.endpoint</groupId>
+      <groupId>com.wso2telco.dep.mediation.endpoint</groupId>
       <artifactId>CelcomDBUserInfoEndpoint</artifactId>
       <version>1.0.0</version>
       <type>xml</type>
     </dependency>
     <dependency>
-      <groupId>com.example.Telco.sequence</groupId>
+      <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>dbAsyncInsertSeq</artifactId>
       <version>1.0.0</version>
       <type>xml</type>
     </dependency>
     <dependency>
-      <groupId>com.example.Telco.sequence</groupId>
+      <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>userInfoSeq</artifactId>
       <version>1.0.0</version>
       <type>xml</type>
     </dependency>
     <dependency>
-      <groupId>com.example.Telco.sequence</groupId>
+      <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>userInfoFaultSeq</artifactId>
       <version>1.0.0</version>
       <type>xml</type>
     </dependency>
     <dependency>
-      <groupId>com.example.Telco.sequence</groupId>
+      <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>checkLimitError</artifactId>
       <version>1.0.0</version>
       <type>xml</type>
     </dependency>
     <dependency>
-      <groupId>com.example.Telco.sequence</groupId>
+      <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>chargeRequestSeq</artifactId>
       <version>1.0.0</version>
       <type>xml</type>
