@@ -2,12 +2,12 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.example.PaymentChargeCapp</groupId>
-  <artifactId>PaymentChargeCapp</artifactId>
+  <groupId>com.wso2telco.dep.mediation</groupId>
+  <artifactId>capp-mediation</artifactId>
   <version>1.0.0</version>
   <packaging>carbon/application</packaging>
-  <name>PaymentChargeCapp</name>
-  <description>PaymentChargeCapp</description>
+  <name>capp-mediation</name>
+  <description>capp-mediation</description>
   <properties>
     <com.example.Telco.sequence_._userInfoAsyncSeq>capp/EnterpriseServiceBus</com.example.Telco.sequence_._userInfoAsyncSeq>
     <com.example.Telco.sequence_._chargeRequestSeq>capp/EnterpriseServiceBus</com.example.Telco.sequence_._chargeRequestSeq>

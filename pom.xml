@@ -12,6 +12,8 @@
 
 <modules>
 	<module>hub-mediator</module>
+	<module>esb-mediation</module>
+	<module>capp-mediation</module>
 </modules>
     <distributionManagement>
         <snapshotRepository>
