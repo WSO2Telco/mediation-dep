@@ -15,7 +15,7 @@
  * 
  */
 
-package exception;
+package com.wso2telco.dep.mediation.exception;
 public class AxiataException extends RuntimeException {
 
     private String errcode;

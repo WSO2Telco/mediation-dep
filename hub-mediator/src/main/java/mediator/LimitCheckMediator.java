@@ -14,7 +14,7 @@
 * limitations under the License.
 */
 
-package mediator;
+package com.wso2telco.dep.mediation.mediator;
 
 import com.axiata.dialog.dbutils.AxataDBUtilException;
 import com.axiata.dialog.dbutils.AxiataDbService;
