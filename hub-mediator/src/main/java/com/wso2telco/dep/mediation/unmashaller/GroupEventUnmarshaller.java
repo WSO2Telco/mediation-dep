@@ -1,7 +1,7 @@
-package unmashaller;
+package com.wso2telco.dep.mediation.unmashaller;
 
 
-import entity.cep.*;
+import com.wso2telco.dep.mediation.cep.*;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.wso2.carbon.utils.CarbonUtils;

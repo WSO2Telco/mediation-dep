@@ -3,6 +3,6 @@
     <property expression="get-property('query.param.consumerKey')" name="consumerKey" scope="default" type="STRING"/>
     <property expression="get-property('endUserId')" name="endUserId" scope="default" type="STRING"/>
     <property expression="get-property('query.param.operator')" name="operator" scope="default" type="STRING"/>
-    <class name="mediator.LimitCheckMediator"/>
+    <class name="com.wso2telco.dep.mediation.mediator.LimitCheckMediator"/>
     <sequence key="chargeRequestSeq"/>
 </sequence>

@@ -1,7 +1,7 @@
-package entity.cep;
+package com.wso2telco.dep.mediation.cep;
 
-import unmashaller.GroupDTO;
-import unmashaller.ServiceProviderDTO;
+import com.wso2telco.dep.mediation.unmashaller.GroupDTO;
+import com.wso2telco.dep.mediation.unmashaller.ServiceProviderDTO;
 
 import java.io.Serializable;
 import java.util.ArrayList;

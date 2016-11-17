@@ -1,4 +1,6 @@
-package entity.cep;
+package com.wso2telco.dep.mediation.cep;
+
+import com.wso2telco.dep.mediation.entity.cep.ServiceProvider;
 
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;

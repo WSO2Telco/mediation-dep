@@ -1,4 +1,4 @@
-package unmashaller;
+package com.wso2telco.dep.mediation.unmashaller;
 
 /**
  * Created by aushani on 9/22/16.

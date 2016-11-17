@@ -7,9 +7,9 @@
     <groupId>com.wso2telco.dep.mediation</groupId>
     <artifactId>hub-mediator</artifactId>
     <version>1.0.0</version>
-    <description>test-mediator</description>
+    <description>test-com.wso2telco.dep.mediation.mediator</description>
     <properties>
-        <CApp.type>lib/synapse/mediator</CApp.type>
+        <CApp.type>lib/synapse/com.wso2telco.dep.mediation.mediator</CApp.type>
     </properties>
     <dependencies>
         <dependency>
@@ -104,8 +104,8 @@
                 <extensions>true</extensions>
                 <configuration>
                     <instructions>
-                        <Bundle-SymbolicName>test-mediator</Bundle-SymbolicName>
-                        <Bundle-Name>test-mediator</Bundle-Name>
+                        <Bundle-SymbolicName>test-com.wso2telco.dep.mediation.mediator</Bundle-SymbolicName>
+                        <Bundle-Name>test-com.wso2telco.dep.mediation.mediator</Bundle-Name>
                         <Export-Package>com.example.telco</Export-Package>
                         <DynamicImport-Package>*</DynamicImport-Package>
                     </instructions>
@@ -119,7 +119,7 @@
                         <buildcommand>org.eclipse.jdt.core.javabuilder</buildcommand>
                     </buildcommands>
                     <projectnatures>
-                        <projectnature>org.wso2.developerstudio.eclipse.artifact.mediator.project.nature</projectnature>
+                        <projectnature>org.wso2.developerstudio.eclipse.artifact.com.wso2telco.dep.mediation.mediator.project.nature</projectnature>
                         <projectnature>org.eclipse.jdt.core.javanature</projectnature>
                     </projectnatures>
                 </configuration>

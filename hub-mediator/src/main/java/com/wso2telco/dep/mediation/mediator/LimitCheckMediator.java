@@ -21,11 +21,11 @@ import com.wso2telco.core.dbutils.AxiataDbService;
 import com.wso2telco.core.dbutils.dao.SpendLimitDAO;
 import exception.AxiataException;
 import org.apache.synapse.SynapseException;
-import unmashaller.OparatorNotinListException;
+import com.wso2telco.dep.mediation.unmashaller.OparatorNotinListException;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
-import unmashaller.GroupDTO;
-import unmashaller.GroupEventUnmarshaller;
+import com.wso2telco.dep.mediation.unmashaller.GroupDTO;
+import com.wso2telco.dep.mediation.unmashaller.GroupEventUnmarshaller;
 
 import javax.xml.bind.JAXBException;
 

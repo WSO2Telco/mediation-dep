@@ -1,4 +1,4 @@
-package unmashaller;
+package com.wso2telco.dep.mediation.unmashaller;
 
 import java.util.ArrayList;
 import java.util.List;
