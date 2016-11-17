@@ -19,7 +19,7 @@ package com.wso2telco.dep.mediation.mediator;
 import com.wso2telco.core.dbutils.AxataDBUtilException;
 import com.wso2telco.core.dbutils.AxiataDbService;
 import com.wso2telco.core.dbutils.dao.SpendLimitDAO;
-import exception.AxiataException;
+import com.wso2telco.dep.mediation.exception.AxiataException;
 import org.apache.synapse.SynapseException;
 import com.wso2telco.dep.mediation.unmashaller.OparatorNotinListException;
 import org.apache.synapse.MessageContext;

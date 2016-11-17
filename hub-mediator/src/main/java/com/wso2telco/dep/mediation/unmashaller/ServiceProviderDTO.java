@@ -1,6 +1,7 @@
 package com.wso2telco.dep.mediation.unmashaller;
 
-import com.wso2telco.dep.mediation.cep.Application;
+
+import com.wso2telco.dep.mediation.entity.cep.Application;
 
 import java.util.ArrayList;
 import java.util.List;
