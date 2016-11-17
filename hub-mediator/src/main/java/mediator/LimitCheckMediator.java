@@ -16,9 +16,9 @@
 
 package mediator;
 
-import com.axiata.dialog.dbutils.AxataDBUtilException;
-import com.axiata.dialog.dbutils.AxiataDbService;
-import com.axiata.dialog.dbutils.dao.SpendLimitDAO;
+import com.wso2telco.core.dbutils.AxataDBUtilException;
+import com.wso2telco.core.dbutils.AxiataDbService;
+import com.wso2telco.core.dbutils.dao.SpendLimitDAO;
 import exception.AxiataException;
 import org.apache.synapse.SynapseException;
 import unmashaller.OparatorNotinListException;
@@ -118,14 +118,14 @@ public class LimitCheckMediator extends AbstractMediator {
         return GroupEventUnmarshaller.getInstance();
     }
 
-    private SpendLimitDAO getGroupTotalDayAmount(String groupName,String operator,String msisdn) throws
+    private SpendLimitDAO getGroupTotalDayAmount(String groupName, String operator, String msisdn) throws
             AxataDBUtilException {
-        return dbservice.getGroupTotalDayAmount(groupName,operator,msisdn);
+        return dbservice.getGroupTotalDayAmount(groupName, operator, msisdn);
     }
 
-    private SpendLimitDAO getGroupTotalMonthAmount(String groupName,String operator,String msisdn) throws AxataDBUtilException {
-        return dbservice.getGroupTotalMonthAmount(groupName,operator,msisdn);
+    private SpendLimitDAO getGroupTotalMonthAmount(String groupName, String operator, String msisdn) throws
+            AxataDBUtilException {
+        return dbservice.getGroupTotalMonthAmount(groupName, operator, msisdn);
     }
-
 
 }
