@@ -21,16 +21,16 @@
 
     <parent>
         <groupId>com.wso2telco.dep.mediation</groupId>
-        <artifactId>synapse-mediation</artifactId>
+        <artifactId>mediation-dep</artifactId>
         <version>1.0.0-SNAPSHOT</version>
         <relativePath>../pom.xml</relativePath>
     </parent>
 
     <modelVersion>4.0.0</modelVersion>
-    <artifactId>payment-configs</artifactId>
+    <artifactId>distribution</artifactId>
     <packaging>pom</packaging>
-    <name>Payment Configs Synapse Mediation</name>
-    <description>Payment Configs Synapse Mediation</description>
+    <name>WSO2Telco- Distribution Parent</name>
+    <description>WSO2Telco- Distribution Parent</description>
 
     <licenses>
         <license>
@@ -39,25 +39,43 @@
         </license>
     </licenses>
 
-    <modules>
-        <module>spend-limit-configs</module>
-    </modules>
-
     <build>
         <plugins>
             <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <configuration>
+                    <descriptor>assembly.xml</descriptor>
+                    <finalName>esb-mediation-${project.version}</finalName>
+                </configuration>
                 <executions>
                     <execution>
-                        <id>auto-clean</id>
-                        <phase>initialize</phase>
+                        <phase>package</phase>
                         <goals>
-                            <goal>clean</goal>
+                            <goal>single</goal>
                         </goals>
                     </execution>
                 </executions>
             </plugin>
-
+            <!--<plugin>-->
+            <!--<artifactId>maven-assembly-plugin</artifactId>-->
+            <!--<version>2.5.5</version>-->
+            <!--<configuration>-->
+            <!--<appendAssemblyId>false</appendAssemblyId>-->
+            <!--<descriptors>-->
+            <!--<descriptor>capps/assembly.xml</descriptor>-->
+            <!--</descriptors>-->
+            <!--</configuration>-->
+            <!--<executions>-->
+            <!--<execution>-->
+            <!--<phase>package</phase>-->
+            <!--<goals>-->
+            <!--<goal>single</goal>-->
+            <!--</goals>-->
+            <!--</execution>-->
+            <!--</executions>-->
+            <!--</plugin>-->
         </plugins>
     </build>
+
 </project>
