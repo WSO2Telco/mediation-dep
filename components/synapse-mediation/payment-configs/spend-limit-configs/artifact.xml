@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><artifacts>
+    <artifact name="PaymentAPI" groupId="com.wso2telco.dep.mediation.api" version="1.0.0-SNAPSHOT" type="synapse/api" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/api/PaymentAPI.xml</file>
+    </artifact>
+    <artifact name="CelcomUserInfoEndpoint" groupId="com.wso2telco.dep.mediation.endpoint" version="1.0.0-SNAPSHOT" type="synapse/endpoint" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/endpoints/CelcomUserInfoEndpoint.xml</file>
+    </artifact>
+    <artifact name="userInfoFaultSeq" groupId="com.wso2telco.dep.mediation.sequence" version="1.0.0-SNAPSHOT" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/userInfoFaultSeq.xml</file>
+    </artifact>
+    <artifact name="userInfoSeq" groupId="com.wso2telco.dep.mediation.sequence" version="1.0.0-SNAPSHOT" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/userInfoSeq.xml</file>
+    </artifact>
+    <artifact name="chargeRequestSeq" groupId="com.wso2telco.dep.mediation.sequence" version="1.0.0-SNAPSHOT" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/chargeRequestSeq.xml</file>
+    </artifact>
+    <artifact name="checkLimitSeq" groupId="com.wso2telco.dep.mediation.sequence" version="1.0.0-SNAPSHOT" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/checkLimitSeq.xml</file>
+    </artifact>
+    <artifact name="dbLookupSeq" groupId="com.wso2telco.dep.mediation.sequence" version="1.0.0-SNAPSHOT" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/dbLookupSeq.xml</file>
+    </artifact>
+    <artifact name="filterCheckLimitSeq" groupId="com.wso2telco.dep.mediation.sequence" version="1.0.0-SNAPSHOT" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/filterCheckLimitSeq.xml</file>
+    </artifact>
+    <artifact name="CelcomDBUserInfoEndpoint" groupId="com.wso2telco.dep.mediation.endpoint" version="1.0.0-SNAPSHOT" type="synapse/endpoint" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/endpoints/CelcomDBUserInfoEndpoint.xml</file>
+    </artifact>
+    <artifact name="userInfoAsyncSeq" groupId="com.wso2telco.dep.mediation.sequence" version="1.0.0-SNAPSHOT" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/userInfoAsyncSeq.xml</file>
+    </artifact>
+    <artifact name="dbAsyncInsertSeq" groupId="com.wso2telco.dep.mediation.sequence" version="1.0.0-SNAPSHOT" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/dbAsyncInsertSeq.xml</file>
+    </artifact>
+    <artifact name="checkLimitError" groupId="com.wso2telco.dep.mediation.sequence" version="1.0.0-SNAPSHOT" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/checkLimitError.xml</file>
+    </artifact>
+    <artifact name="dropSeq" groupId="com.wso2telco.dep.mediation.sequence" version="1.0.0-SNAPSHOT" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/dropSeq.xml</file>
+    </artifact>
+    <artifact name="CelcomTokenEndpoint" groupId="com.wso2telco.dep.mediation.endpoint" version="1.0.0-SNAPSHOT" type="synapse/endpoint" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/endpoints/CelcomTokenEndpoint.xml</file>
+    </artifact>
+    <artifact name="getCelcomAuthTokenSeq" groupId="com.wso2telco.dep.mediation.sequence" version="1.0.0-SNAPSHOT" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/getCelcomAuthTokenSeq.xml</file>
+    </artifact>
+    <artifact name="setCelcomRegistryTokens" groupId="com.wso2telco.dep.mediation.sequence" version="1.0.0-SNAPSHOT" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/setCelcomRegistryTokens.xml</file>
+    </artifact>
+    <artifact name="celcomAuthCallSeq" groupId="com.wso2telco.dep.mediation.sequence" version="1.0.0-SNAPSHOT" type="synapse/sequence" serverRole="EnterpriseServiceBus">
+        <file>src/main/synapse-config/sequences/celcomAuthCallSeq.xml</file>
+    </artifact>
+</artifacts>

@@ -2,12 +2,16 @@
 <project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>com.wso2telco.dep.mediation</groupId>
-  <artifactId>capp-mediation</artifactId>
-  <version>1.0.0</version>
+  <parent>
+    <groupId>com.wso2telco.dep.mediation</groupId>
+    <artifactId>payment-capp</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <relativePath>../pom.xml</relativePath>
+  </parent>
+  <artifactId>com.wso2telco.dep.spend.limit.mediation.capp</artifactId>
   <packaging>carbon/application</packaging>
-  <name>capp-mediation</name>
-  <description>capp-mediation</description>
+  <name>com.wso2telco.dep.spend.limit.mediation.capp</name>
+  <description>com.wso2telco.dep.spend.limit.mediation.capp</description>
   <properties>
     <com.wso2telco.dep.mediation.sequence_._userInfoAsyncSeq>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.sequence_._userInfoAsyncSeq>
     <com.wso2telco.dep.mediation.sequence_._chargeRequestSeq>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.sequence_._chargeRequestSeq>
@@ -32,103 +36,103 @@
     <dependency>
       <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>checkLimitSeq</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
       <type>xml</type>
     </dependency>
     <dependency>
       <groupId>com.wso2telco.dep.mediation.endpoint</groupId>
       <artifactId>CelcomTokenEndpoint</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
       <type>xml</type>
     </dependency>
     <dependency>
       <groupId>com.wso2telco.dep.mediation.endpoint</groupId>
       <artifactId>CelcomUserInfoEndpoint</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
       <type>xml</type>
     </dependency>
     <dependency>
       <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>dbLookupSeq</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
       <type>xml</type>
     </dependency>
     <dependency>
       <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>dropSeq</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
       <type>xml</type>
     </dependency>
     <dependency>
       <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>celcomAuthCallSeq</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
       <type>xml</type>
     </dependency>
     <dependency>
       <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>getCelcomAuthTokenSeq</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
       <type>xml</type>
     </dependency>
     <dependency>
       <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>userInfoAsyncSeq</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
       <type>xml</type>
     </dependency>
     <dependency>
       <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>filterCheckLimitSeq</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
       <type>xml</type>
     </dependency>
     <dependency>
       <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>setCelcomRegistryTokens</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
       <type>xml</type>
     </dependency>
     <dependency>
       <groupId>com.wso2telco.dep.mediation.api</groupId>
       <artifactId>PaymentAPI</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
       <type>xml</type>
     </dependency>
     <dependency>
       <groupId>com.wso2telco.dep.mediation.endpoint</groupId>
       <artifactId>CelcomDBUserInfoEndpoint</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
       <type>xml</type>
     </dependency>
     <dependency>
       <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>dbAsyncInsertSeq</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
       <type>xml</type>
     </dependency>
     <dependency>
       <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>userInfoSeq</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
       <type>xml</type>
     </dependency>
     <dependency>
       <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>userInfoFaultSeq</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
       <type>xml</type>
     </dependency>
     <dependency>
       <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>checkLimitError</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
       <type>xml</type>
     </dependency>
     <dependency>
       <groupId>com.wso2telco.dep.mediation.sequence</groupId>
       <artifactId>chargeRequestSeq</artifactId>
-      <version>1.0.0</version>
+      <version>${project.version}</version>
       <type>xml</type>
     </dependency>
   </dependencies>

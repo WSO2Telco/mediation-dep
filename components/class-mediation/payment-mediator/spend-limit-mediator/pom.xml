@@ -4,9 +4,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.wso2telco.dep.mediation</groupId>
-    <artifactId>hub-mediator</artifactId>
-    <version>1.0.0</version>
+    <parent>
+        <groupId>com.wso2telco.dep.mediation</groupId>
+        <artifactId>payment-mediator</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>spend-limit-mediator</artifactId>
     <description>test-com.wso2telco.dep.mediation.mediator</description>
     <properties>
         <CApp.type>lib/synapse/com.wso2telco.dep.mediation.mediator</CApp.type>
@@ -15,62 +20,50 @@
         <dependency>
             <groupId>commons-codec.wso2</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.4.0.wso2v1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.httpcomponents.wso2</groupId>
             <artifactId>httpcore</artifactId>
-            <version>4.3.3.wso2v1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.woden.wso2</groupId>
             <artifactId>woden</artifactId>
-            <version>1.0.0.M9-wso2v1</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.commons-httpclient</groupId>
             <artifactId>commons-httpclient</artifactId>
-            <version>3.1.0.wso2v3</version>
         </dependency>
         <dependency>
             <groupId>wsdl4j.wso2</groupId>
             <artifactId>wsdl4j</artifactId>
-            <version>1.6.2.wso2v4</version>
         </dependency>
         <dependency>
             <groupId>commons-logging</groupId>
             <artifactId>commons-logging</artifactId>
-            <version>1.1.1</version>
         </dependency>
         <dependency>
             <groupId>commons-io.wso2</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.4.0.wso2v1</version>
         </dependency>
         <dependency>
             <groupId>org.apache.synapse</groupId>
             <artifactId>synapse-core</artifactId>
-            <version>2.1.7-wso2v7</version>
         </dependency>
         <dependency>
             <groupId>org.apache.ws.commons.schema.wso2</groupId>
             <artifactId>XmlSchema</artifactId>
-            <version>1.4.7.wso2v3</version>
         </dependency>
         <dependency>
             <groupId>org.apache.geronimo.specs.wso2</groupId>
             <artifactId>geronimo-stax-api_1.0_spec</artifactId>
-            <version>1.0.1.wso2v2</version>
         </dependency>
         <dependency>
             <groupId>org.wso2.orbit.org.apache.neethi</groupId>
             <artifactId>neethi</artifactId>
-            <version>2.0.4.wso2v5</version>
         </dependency>
         <dependency>
             <groupId>com.wso2telco.core</groupId>
             <artifactId>dbutils</artifactId>
-            <version>2.0.4-SNAPSHOT</version>
         </dependency>
     </dependencies>
     <repositories>
