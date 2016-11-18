@@ -16,8 +16,8 @@
 
 package com.wso2telco.dep.mediation.mediator;
 
-import com.wso2telco.core.dbutils.AxataDBUtilException;
-import com.wso2telco.core.dbutils.AxiataDbService;
+import com.wso2telco.core.dbutils.DBUtilException;
+import com.wso2telco.core.dbutils.DbService;
 import com.wso2telco.core.dbutils.dao.SpendLimitDAO;
 import com.wso2telco.dep.mediation.exception.AxiataException;
 import org.apache.synapse.SynapseException;
@@ -33,7 +33,7 @@ import javax.xml.bind.JAXBException;
 public class LimitCheckMediator extends AbstractMediator {
 
     private static final GroupEventUnmarshaller groupEventUnmarshaller = loadGroupEventUnmashaller();
-    private AxiataDbService dbservice = new AxiataDbService();;
+    private DbService dbservice = new DbService();
 
     public boolean mediate(MessageContext mc) throws AxiataException {
         try {
@@ -48,7 +48,7 @@ public class LimitCheckMediator extends AbstractMediator {
             mc.setProperty("FAULT_MSG", e.getErrmsg());
             mc.setProperty("FAULT_VARIABLE", e.getErrvar()[0]);
             throw e;
-        } catch (AxataDBUtilException e) {
+        } catch (DBUtilException e) {
             mc.setProperty("FAULT_CODE", "500");
             mc.setProperty("FAULT_MSG", e.getMessage());
             throw new SynapseException(e.getMessage());
@@ -57,7 +57,7 @@ public class LimitCheckMediator extends AbstractMediator {
     }
 
     public boolean checkSpendLimit(String msisdn, String operator, Double chargeAmount, String consumerKey) throws
-            AxataDBUtilException , AxiataException{
+            DBUtilException , AxiataException{
         try {
             GroupDTO groupDTO= groupEventUnmarshaller.getGroupDTO(operator,consumerKey);
             Double groupdailyLimit = Double.parseDouble(groupDTO.getDayAmount());
@@ -100,8 +100,8 @@ public class LimitCheckMediator extends AbstractMediator {
 
         }catch (OparatorNotinListException e){
             return true;
-        }catch (AxataDBUtilException e) {
-            throw new AxataDBUtilException("Data retreving error");
+        }catch (DBUtilException e) {
+            throw new DBUtilException("Data retreving error");
         }
 
         return true;
@@ -119,12 +119,12 @@ public class LimitCheckMediator extends AbstractMediator {
     }
 
     private SpendLimitDAO getGroupTotalDayAmount(String groupName, String operator, String msisdn) throws
-            AxataDBUtilException {
+            DBUtilException {
         return dbservice.getGroupTotalDayAmount(groupName, operator, msisdn);
     }
 
     private SpendLimitDAO getGroupTotalMonthAmount(String groupName, String operator, String msisdn) throws
-            AxataDBUtilException {
+            DBUtilException {
         return dbservice.getGroupTotalMonthAmount(groupName, operator, msisdn);
     }
 
