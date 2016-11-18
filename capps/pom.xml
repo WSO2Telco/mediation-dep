@@ -29,9 +29,9 @@
     <modelVersion>4.0.0</modelVersion>
     <artifactId>mediation-capp</artifactId>
     <packaging>pom</packaging>
-    <name>WSO2 API Manager - Distribution Parent</name>
+    <name>CAPP distribution</name>
     <url>http://wso2.com/products/api-manager</url>
-    <description>WSO2 API Manager Distribution Parent</description>
+    <description>CAPP Distribution</description>
 
     <licenses>
         <license>
@@ -43,22 +43,4 @@
     <modules>
         <module>payment-capp</module>
     </modules>
-
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>auto-clean</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-        </plugins>
-    </build>
 </project>
