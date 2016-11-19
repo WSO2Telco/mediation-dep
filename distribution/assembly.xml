@@ -19,9 +19,9 @@
 			<outputDirectory>/libs</outputDirectory>
 		</fileSet>
 		<fileSet>
-			<directory>../components/class-mediation/payment-mediator/spend-limit-mediator/target</directory>
+			<directory>../components/class-mediation/payment-mediator/com.wso2telco.dep.spend.limit.mediator/target</directory>
 			<includes>
-				<include>spend-limit-mediator-${pom.version}.jar</include>
+				<include>com.wso2telco.dep.spend.limit.mediator-${pom.version}.jar</include>
 			</includes>
 			<outputDirectory>/libs</outputDirectory>
 		</fileSet>

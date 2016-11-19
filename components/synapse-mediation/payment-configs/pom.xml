@@ -40,24 +40,7 @@
     </licenses>
 
     <modules>
-        <module>spend-limit-configs</module>
+        <module>com.wso2telco.dep.spend.limit.synapse.configs</module>
     </modules>
 
-    <build>
-        <plugins>
-            <plugin>
-                <artifactId>maven-clean-plugin</artifactId>
-                <executions>
-                    <execution>
-                        <id>auto-clean</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-
-        </plugins>
-    </build>
 </project>

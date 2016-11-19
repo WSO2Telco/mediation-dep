@@ -23,7 +23,7 @@
     <com.wso2telco.dep.mediation.sequence_._dropSeq>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.sequence_._dropSeq>
     <com.wso2telco.dep.mediation.sequence_._celcomAuthCallSeq>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.sequence_._celcomAuthCallSeq>
     <com.wso2telco.dep.mediation.endpoint_._CelcomTokenEndpoint>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.endpoint_._CelcomTokenEndpoint>
-    <artifact.types>jaggery/app=zip,service/rule=aar,lib/library/bundle=jar,event/receiver=xml,synapse/message-processors=xml,synapse/endpointTemplate=xml,synapse/message-store=xml,synapse/proxy-service=xml,event/execution-plan=siddhiql,carbon/application=car,registry/resource=zip,lib/dataservice/validator=jar,synapse/endpoint=xml,web/application=war,synapse/inbound-endpoint=xml,synapse/sequence=xml,synapse/configuration=xml,lib/registry/handlers=jar,synapse/task=xml,service/meta=xml,webapp/jaxws=war,synapse/api=xml,synapse/lib=zip,bpel/workflow=zip,lib/registry/filter=jar,service/dataservice=dbs,event/publisher=xml,synapse/local-entry=xml,synapse/priority-executor=xml,synapse/event-source=xml,synapse/template=xml,event/stream=json,lib/carbon/ui=jar,service/axis2=aar,synapse/sequenceTemplate=xml,wso2/gadget=dar,lib/synapse/com.wso2telco.dep.mediation.mediator=jar</artifact.types>
+    <artifact.types>jaggery/app=zip,service/rule=aar,lib/library/bundle=jar,event/receiver=xml,synapse/message-processors=xml,synapse/endpointTemplate=xml,synapse/message-store=xml,synapse/proxy-service=xml,event/execution-plan=siddhiql,carbon/application=car,registry/resource=zip,lib/dataservice/validator=jar,synapse/endpoint=xml,web/application=war,synapse/inbound-endpoint=xml,synapse/sequence=xml,synapse/configuration=xml,lib/registry/handlers=jar,synapse/task=xml,service/meta=xml,webapp/jaxws=war,synapse/api=xml,synapse/lib=zip,bpel/workflow=zip,lib/registry/filter=jar,service/dataservice=dbs,event/publisher=xml,synapse/local-entry=xml,synapse/priority-executor=xml,synapse/event-source=xml,synapse/template=xml,event/stream=json,lib/carbon/ui=jar,service/axis2=aar,synapse/sequenceTemplate=xml,wso2/gadget=dar,lib/synapse/com.wso2telco.dep.spend.limit.mediator.mediator=jar</artifact.types>
     <com.wso2telco.dep.mediation.sequence_._checkLimitSeq>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.sequence_._checkLimitSeq>
     <com.wso2telco.dep.mediation.endpoint_._CelcomUserInfoEndpoint>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.endpoint_._CelcomUserInfoEndpoint>
     <com.wso2telco.dep.mediation.sequence_._dbLookupSeq>capp/EnterpriseServiceBus</com.wso2telco.dep.mediation.sequence_._dbLookupSeq>
@@ -200,7 +200,7 @@
             </goals>
           </execution>
         </executions>
-        <configuration />
+        <configuration/>
       </plugin>
       <plugin>
         <groupId>org.wso2.maven</groupId>
