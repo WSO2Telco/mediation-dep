@@ -40,6 +40,6 @@
     </licenses>
 
     <modules>
-        <module>spend-limit-mediator</module>
+        <module>com.wso2telco.dep.spend.limit.mediator</module>
     </modules>
 </project>
