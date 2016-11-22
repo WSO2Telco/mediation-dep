@@ -40,7 +40,7 @@
     </licenses>
 
     <modules>
-        <module>jwt-mediator</module>
+        <module>common/jwt-mediator</module>
         <module>payment-mediator</module>
     </modules>
 </project>
