@@ -15,6 +15,7 @@
 		<module>components</module>
 		<module>capps</module>
 		<module>distribution</module>
+		<module>mediation-old</module>
 	</modules>
 	<distributionManagement>
 		<snapshotRepository>
@@ -103,6 +104,16 @@
 				<version>2.0.4-SNAPSHOT</version>
 			</dependency>
 			<dependency>
+				<groupId>com.wso2telco.core</groupId>
+				<artifactId>msisdn-validator</artifactId>
+				<version>${com.wso2telco.core.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.wso2telco.core</groupId>
+				<artifactId>mnc-resolver</artifactId>
+				<version>${com.wso2telco.core.version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.wso2.orbit.org.apache.neethi</groupId>
 				<artifactId>neethi</artifactId>
 				<version>2.0.4.wso2v5</version>
@@ -111,6 +122,26 @@
 				<groupId>org.wso2.orbit.commons-httpclient</groupId>
 				<artifactId>commons-httpclient</artifactId>
 				<version>3.1.0.wso2v3</version>
+			</dependency>
+			<dependency>
+				<groupId>com.wso2telco.dep</groupId>
+				<artifactId>oneapi-validation</artifactId>
+				<version>${com.wso2telco.dep.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.wso2telco.dep</groupId>
+				<artifactId>operator-service</artifactId>
+				<version>${com.wso2telco.dep.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>com.wso2telco.dep</groupId>
+				<artifactId>subscription-validator</artifactId>
+				<version>${com.wso2telco.dep.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>org.wso2.carbon.apimgt</groupId>
+				<artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
+				<version>${org.wso2.carbon.apimgt.version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>
@@ -268,5 +299,18 @@
 			</releases>
 		</pluginRepository>
 	</pluginRepositories>
+
+	<properties>
+		<commons-httpclient.wso2.version>3.1.0.wso2v2</commons-httpclient.wso2.version>
+		<org.json.wso2.version>3.0.0.wso2v1</org.json.wso2.version>
+		<org.wso2.orbit.org.apache.httpcomponents.version>4.3.1.wso2v2
+		</org.wso2.orbit.org.apache.httpcomponents.version>
+		<org.apache.synapse.core.version>2.1.7-wso2v3</org.apache.synapse.core.version>
+		<org.apache.synapse.version>2.1.7-wso2v3</org.apache.synapse.version>
+		<commons-codec.wso2.version>1.4.0.wso2v1</commons-codec.wso2.version>
+		<com.wso2telco.dep.version>2.0.0-SNAPSHOT</com.wso2telco.dep.version>
+		<com.wso2telco.core.version>2.0.4-SNAPSHOT</com.wso2telco.core.version>
+		<org.wso2.carbon.apimgt.version>6.0.4</org.wso2.carbon.apimgt.version>
+	</properties>
 
 </project>
