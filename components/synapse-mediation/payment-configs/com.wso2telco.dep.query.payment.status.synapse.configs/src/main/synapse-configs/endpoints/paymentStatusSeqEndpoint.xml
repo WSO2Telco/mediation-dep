@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<endpoint name="paymentStatusSeqEndpoint" xmlns="http://ws.apache.org/ns/synapse">
+    <default trace="disable"/>
+    <timeout>
+        <duration>2000</duration>
+        <responseAction>fault</responseAction>
+    </timeout>
+    <suspendOnFailure>
+        <errorCodes>101500,101501,101506,101507,101508</errorCodes>
+        <initialDuration>1000</initialDuration>
+        <progressionFactor>2.0</progressionFactor>
+        <maximumDuration>60000</maximumDuration>
+    </suspendOnFailure>
+    <markForSuspension>
+        <errorCodes>101504,101505</errorCodes>
+        <retriesBeforeSuspension>3</retriesBeforeSuspension>
+        <retryDelay>1</retryDelay>
+    </markForSuspension>
+</endpoint>
