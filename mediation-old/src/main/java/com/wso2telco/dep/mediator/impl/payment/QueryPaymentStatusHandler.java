@@ -35,11 +35,8 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
 
-<<<<<<< HEAD
 import java.util.Map;
 
-=======
->>>>>>> b4815d0a633e93d27f82a200c0ae2233941b9cac
 public class QueryPaymentStatusHandler implements PaymentHandler {
 
 	private Log log = LogFactory.getLog(AmountChargeHandler.class);
