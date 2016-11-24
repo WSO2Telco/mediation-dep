@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<api xmlns="http://ws.apache.org/ns/synapse" name="paymentApi" context="/payment">
+    <resource methods="DELETE POST PUT GET" url-mapping="/*" protocol="https">
+        <inSequence>
+            <sequence key="paymentMainSeq"/>
+        </inSequence>
+    </resource>
+</api>
