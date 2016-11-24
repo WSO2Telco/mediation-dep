@@ -26,6 +26,7 @@ import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.USSDService;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
 import org.apache.axis2.AxisFault;
@@ -144,10 +145,14 @@ public class SendUSSDHandler implements USSDHandler {
 		String sending_add = endpoint.getEndpointref().getAddress();
 		log.info("sending endpoint found: " + sending_add + " Request ID: " + UID.getRequestID(context));
 
-		String responseStr = executor.makeRequest(endpoint, sending_add, jsonBody.toString(), true, context,false);
+		HandlerUtils.setHandlerProperty(context,this.getClass().getSimpleName());
+		HandlerUtils.setEndpointProperty(context,sending_add);
+		HandlerUtils.setAuthorizationHeader(context,executor,endpoint);
+
+		/*String responseStr = executor.makeRequest(endpoint, sending_add, jsonBody.toString(), true, context,false);
 		executor.handlePluginException(responseStr);
 		executor.removeHeaders(context);
-		executor.setResponse(context, responseStr);
+		executor.setResponse(context, responseStr);*/
 		
 		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("messageType", "application/json");
 
