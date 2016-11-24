@@ -40,6 +40,8 @@
     </licenses>
 
     <modules>
+        <module>com.wso2telco.dep.payment.synapse.configs</module>
+        <module>com.wso2telco.dep.query.payment.status.synapse.configs</module>
         <module>com.wso2telco.dep.spend.limit.synapse.configs</module>
     </modules>
 
