@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="paymentStatusSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+    <!--log level="custom">
+        <property name="********* ENDPOINT *********"  expression="get-property('ENDPOINT')"/>
+    </log-->
+    <property name="REST_URL_POSTFIX" action="remove" scope="axis2"/>
+    <header expression="get-property('ENDPOINT')" name="To" scope="default" />
+    <send>
+       <endpoint key="paymentStatusSeqEndpoint"/>
+     </send>
+    <respond/>
+</sequence>

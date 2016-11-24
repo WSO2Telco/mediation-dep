@@ -35,6 +35,8 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
 
+import java.util.Map;
+
 public class QueryPaymentStatusHandler implements PaymentHandler {
 
 	private Log log = LogFactory.getLog(AmountChargeHandler.class);
@@ -77,20 +79,34 @@ public class QueryPaymentStatusHandler implements PaymentHandler {
 
 		String sending_add = endpoint.getEndpointref().getAddress();
 
-		String responseStr = executor.makeGetRequest(endpoint, sending_add,	executor.getSubResourcePath(), true, context, false);
-
-		executor.removeHeaders(context);
-
-		if (responseStr == null || responseStr.equals("") || responseStr.isEmpty()) {
-			throw new CustomException("SVC1000", "", new String[] { null });
-		} else {
-			executor.handlePluginException(responseStr);
+		// set information to the message context, to be used in the sequence
+		context.setProperty("HANDLER", this.getClass().getSimpleName());
+		context.setProperty("ENDPOINT", sending_add);
+		// set Authorization header
+		org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) context)
+				.getAxis2MessageContext();
+		Object headers = axis2MessageContext
+				.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+		if (headers != null && headers instanceof Map) {
+			Map headersMap = (Map) headers;
+			headersMap.put("Authorization", "Bearer " + executor.getAccessToken(endpoint
+					.getOperator(), context));
 		}
 
-		// set response re-applied
-		executor.setResponse(context, responseStr);
-		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("messageType", "application/json");
-		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("ContentType", "application/json");
+//		String responseStr = executor.makeGetRequest(endpoint, sending_add,	executor.getSubResourcePath(), true, context, false);
+//
+//		executor.removeHeaders(context);
+//
+//		if (responseStr == null || responseStr.equals("") || responseStr.isEmpty()) {
+//			throw new CustomException("SVC1000", "", new String[] { null });
+//		} else {
+//			executor.handlePluginException(responseStr);
+//		}
+//
+//		// set response re-applied
+//		executor.setResponse(context, responseStr);
+//		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("messageType", "application/json");
+//		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("ContentType", "application/json");
 
 		return true;
 	}

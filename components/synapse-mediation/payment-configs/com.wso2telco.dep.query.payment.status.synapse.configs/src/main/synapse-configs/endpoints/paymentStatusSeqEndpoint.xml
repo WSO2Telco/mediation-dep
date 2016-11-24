@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<endpoint name="payment-api-endpoint" xmlns="http://ws.apache.org/ns/synapse">
+<endpoint name="paymentStatusSeqEndpoint" xmlns="http://ws.apache.org/ns/synapse">
     <default trace="disable"/>
     <timeout>
         <duration>2000</duration>

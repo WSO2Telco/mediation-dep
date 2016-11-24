@@ -107,7 +107,8 @@ public abstract class RequestExecutor {
 	 * @throws Exception
 	 *             the exception
 	 */
-	protected String getAccessToken(String operator, MessageContext messageContext) throws Exception {
+	public String getAccessToken(String operator, MessageContext messageContext) throws
+			Exception {
 		OperatorApplicationDTO op = null;
 		String token = null;
 
