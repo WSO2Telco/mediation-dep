@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="sendUssdSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+    <log level="custom">
+        <property name="********* ENDPOINT *********"  expression="get-property('ENDPOINT')"/>
+    </log>
+
+</sequence>
