@@ -7,6 +7,9 @@
         <case regex="SendUSSDHandler">
             <sequence key="sendUssdSeq"/>
         </case>
+        <case regex="USSDInboundHandler">
+            <sequence key="ussdInboundSeq"/>
+        </case>
         <default>
             <!-- TODO:handle error -->
         </default>
