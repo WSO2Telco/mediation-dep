@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="ussdMainOutSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+    <class name="com.wso2telco.dep.mediator.impl.ussd.USSDInboundResponseMediator">
+        <property name="executorClass" value="com.wso2telco.dep.mediator.impl.ussd.USSDExecutor"/>
+    </class>
+    <log level="full"/>
+    <switch source="get-property('HANDLER')">
+        <case regex="USSDInboundResponseHandler">
+            <sequence key="ussdInboundResponseSeq"/>
+        </case>
+        <default>
+            <!-- TODO:handle error -->
+        </default>
+    </switch>
+
+</sequence>
