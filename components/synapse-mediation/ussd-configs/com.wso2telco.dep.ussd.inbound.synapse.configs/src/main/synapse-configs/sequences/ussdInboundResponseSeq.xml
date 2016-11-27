@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<sequence name="sendUssdSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+<sequence name="ussdInboundResponseSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+
     <property name="REST_URL_POSTFIX" action="remove" scope="axis2"/>
     <header expression="get-property('ENDPOINT')" name="To" scope="default"/>
     <send>
-        <endpoint key="sendUssdSeqEndpoint"/>
+        <endpoint key="ussdInboundResponseSeqEndpoint"/>
     </send>
     <respond/>
-
 </sequence>
