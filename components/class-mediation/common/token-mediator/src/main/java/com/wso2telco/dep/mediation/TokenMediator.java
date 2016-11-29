@@ -23,7 +23,6 @@ import java.util.Map;
 
 /**
  * Call the operator token service (Token Pool Service/ Default Token Service) and retrieves a Token
- *
  */
 public class TokenMediator extends AbstractMediator {
 
@@ -207,12 +206,9 @@ public class TokenMediator extends AbstractMediator {
     /**
      * Make tokenrequest.
      *
-     * @param tokenurl
-     *            the tokenurl
-     * @param urlParameters
-     *            the url parameters
-     * @param authheader
-     *            the authheader
+     * @param tokenurl      the tokenurl
+     * @param urlParameters the url parameters
+     * @param authheader    the authheader
      * @return the string
      */
     protected String makeTokenrequest(String tokenurl, String urlParameters, String authheader, MessageContext messageContext) {
