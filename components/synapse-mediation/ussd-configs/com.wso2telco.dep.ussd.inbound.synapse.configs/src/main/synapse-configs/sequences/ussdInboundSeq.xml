@@ -2,9 +2,9 @@
 <sequence name="ussdInboundSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
     <property name="REST_URL_POSTFIX" action="remove" scope="axis2"/>
     <header expression="get-property('ENDPOINT')" name="To" scope="default"/>
-    <send>
+    <call>
         <endpoint key="ussdInboundSeqEndpoint"/>
-    </send>
+    </call>
+    <sequence key="ussdInboundResponseSeq"/>
     <respond/>
-
 </sequence>
