@@ -33,6 +33,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
@@ -155,6 +156,8 @@ public class SendUSSDHandler implements USSDHandler {
 		executor.setResponse(context, responseStr);*/
 		
 		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("messageType", "application/json");
+		String transformedJson = jsonBody.toString();
+		JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), transformedJson, true, true);
 
 		return true;
 	}
