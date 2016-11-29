@@ -29,6 +29,7 @@ public class Group {
     private String operator;
     private String dayAmount;
     private String monthAmount;
+    private String userInfoEnabled;
     private List<ServiceProvider> serviceProviderList;
 
     public String getGroupName() {
@@ -66,7 +67,10 @@ public class Group {
         this.monthAmount = monthAmount;
    }
 
+    @XmlElement(name="IsUserInfoEnabled")
+    public void setUserInfoEnabled(String userInfoEnabled){ this.userInfoEnabled = userInfoEnabled; }
 
+    public String getUserInfoEnabled(){ return userInfoEnabled; }
 
     public List<ServiceProvider> getServiceProviderList() {
         return serviceProviderList;
