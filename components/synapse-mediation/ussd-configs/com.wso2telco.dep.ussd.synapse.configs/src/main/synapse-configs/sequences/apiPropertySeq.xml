@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="apiPropertySeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">>
+    <property name="CONSUMER_KEY" expression="$trp:CONSUMER_KEY"/>
+    <property name="USER_ID" expression="$trp:USER_ID"/>
+    <property name="CONTEXT" expression="$trp:CONTEXT"/>
+    <property name="API_VERSION" expression="$trp:API_VERSION"/>
+    <property name="API_NAME" expression="$trp:API_NAME"/>
+    <property name="VERSION" expression="$trp:VERSION"/>
+    <property name="RESOURCE" expression="$trp:RESOURCE"/>
+    <property name="HTTP_METHOD" expression="$trp:HTTP_METHOD"/>
+    <property name="HOST_NAME" expression="$trp:HOST_NAME"/>
+    <property name="API_PUBLISHER" expression="$trp:API_PUBLISHER"/>
+    <property name="APPLICATION_NAME" expression="$trp:APPLICATION_NAME"/>
+    <property name="APPLICATION_ID" expression="$trp:APPLICATION_ID"/>
+</sequence>

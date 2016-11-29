@@ -4,8 +4,5 @@
         <inSequence>
             <sequence key="ussdMainSeq"/>
         </inSequence>
-        <outSequence>
-            <sequence key="ussdMainOutSeq"/>
-        </outSequence>
     </resource>
 </api>
