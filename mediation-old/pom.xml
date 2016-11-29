@@ -30,7 +30,6 @@
 
     <groupId>com.wso2telco.dep</groupId>
     <artifactId>mediator</artifactId>
-    <version>2.0.0</version>
 
     <packaging>bundle</packaging>
     <name>WSO2.Telco Mediator Module</name>

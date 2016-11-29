@@ -19,11 +19,16 @@ package com.wso2telco.dep.mediator;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.InboundSMSMessage;
 import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.InboundSMSMessageList;
 import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.SouthboundRetrieveResponse;
 import com.wso2telco.dep.mediator.internal.UID;
+import com.wso2telco.dep.mediator.unmarshaler.GroupDTO;
+import com.wso2telco.dep.mediator.unmarshaler.GroupEventUnmarshaller;
+import com.wso2telco.dep.mediator.unmarshaler.OparatorNotinListException;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
+import com.wso2telco.dep.mediator.util.FileNames;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.exceptions.RequestError;
 import com.wso2telco.dep.oneapivalidation.exceptions.ResponseError;
@@ -38,14 +43,19 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.apache.synapse.transport.passthru.util.RelayUtils;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
@@ -96,75 +106,6 @@ public abstract class RequestExecutor {
 	 */
 	public void setStrErr(String strErr) {
 		this.strErr = strErr;
-	}
-
-	/**
-	 * Gets the access token.
-	 *
-	 * @param operator
-	 *            the operator
-	 * @return the access token
-	 * @throws Exception
-	 *             the exception
-	 */
-	public String getAccessToken(String operator, MessageContext messageContext) throws
-			Exception {
-		OperatorApplicationDTO op = null;
-		String token = null;
-
-		if (operator == null) {
-			return token;
-		}
-
-		String applicationid = getApplicationid();
-		OparatorService dbservice = new OparatorService();
-		if (applicationid == null) {
-			throw new CustomException("SVC0001", "",new String[] { "Requested service is not provisioned" });
-		}
-		validoperators = dbservice.getApplicationOperators(Integer.valueOf(applicationid));
-		if (validoperators.isEmpty()) {
-			throw new CustomException("SVC0001", "",new String[] { "Requested service is not provisioned" });
-		}
-		for (OperatorApplicationDTO d : validoperators) {
-			if (d.getOperatorname() != null && d.getOperatorname().contains(operator)) {
-				op = d;
-				break;
-			}
-		}
-		//
-		
-		log.info("Token time : " + op.getTokentime() + " Request ID: " + UID.getRequestID(messageContext));
-		log.info("Token validity : " + op.getTokenvalidity() + " Request ID: " + UID.getRequestID(messageContext));
-		
-		long timeexpires = (long) (op.getTokentime() + (op.getTokenvalidity() * 1000));
-		 log.info("Expire time : " + timeexpires + " Request ID: " + UID.getRequestID(messageContext));
-		
-		long currtime = new Date().getTime();
-		log.info("Current time : " + currtime + " Request ID: " + UID.getRequestID(messageContext));
-		
-		if (timeexpires > currtime) {
-			token = op.getToken();
-			 log.info("Token of " + op.getOperatorname() + " operator is active"
-					 + " Request ID: " + UID.getRequestID(messageContext));
-		} else {
-			log.info("Regenerating the token of " + op.getOperatorname() + " operator"
-					+ " Request ID: " + UID.getRequestID(messageContext));
-			String Strtoken = makeTokenrequest(op.getTokenurl(), "grant_type=refresh_token&refresh_token=" + op.getRefreshtoken(), ("" + op.getTokenauth()), messageContext);			
-			
-			if (Strtoken != null && Strtoken.length() > 0) {
-				log.info("Token regeneration response of " + op.getOperatorname() + " operator : " + Strtoken
-						+ " Request ID: " + UID.getRequestID(messageContext));
-				JSONObject jsontoken = new JSONObject(Strtoken);
-				token = jsontoken.getString("access_token");
-				new OparatorService().updateOperatorToken(op.getOperatorid(), jsontoken.getString("refresh_token"),
-						Long.parseLong(jsontoken.getString("expires_in")), new Date().getTime(), token);
-
-			} else {
-				log.error("Token regeneration response of " + op.getOperatorname() + " operator is invalid.");
-			}
-		}
-
-		return token;
 	}
 
 	/** The resource url. */
@@ -259,7 +200,7 @@ public abstract class RequestExecutor {
 	public boolean initialize(MessageContext context) throws Exception {
 
 		// Get valid operators
-		
+
 		String applicationid = getApplicationid();
 		OparatorService operatorService = new OparatorService();
 		if (applicationid == null) {
@@ -274,13 +215,13 @@ public abstract class RequestExecutor {
 		List<Integer> activeoperators = operatorService.getActiveApplicationOperators(Integer.valueOf(applicationid),
 				apiName);
 		List<OperatorApplicationDTO> validoperatorsDup = new ArrayList<OperatorApplicationDTO>();
-		
+
 		for (OperatorApplicationDTO operator : validoperators) {
 			if (activeoperators.contains(operator.getOperatorid())) {
 				validoperatorsDup.add(operator);
 			}
 		}
-		
+
 		if (validoperatorsDup.isEmpty()) {
 			throw new CustomException("SVC0001", "", new String[] { "Requested service is not provisioned" });
 		}
@@ -458,8 +399,21 @@ public abstract class RequestExecutor {
 		   String key = (String)keys.next();
 		   if (key.equals("inboundSMSMessageNotification")||key.equals("deliveryInfoNotification")) {
 		   isMoCallBack=true;
-	   }		   
+	   }
 		}
+
+        try {// check for charge operation. if true append ESB url
+            JSONObject jsonObj = new JSONObject(requestStr);
+            String transactionOperationStatus = jsonObj.getJSONObject("amountTransaction")
+                    .getString("transactionOperationStatus");
+            String status = "Charged";
+            if (status.equals(transactionOperationStatus)) {
+                url = modifyEndpoint(url, operatorendpoint.getOperator(), messageContext);
+            }
+        } catch (JSONException exception) {
+            log.error("Error parsing json object from request.", exception);
+        }
+
 		ICallresponse icallresponse = null;
 		String retStr = "";
 		int statusCode = 0;
@@ -496,7 +450,7 @@ public abstract class RequestExecutor {
 				}
 			}
 
-			
+
 			if (inclueHeaders) {
 				org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
 						.getAxis2MessageContext();
@@ -513,19 +467,19 @@ public abstract class RequestExecutor {
 					}
 				}
 			}
-			 
+
 			connection.setUseCaches(false);
 			connection.setDoInput(true);
 			connection.setDoOutput(true);
-		
-			 log.info("Southbound Request URL: " + connection.getRequestMethod() + " " + connection.getURL() 
+
+			 log.info("Southbound Request URL: " + connection.getRequestMethod() + " " + connection.getURL()
 	            		+ " Request ID: " + UID.getRequestID(messageContext));
 	            if (log.isDebugEnabled()) {
 	                log.debug("Southbound Request Headers: " + connection.getRequestProperties());
 	            }
-	            log.info("Southbound Request Body: " + requestStr 
+	            log.info("Southbound Request Body: " + requestStr
 	            		+ " Request ID: " + UID.getRequestID(messageContext));
-			
+
 			//========================UNICODE PATCH=========================================
 			BufferedOutputStream wr = new BufferedOutputStream(connection.getOutputStream());
 			wr.write(requestStr.getBytes("UTF-8"));
@@ -533,7 +487,7 @@ public abstract class RequestExecutor {
 			wr.flush();
 			wr.close();
 			//========================UNICODE PATCH=========================================
-			 
+
            /*DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
              wr.writeBytes(requestStr);
             wr.flush();
@@ -549,14 +503,14 @@ public abstract class RequestExecutor {
 			} else {
 				is = connection.getErrorStream();
 			}
-			
+
 			BufferedReader br = new BufferedReader(new InputStreamReader(is));
 			String output;
 			while ((output = br.readLine()) != null) {
 				retStr += output;
 			}
 			br.close();
-		
+
 		   log.info("Southbound Response Status: " + statusCode + " " + connection.getResponseMessage()
             		+ " Request ID: " + UID.getRequestID(messageContext));
             if (log.isDebugEnabled()) {
@@ -564,8 +518,8 @@ public abstract class RequestExecutor {
             }
             log.info("Southbound Response Body: " + retStr
             		+ " Request ID: " + UID.getRequestID(messageContext));
-			
-			 
+
+
 		} catch (Exception e) {
 			log.error("[WSRequestService ], makerequest, " + e.getMessage(), e);
 			return null;
@@ -573,9 +527,9 @@ public abstract class RequestExecutor {
 			if (connection != null) {
 				connection.disconnect();
 			}
-			 
+
 			log.debug("Mo OR DN CallBack : " + isMoCallBack +" requestStr : " + requestStr+" retStr : " + retStr);
-			 
+
 			messageContext.setProperty(DataPublisherConstants.RESPONSE_CODE, Integer.toString(statusCode));
             messageContext.setProperty(DataPublisherConstants.MSISDN, messageContext.getProperty(MSISDNConstants.USER_MSISDN));
 		/*	TODO:This need to consider when publishing request data
@@ -600,16 +554,16 @@ public abstract class RequestExecutor {
 	 * @return the string
 	 */
 	protected String makeTokenrequest(String tokenurl, String urlParameters, String authheader, MessageContext messageContext) {
-		
+
 		ICallresponse icallresponse = null;
 		String retStr = "";
 
 		URL neturl;
 		HttpURLConnection connection = null;
 
-		log.info("url : " + tokenurl + " | urlParameters : " + urlParameters + " | authheader : " + authheader 
+		log.info("url : " + tokenurl + " | urlParameters : " + urlParameters + " | authheader : " + authheader
 			 + " Request ID: " + UID.getRequestID(messageContext));
-		
+
 		if ((tokenurl != null && tokenurl.length() > 0) && (urlParameters != null && urlParameters.length() > 0)
 				&& (authheader != null && authheader.length() > 0)) {
 			try {
@@ -617,7 +571,7 @@ public abstract class RequestExecutor {
 				byte[] postData = urlParameters.getBytes(StandardCharsets.UTF_8);
 				int postDataLength = postData.length;
 				URL url = new URL(tokenurl);
-				
+
 				connection = (HttpURLConnection) url.openConnection();
 				connection.setDoOutput(true);
 				connection.setInstanceFollowRedirects(false);
@@ -718,7 +672,7 @@ public abstract class RequestExecutor {
 					}
 				}
 			}
-			
+
 			if (inclueHeaders) {
 				org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
 						.getAxis2MessageContext();
@@ -735,18 +689,18 @@ public abstract class RequestExecutor {
 					}
 				}
 			}
-				             
-				 
+
+
 			connection.setUseCaches(false);
 
-			log.info("Southbound Request URL: " + connection.getRequestMethod() + " " + connection.getURL() 
+			log.info("Southbound Request URL: " + connection.getRequestMethod() + " " + connection.getURL()
             		+ " Request ID: " + UID.getRequestID(messageContext));
             if (log.isDebugEnabled()) {
                 log.debug("Southbound Request Headers: " + connection.getRequestProperties());
             }
-            log.info("Southbound Request Body: " + requestStr 
+            log.info("Southbound Request Body: " + requestStr
             		+ " Request ID: " + UID.getRequestID(messageContext));
-		
+
 
 			statusCode = connection.getResponseCode();
 			if ((statusCode != 200) && (statusCode != 201) && (statusCode != 400) && (statusCode != 401)) {
@@ -766,7 +720,7 @@ public abstract class RequestExecutor {
 				retStr += output;
 			}
 			br.close();
-		
+
 		   log.info("Southbound Response Status: " + statusCode + " " + connection.getResponseMessage()
             		+ " Request ID: " + UID.getRequestID(messageContext));
             if (log.isDebugEnabled()) {
@@ -835,8 +789,8 @@ public abstract class RequestExecutor {
 					}
 				}
 			}
-			
-			
+
+
 			if (inclueHeaders) {
 				org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
 						.getAxis2MessageContext();
@@ -853,17 +807,17 @@ public abstract class RequestExecutor {
 					}
 				}
 			}
-			
+
 			connection.setUseCaches(false);
-		
-			log.info("Southbound Request URL: " + connection.getRequestMethod() + " " + connection.getURL() 
+
+			log.info("Southbound Request URL: " + connection.getRequestMethod() + " " + connection.getURL()
             		+ " Request ID: " + UID.getRequestID(messageContext));
             if (log.isDebugEnabled()) {
                 log.debug("Southbound Request Headers: " + connection.getRequestProperties());
             }
-            log.info("Southbound Request Body: " + requestStr 
+            log.info("Southbound Request Body: " + requestStr
             		+ " Request ID: " + UID.getRequestID(messageContext));
-            
+
 			if (requestStr != null) {
 				connection.setDoOutput(true);
 				DataOutputStream wr = new DataOutputStream(connection.getOutputStream());
@@ -893,7 +847,7 @@ public abstract class RequestExecutor {
 				retStr += output;
 			}
 			br.close();
-		
+
 		   log.info("Southbound Response Status: " + statusCode + " " + connection.getResponseMessage()
             		+ " Request ID: " + UID.getRequestID(messageContext));
             if (log.isDebugEnabled()) {
@@ -901,8 +855,8 @@ public abstract class RequestExecutor {
             }
             log.info("Southbound Response Body: " + retStr
             		+ " Request ID: " + UID.getRequestID(messageContext));
-		
-            
+
+
 		} catch (Exception e) {
 			log.error("[WSRequestService ], makerequest, " + e.getMessage(), e);
 			return null;
@@ -1005,7 +959,7 @@ public abstract class RequestExecutor {
 			// PATCH=========================================
 
 			statusCode = connection.getResponseCode();
-			
+
 			log.info("Northbound Response Status: " + statusCode + " " + connection.getResponseMessage()
             		+ " Request ID: " + UID.getRequestID(messageContext));
             if (log.isDebugEnabled()) {
@@ -1013,7 +967,7 @@ public abstract class RequestExecutor {
             }
             log.info("Northbound Response Body: " + retStr
             		+ " Request ID: " + UID.getRequestID(messageContext));
-		
+
 			if (statusCode != 200) {
 				throw new RuntimeException("Failed : HTTP error code : " + statusCode);
 			}
@@ -1029,8 +983,8 @@ public abstract class RequestExecutor {
 
 		return statusCode;
 	}
-	
-	
+
+
 	public String makeRetrieveSMSGetRequest(OperatorEndpoint operatorendpoint, String url, String requestStr, boolean auth,
 	                                        MessageContext messageContext, boolean inclueHeaders) {
 
@@ -1158,18 +1112,18 @@ public abstract class RequestExecutor {
 		return retStr;
 	}
 
-	
 
-		
+
+
 	private void publishWalletPaymentData(int statusCode, String retStr, MessageContext messageContext) {
 		        //set properties for response data publisher
 		        messageContext.setProperty(DataPublisherConstants.RESPONSE_CODE, Integer.toString(statusCode));
 		        messageContext.setProperty(DataPublisherConstants.MSISDN, messageContext.getProperty(MSISDNConstants.USER_MSISDN));
-		
-		       
+
+
 		    }
-		
-		
+
+
 		    /**
 		     *
 		     * @param url
@@ -1179,16 +1133,16 @@ public abstract class RequestExecutor {
 		     */
 		    public String makeWalletRequest(OperatorEndpoint operatorendpoint, String url, String requestStr, boolean auth,
 		                                    MessageContext messageContext, boolean inclueHeaders) {
-		
-		
+
+
 		        String retStr = "";
 		        int statusCode = 0;
-		
+
 		        URL neturl;
 		        HttpURLConnection connection = null;
-		
+
 		        try {
-		
+
 		            neturl = new URL(url);
 		            connection = (HttpURLConnection) neturl.openConnection();
 		           connection.setRequestMethod("POST");
@@ -1197,7 +1151,7 @@ public abstract class RequestExecutor {
 		            connection.setRequestProperty("Accept-Charset", "UTF-8");//ADDED
 		            if (auth) {
 		            	connection.setRequestProperty("Authorization", "Bearer " + getAccessToken(operatorendpoint.getOperator(), messageContext));
-		
+
 		                //Add JWT token header
 		                org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
 		                        .getAxis2MessageContext();
@@ -1210,7 +1164,7 @@ public abstract class RequestExecutor {
 		                    }
 		                }
 		            }
-		
+
 		            if (inclueHeaders) {
 		                org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
 		                        .getAxis2MessageContext();
@@ -1227,35 +1181,35 @@ public abstract class RequestExecutor {
 		            connection.setUseCaches(false);
 		            connection.setDoInput(true);
 		            connection.setDoOutput(true);
-		
-		            log.info("Southbound Request URL: " + connection.getRequestMethod() + " " + connection.getURL() 
+
+		            log.info("Southbound Request URL: " + connection.getRequestMethod() + " " + connection.getURL()
 		            		+ " Request ID: " + UID.getRequestID(messageContext));
 		            if (log.isDebugEnabled()) {
 		                log.debug("Southbound Request Headers: " + connection.getRequestProperties());
 		            }
-		            log.info("Southbound Request Body: " + requestStr 
+		            log.info("Southbound Request Body: " + requestStr
 		            		+ " Request ID: " + UID.getRequestID(messageContext));
-		            
+
 		            //========================UNICODE PATCH=========================================
 		            BufferedOutputStream wr = new BufferedOutputStream(connection.getOutputStream());
 		            wr.write(requestStr.getBytes("UTF-8"));
 		            wr.flush();
 		            wr.close();
 		            //========================UNICODE PATCH=========================================
-		
-		
+
+
 		            statusCode = connection.getResponseCode();
 		            if ((statusCode != 200) && (statusCode != 201) && (statusCode != 400) && (statusCode != 401)) {
 		                throw new RuntimeException("Failed : HTTP error code : " + statusCode);
 		            }
-		
+
 		           InputStream is = null;
 		            if ((statusCode == 200) || (statusCode == 201)) {
 		                is = connection.getInputStream();
 		            } else {
 		                is = connection.getErrorStream();
 		            }
-		
+
 		            BufferedReader br = new BufferedReader(new InputStreamReader(is));
 		            String output;
 		            while ((output = br.readLine()) != null) {
@@ -1281,10 +1235,10 @@ public abstract class RequestExecutor {
 				            MSISDNConstants.USER_MSISDN));
 		            publishWalletPaymentData(statusCode, retStr, messageContext);
 		        }
-		
+
 		        return retStr;
 		    }
-		
+
 		    /**
 		         *
 		         * @param url
@@ -1294,16 +1248,16 @@ public abstract class RequestExecutor {
 		        */
         public String makeCreditRequest(OperatorEndpoint operatorendpoint, String url, String requestStr, boolean auth,
                                         MessageContext messageContext, boolean inclueHeaders) {
-    
-    
+
+
             String retStr = "";
             int statusCode = 0;
-    
+
             URL neturl;
             HttpURLConnection connection = null;
-    
+
             try {
-    
+
                 neturl = new URL(url);
                 connection = (HttpURLConnection) neturl.openConnection();
                 connection.setRequestMethod("POST");
@@ -1311,7 +1265,7 @@ public abstract class RequestExecutor {
                 connection.setRequestProperty("Accept", "application/json");
                 connection.setRequestProperty("Accept-Charset", "UTF-8");//ADDED
                 if (auth) {
-                	connection.setRequestProperty("Authorization", "Bearer " + getAccessToken(operatorendpoint.getOperator(),messageContext));    
+                	connection.setRequestProperty("Authorization", "Bearer " + getAccessToken(operatorendpoint.getOperator(),messageContext));
                     //Add JWT token header
                     org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                             .getAxis2MessageContext();
@@ -1324,7 +1278,7 @@ public abstract class RequestExecutor {
                         }
                     }
                 }
-    
+
                 if (inclueHeaders) {
                     org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) messageContext)
                             .getAxis2MessageContext();
@@ -1341,44 +1295,44 @@ public abstract class RequestExecutor {
                 connection.setUseCaches(false);
                 connection.setDoInput(true);
                 connection.setDoOutput(true);
-    
-    
+
+
                 log.debug("Southbound Request URL: " + connection.getRequestMethod() + " " + connection.getURL());
                 log.debug("Southbound Request Headers: " + connection.getRequestProperties());
                 log.debug("Southbound Request Body: " + requestStr);
-    
-    
+
+
                //UNICODE
                 BufferedOutputStream wr = new BufferedOutputStream(connection.getOutputStream());
                 wr.write(requestStr.getBytes("UTF-8"));
                 wr.flush();
                 wr.close();
-    
-    
+
+
                 statusCode = connection.getResponseCode();
                 if ((statusCode != 200) && (statusCode != 201) && (statusCode != 400) && (statusCode != 401)) {
                     throw new RuntimeException("Failed : HTTP error code : " + statusCode);
                 }
-    
+
                 InputStream is = null;
                 if ((statusCode == 200) || (statusCode == 201)) {
                     is = connection.getInputStream();
                 } else {
                    is = connection.getErrorStream();
                 }
-    
+
                 BufferedReader br = new BufferedReader(new InputStreamReader(is));
                 String output;
                 while ((output = br.readLine()) != null) {
                     retStr += output;
                 }
                 br.close();
-    
-    
+
+
                 log.debug("Southbound Response Status: " + statusCode + " " + connection.getResponseMessage());
                 log.debug("Southbound Response Headers: " + connection.getHeaderFields());
                 log.debug("Southbound Response Body: " + retStr);
-    
+
             } catch (Exception e) {
                 log.error("[CreditRequestService ], makerequest, " + e.getMessage(), e);
                 return null;
@@ -1390,9 +1344,194 @@ public abstract class RequestExecutor {
                 messageContext.setProperty(DataPublisherConstants.MSISDN, messageContext.getProperty(MSISDNConstants.USER_MSISDN));
                 publishWalletPaymentData(statusCode, retStr, messageContext);
             }
-    
+
             return retStr;
         }
-    
+
+    /**
+     * Retrieves the access token using either token pool service or the default flow is done
+     *
+     * @param operator the name of the operator
+     * @return the string representation of the access token
+     * @throws Exception
+     */
+    public String getAccessToken(String operator, MessageContext messageContext) throws Exception {
+        String response = "";
+        FileReader fileReader = new FileReader();
+        String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
+                      + FileNames.MEDIATOR_CONF_FILE.getFileName();
+        Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
+
+        String tokenPoolService = mediatorConfMap.get("tokenpoolservice");
+        String resourceURL = mediatorConfMap.get("tokenpoolResourceURL");
+        log.info("tokenPoolService Enabled: " + tokenPoolService + "with tokenPoolService URL: " + resourceURL);
+
+        if (tokenPoolService != null && resourceURL != null && tokenPoolService.equals("true")) {
+            log.info("Token Pool Service getPoolAccessToken() Flow ");
+            response = getPoolAccessToken(operator, resourceURL);
+        } else {
+            log.info("Hub Mediator getDefaultAccessToken() Flow ");
+            response = getDefaultAccessToken(operator, messageContext);
+        }
+        return response;
+    }
+
+    /**
+     * Retrieves the token from the token pool service.
+     *
+     * @param owner_id which is operator in Token Pool service
+     * @return access token
+     * @throws Exception
+     */
+    private String getPoolAccessToken(String owner_id, String resourceURL) throws Exception {
+        StringBuffer result = new StringBuffer();
+        HttpURLConnection poolConnection = null;
+        URL requestUrl;
+
+        try {
+
+            requestUrl = new URL(resourceURL + URLEncoder.encode(owner_id, "UTF-8"));
+            poolConnection = (HttpURLConnection) requestUrl.openConnection();
+            poolConnection.setDoOutput(true);
+            poolConnection.setInstanceFollowRedirects(false);
+            poolConnection.setRequestMethod("GET");
+            poolConnection.setRequestProperty("Accept", "application/json");
+            poolConnection.setUseCaches(false);
+
+            InputStream input = null;
+            if (poolConnection.getResponseCode() == 200) {
+                input = poolConnection.getInputStream();
+            } else {
+                input = poolConnection.getErrorStream();
+            }
+
+            BufferedReader br = new BufferedReader(new InputStreamReader(input));
+            String output;
+            while ((output = br.readLine()) != null) {
+                result.append(output);
+            }
+            br.close();
+        } catch (Exception e) {
+            log.error("[TokenPoolRequestService ], getPoolAccessToken, " + e.getMessage());
+            return null;
+        } finally {
+            if (poolConnection != null) {
+                poolConnection.disconnect();
+            }
+        }
+        return result.toString();
+    }
+
+    /**
+     * Retieves the access token using the default flow.
+     *
+     * @param operator the name of the operator
+     * @return
+     * @throws Exception
+     */
+    protected String getDefaultAccessToken(String operator, MessageContext messageContext) throws Exception {
+        OperatorApplicationDTO op = null;
+        String token = null;
+
+        if (operator == null) {
+            return token;
+        }
+
+        String applicationid = getApplicationid();
+        if (applicationid == null) {
+            throw new CustomException("SVC0001", "", new String[]{"Requested service is not provisioned"});
+        }
+        OparatorService operatorService = new OparatorService();
+        validoperators = operatorService.getApplicationOperators(Integer.valueOf(applicationid));
+
+        if (validoperators.isEmpty()) {
+            throw new CustomException("SVC0001", "", new String[]{"Requested service is not provisioned"});
+        }
+
+        for (OperatorApplicationDTO d : validoperators) {
+            if (d.getOperatorname() != null && d.getOperatorname().contains(operator)) {
+                op = d;
+                break;
+            }
+        }
+        //
+        log.info("Token time : " + op.getTokentime() + " Request ID: " + UID.getRequestID(messageContext));
+        log.info("Token validity : " + op.getTokenvalidity() + " Request ID: " + UID.getRequestID(messageContext));
+
+        long timeexpires = (long) (op.getTokentime() + (op.getTokenvalidity() * 1000));
+
+        log.info("Expire time : " + timeexpires + " Request ID: " + UID.getRequestID(messageContext));
+
+        long currtime = new Date().getTime();
+
+        log.info("Current time : " + currtime + " Request ID: " + UID.getRequestID(messageContext));
+
+        if (timeexpires > currtime) {
+            token = op.getToken();
+            log.info("Token of " + op.getOperatorname() + " operator is active"
+                     + " Request ID: " + UID.getRequestID(messageContext));
+        } else {
+
+            log.info("Regenerating the token of " + op.getOperatorname() + " operator"
+                     + " Request ID: " + UID.getRequestID(messageContext));
+            String Strtoken = makeTokenrequest(op.getTokenurl(),
+                    "grant_type=refresh_token&refresh_token=" + op.getRefreshtoken(),
+                    ("" + op.getTokenauth()),
+                    messageContext);
+            if (Strtoken != null && Strtoken.length() > 0) {
+                log.info("Token regeneration response of " + op.getOperatorname() + " operator : " + Strtoken
+                         + " Request ID: " + UID.getRequestID(messageContext));
+
+                JSONObject jsontoken = new JSONObject(Strtoken);
+                token = jsontoken.getString("access_token");
+                operatorService.updateOperatorToken(op.getOperatorid(),
+                        jsontoken.getString("refresh_token"),
+                        Long.parseLong(jsontoken.getString("expires_in")),
+                        new Date().getTime(), token);
+
+            } else {
+                log.error("Token regeneration response of " + op.getOperatorname() + " operator is invalid.");
+            }
+        }
+        //something here
+
+        return token;
+    }
+
+    private String modifyEndpoint(String sendingAdd, String operator, MessageContext context){
+
+        FileReader fileReader = new FileReader();
+        String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
+                      + FileNames.MEDIATOR_CONF_FILE.getFileName();
+        Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
+        String esbEndpoint = mediatorConfMap.get("esbEndpoint");
+        String isUserInfoEnabled = "false";
+        String operatorEndpoint = sendingAdd;
+        String consumerKey = "";
+
+        AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(context);
+        if (authContext != null) {
+            consumerKey = authContext.getConsumerKey();
+        }
+
+        GroupEventUnmarshaller unmarshaller = GroupEventUnmarshaller.getInstance();
+        try {
+            GroupDTO groupDTO = unmarshaller.getGroupDTO(operator, consumerKey);
+            isUserInfoEnabled = groupDTO.getUserInfoEnabled() + "";
+        } catch (OparatorNotinListException e) {
+            e.printStackTrace();
+        }
+
+        String isUserinfoEnabledQueryParam = "isUserInfoEnabled=" + isUserInfoEnabled;
+        String operatorEndpointQueryParam = "oprendpoint=" + operatorEndpoint;
+        String operatorQueryParam = "operator=" + operator;
+        String consumerKeyQueryParam = "consumerKey=" + consumerKey;
+
+        String modifiedEndpoint =
+                esbEndpoint + "?" + operatorEndpointQueryParam + "&" + operatorQueryParam + "&" + consumerKeyQueryParam
+                + "&" + isUserinfoEnabledQueryParam;
+
+        return modifiedEndpoint;
+    }
 
 }
