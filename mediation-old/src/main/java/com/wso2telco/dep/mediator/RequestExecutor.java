@@ -1509,10 +1509,7 @@ public abstract class RequestExecutor {
         String operatorEndpoint = sendingAdd;
         String consumerKey = "";
 
-        AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(context);
-        if (authContext != null) {
-            consumerKey = authContext.getConsumerKey();
-        }
+        consumerKey = (String) context.getProperty("CONSUMER_KEY");
 
         GroupEventUnmarshaller unmarshaller = GroupEventUnmarshaller.getInstance();
         try {

@@ -56,8 +56,8 @@ public class LimitCheckMediator extends AbstractMediator {
         return true;
     }
 
-    public boolean checkSpendLimit(String msisdn, String operator, Double chargeAmount, String consumerKey) throws
-            DBUtilException , AxiataException{
+    public boolean checkSpendLimit(String msisdn, String operator, Double chargeAmount, String consumerKey)
+            throws DBUtilException {
         try {
             GroupDTO groupDTO= groupEventUnmarshaller.getGroupDTO(operator,consumerKey);
             Double groupdailyLimit = Double.parseDouble(groupDTO.getDayAmount());
