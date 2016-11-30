@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -25,14 +25,12 @@ import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.USSDService;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.FileNames;
-import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -78,61 +76,110 @@ public class USSDInboundHandler implements USSDHandler {
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see
 	 * com.wso2telco.mediator.impl.ussd.USSDHandler#handle(org.apache.synapse.
 	 * MessageContext)
 	 */
 	@Override
-    public boolean handle(MessageContext context) throws CustomException, AxisFault, Exception {
+	public boolean handle(MessageContext context) throws CustomException, AxisFault, Exception {
 
-        String requestPath = executor.getSubResourcePath();
-        String subscriptionId = requestPath.substring(requestPath.lastIndexOf("/") + 1);
-        FileReader fileReader = new FileReader();
-        String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
-                + FileNames.MEDIATOR_CONF_FILE.getFileName();
+		String requestid = UID.getUniqueID(Type.RETRIEVE_USSD.getCode(), context, executor.getApplicationid());
+		String requestPath = executor.getSubResourcePath();
+		String subscriptionId = requestPath.substring(requestPath.lastIndexOf("/") + 1);
+		FileReader fileReader = new FileReader();
+		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
+				+ FileNames.MEDIATOR_CONF_FILE.getFileName();
 
-        // remove non numeric chars
-        subscriptionId = subscriptionId.replaceAll("[^\\d.]", "");
-        log.debug("subscriptionId - " + subscriptionId);
+		// remove non numeric chars
+		subscriptionId = subscriptionId.replaceAll("[^\\d.]", "");
+		log.debug("subscriptionId - " + subscriptionId);
+		
+		
+		List<String> ussdSPDetails = ussdService.getUSSDNotify(Integer.valueOf(subscriptionId));
+		log.info("notifyUrl found -  " + ussdSPDetails.get(0) + " Request ID: " + UID.getRequestID(context));
+		//log.info("consumerKey found - " + ussdSPDetails.get(1) + " Request ID: " + UID.getRequestID(context));
+		
+		
 
+		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
 
-        List<String> ussdSPDetails = ussdService.getUSSDNotify(Integer.valueOf(subscriptionId));
-        log.info("notifyUrl found -  " + ussdSPDetails.get(0) + " Request ID: " + UID.getRequestID(context));
-        //log.info("consumerKey found - " + ussdSPDetails.get(1) + " Request ID: " + UID.getRequestID(context));
-
-        Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
-
-        JSONObject jsonBody = executor.getJsonBody();
-        jsonBody.getJSONObject("inboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL", ussdSPDetails.get(0));
-
-        String msisdn = jsonBody.getJSONObject("inboundUSSDMessageRequest").getString("address").substring(5);
-        context.setProperty(DataPublisherConstants.MSISDN, msisdn);
+		JSONObject jsonBody = executor.getJsonBody();
+		jsonBody.getJSONObject("inboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL", ussdSPDetails.get(0));
+		
+		String msisdn = jsonBody.getJSONObject("inboundUSSDMessageRequest").getString("address").substring(5);
+		context.setProperty(DataPublisherConstants.MSISDN, msisdn);
         context.setProperty(DataPublisherConstants.SP_CONSUMER_KEY, ussdSPDetails.get(1));
         context.setProperty(DataPublisherConstants.SP_OPERATOR_ID, ussdSPDetails.get(2));
         context.setProperty(DataPublisherConstants.SP_USER_ID, ussdSPDetails.get(3));
+
 
         log.debug("01 SP_CONSUMER_KEY found - " + ussdSPDetails.get(1) + " Request ID: " + UID.getRequestID(context));
         log.info("01 SP_OPERATOR_ID found - " + ussdSPDetails.get(2) + " Request ID: " + UID.getRequestID(context));
         log.info("01 SP_USER_ID found - " + ussdSPDetails.get(3) + " Request ID: " + UID.getRequestID(context));
 
-        OperatorEndpoint operatorendpoint = new OperatorEndpoint(new EndpointReference(ussdSPDetails.get(0)), null);
-        String sending_add = operatorendpoint.getEndpointref().getAddress();
+        
+        String notifyret = executor.makeRequest(new OperatorEndpoint(new EndpointReference(ussdSPDetails.get(0)), null), ussdSPDetails.get(0), jsonBody.toString(), true, context, false);
 
-        HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
-        HandlerUtils.setEndpointProperty(context, sending_add);
-        HandlerUtils.setAuthorizationHeader(context, executor, operatorendpoint);
+		log.debug(notifyret);
+		if (notifyret == null) {
+			throw new CustomException("POL0299", "", new String[] { "Error invoking Endpoint" });
+		}
 
-        ((Axis2MessageContext) context).getAxis2MessageContext().setProperty("messageType", "application/json");
-        String transformedJson = jsonBody.toString();
-        JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), transformedJson, true, true);
-        //executor.setResponse(context,jsonBody.toString());
-        return true;
-    }
+		JSONObject replyobj = new JSONObject(notifyret);
+		String action = replyobj.getJSONObject("outboundUSSDMessageRequest").getString("ussdAction");
+
+		if (action.equalsIgnoreCase("mtcont")) {
+
+			String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint") + subscriptionId;
+			log.info("Subsendpoint - " +subsEndpoint + " Request ID: " + UID.getRequestID(context));
+			replyobj.getJSONObject("outboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL",
+					subsEndpoint);
+
+		}
+
+		if (action.equalsIgnoreCase("mtfin")) {
+			String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint") + subscriptionId;
+			log.info("Subsendpoint - " +subsEndpoint + " Request ID: " + UID.getRequestID(context));
+			replyobj.getJSONObject("outboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL",
+					subsEndpoint);
+
+			boolean deleted = ussdService.ussdEntryDelete(Integer.valueOf(subscriptionId));
+			log.info("Entry deleted " + deleted + " Request ID: " + UID.getRequestID(context));
+
+		}
+		
+		if(action.equalsIgnoreCase("mocont")){
+			
+            String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint")+subscriptionId;
+            log.info("Subsendpoint - " +subsEndpoint + " Request ID: " + UID.getRequestID(context));
+            replyobj.getJSONObject("outboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL", subsEndpoint);
+
+		}
+			
+		if(action.equalsIgnoreCase("mofin")){
+			
+            String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint")+subscriptionId;
+            log.info("Subsendpoint - " +subsEndpoint + " Request ID: " + UID.getRequestID(context));
+            replyobj.getJSONObject("outboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL", subsEndpoint);
+	
+	        //log.info("Entry deleted after session expired" + deleted);
+            
+		}
+			 
+		executor.removeHeaders(context);
+
+		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 201);
+		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("messageType", "application/json");
+		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("ContentType", "application/json");
+		executor.setResponse(context, replyobj.toString());
+
+		return true;
+	}
 
 	/*
 	 * (non-Javadoc)
-	 *
+	 * 
 	 * @see
 	 * com.wso2telco.mediator.impl.ussd.USSDHandler#validate(java.lang.String,
 	 * java.lang.String, org.json.JSONObject, org.apache.synapse.MessageContext)
