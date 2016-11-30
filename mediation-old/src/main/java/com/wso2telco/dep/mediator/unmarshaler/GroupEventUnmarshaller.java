@@ -58,14 +58,13 @@ public class GroupEventUnmarshaller {
         init();
         unmarshall();
     }
-    public static void startGroupEventUnmarshaller() throws JAXBException {
+    static {
         try {
             if (null == instance) {
                 instance = new GroupEventUnmarshaller();
             }
         } catch (JAXBException e) {
             log.error("Error initializing GroupEventUnmarshaller", e);
-            throw e;
         }
     }
 

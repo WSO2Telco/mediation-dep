@@ -46,7 +46,6 @@ public class RealmServices {
     protected void activate(ComponentContext context) throws JAXBException{
         BundleContext bundleContext = context.getBundleContext();       
       //  bundleContext.registerService(ApplicationManagementService.class.getName(), mgtService, null);       
-        GroupEventUnmarshaller.startGroupEventUnmarshaller();
     }
 
     /**
