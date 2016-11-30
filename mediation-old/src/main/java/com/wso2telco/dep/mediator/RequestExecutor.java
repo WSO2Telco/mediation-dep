@@ -229,7 +229,7 @@ public abstract class RequestExecutor {
 		validoperators = validoperatorsDup;
 		subResourcePath = (String) context.getProperty("REST_SUB_REQUEST_PATH");
 		resourceUrl = (String) context.getProperty("REST_FULL_REQUEST_PATH");
-		httpMethod = (String) context.getProperty("api.ut.HTTP_METHOD");
+		httpMethod = (String) context.getProperty("HTTP_METHOD");
 
 
 		/*String jsonPayloadToString = JsonUtil
