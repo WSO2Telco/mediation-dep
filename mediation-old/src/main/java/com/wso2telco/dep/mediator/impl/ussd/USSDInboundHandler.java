@@ -25,12 +25,14 @@ import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.USSDService;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -118,61 +120,18 @@ public class USSDInboundHandler implements USSDHandler {
         log.info("01 SP_OPERATOR_ID found - " + ussdSPDetails.get(2) + " Request ID: " + UID.getRequestID(context));
         log.info("01 SP_USER_ID found - " + ussdSPDetails.get(3) + " Request ID: " + UID.getRequestID(context));
 
+        OperatorEndpoint operatorendpoint = new OperatorEndpoint(new EndpointReference(ussdSPDetails.get(0)), null);
+        String sending_add = operatorendpoint.getEndpointref().getAddress();
+
+        HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
+        HandlerUtils.setEndpointProperty(context, sending_add);
+        HandlerUtils.setAuthorizationHeader(context, executor, operatorendpoint);
+
+        ((Axis2MessageContext) context).getAxis2MessageContext().setProperty("messageType", "application/json");
+        String transformedJson = jsonBody.toString();
+        JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), transformedJson, true, true);
+
         
-        String notifyret = executor.makeRequest(new OperatorEndpoint(new EndpointReference(ussdSPDetails.get(0)), null), ussdSPDetails.get(0), jsonBody.toString(), true, context, false);
-
-		log.debug(notifyret);
-		if (notifyret == null) {
-			throw new CustomException("POL0299", "", new String[] { "Error invoking Endpoint" });
-		}
-
-		JSONObject replyobj = new JSONObject(notifyret);
-		String action = replyobj.getJSONObject("outboundUSSDMessageRequest").getString("ussdAction");
-
-		if (action.equalsIgnoreCase("mtcont")) {
-
-			String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint") + subscriptionId;
-			log.info("Subsendpoint - " +subsEndpoint + " Request ID: " + UID.getRequestID(context));
-			replyobj.getJSONObject("outboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL",
-					subsEndpoint);
-
-		}
-
-		if (action.equalsIgnoreCase("mtfin")) {
-			String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint") + subscriptionId;
-			log.info("Subsendpoint - " +subsEndpoint + " Request ID: " + UID.getRequestID(context));
-			replyobj.getJSONObject("outboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL",
-					subsEndpoint);
-
-			boolean deleted = ussdService.ussdEntryDelete(Integer.valueOf(subscriptionId));
-			log.info("Entry deleted " + deleted + " Request ID: " + UID.getRequestID(context));
-
-		}
-		
-		if(action.equalsIgnoreCase("mocont")){
-			
-            String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint")+subscriptionId;
-            log.info("Subsendpoint - " +subsEndpoint + " Request ID: " + UID.getRequestID(context));
-            replyobj.getJSONObject("outboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL", subsEndpoint);
-
-		}
-			
-		if(action.equalsIgnoreCase("mofin")){
-			
-            String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint")+subscriptionId;
-            log.info("Subsendpoint - " +subsEndpoint + " Request ID: " + UID.getRequestID(context));
-            replyobj.getJSONObject("outboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL", subsEndpoint);
-	
-	        //log.info("Entry deleted after session expired" + deleted);
-            
-		}
-			 
-		executor.removeHeaders(context);
-
-		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 201);
-		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("messageType", "application/json");
-		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("ContentType", "application/json");
-		executor.setResponse(context, replyobj.toString());
 
 		return true;
 	}
