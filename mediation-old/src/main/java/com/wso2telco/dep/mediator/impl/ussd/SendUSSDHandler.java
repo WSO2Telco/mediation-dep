@@ -100,18 +100,22 @@ public class SendUSSDHandler implements USSDHandler {
 
 		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
 
-		AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(context);
+		/*AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(context);
         String consumerKey = "";
         String userId="";
         //String operatorId="";
         if (authContext != null) {
             consumerKey = authContext.getConsumerKey();
             userId=authContext.getUsername();
-        }
+        }*/
+		String consumerKey = "";
+		String userId = "";
+		consumerKey = (String) context.getProperty("CONSUMER_KEY");
+		userId = (String) context.getProperty("USER_ID");
 		//Integer subscriptionId = ussdService.ussdRequestEntry(notifyUrl ,consumerKey);
 
 		OperatorEndpoint endpoint = null;
-        if (ValidatorUtils.getValidatorForSubscription(context).validate(context)) {
+        if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
             endpoint = occi.getAPIEndpointsByMSISDN(address.replace("tel:", ""), API_TYPE, executor.getSubResourcePath(), false,executor.getValidoperators());
         }
         //operatorId=ussdService.getOperatorIdByOperator(endpoint.getOperator());
