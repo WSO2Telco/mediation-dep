@@ -28,6 +28,7 @@ import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.FileNames;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
+import com.wso2telco.dep.subscriptionvalidator.services.MifeValidator;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
@@ -115,9 +116,15 @@ public class SendUSSDHandler implements USSDHandler {
 		//Integer subscriptionId = ussdService.ussdRequestEntry(notifyUrl ,consumerKey);
 
 		OperatorEndpoint endpoint = null;
-        if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
-            endpoint = occi.getAPIEndpointsByMSISDN(address.replace("tel:", ""), API_TYPE, executor.getSubResourcePath(), false,executor.getValidoperators());
-        }
+		String validatorClassName = (String) context.getProperty("API_ID");
+		if(validatorClassName != null) {
+			MifeValidator validator = (MifeValidator) Class.forName(validatorClassName).newInstance();
+			//if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
+			if (validator.validate(context)) {
+				endpoint = occi.getAPIEndpointsByMSISDN(address.replace("tel:", ""), API_TYPE,
+						executor.getSubResourcePath(), false, executor.getValidoperators());
+			}
+		}
         //operatorId=ussdService.getOperatorIdByOperator(endpoint.getOperator());
         
         Integer subscriptionId = ussdService.ussdRequestEntry(notifyUrl ,consumerKey,endpoint.getOperator(),userId);
