@@ -77,38 +77,24 @@ public class ListTransactionsHandler implements PaymentHandler {
 	public boolean handle(MessageContext context) throws Exception {
 		String[] params = executor.getSubResourcePath().split("/");
 		context.setProperty(MSISDNConstants.USER_MSISDN, params[1].substring(5));
-		OperatorEndpoint endpoint = null;
-		if (ValidatorUtils.getValidatorForSubscription(context).validate(
-				context)) {
-			endpoint = occi.getAPIEndpointsByMSISDN(
-					params[1].replace("tel:", ""), API_TYPE,
-					executor.getSubResourcePath(), true,
-					executor.getValidoperators());
-		}
+        OperatorEndpoint endpoint = null;
+        if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
+            endpoint = occi.getAPIEndpointsByMSISDN(
+                    params[1].replace("tel:", ""), API_TYPE,
+                    executor.getSubResourcePath(), true,
+                    executor.getValidoperators());
+        }
 
-		String sending_add = endpoint.getEndpointref().getAddress();
+        String sending_add = endpoint.getEndpointref().getAddress() + executor.getSubResourcePath();
+        context.setProperty("HANDLER", this.getClass().getSimpleName());
+        context.setProperty("ENDPOINT", sending_add);
+        context.setProperty("requestResourceUrl", executor.getResourceUrl());
 
-		String responseStr = executor.makeGetRequest(endpoint, sending_add,
-				executor.getSubResourcePath(), true, context, false);
-
-		executor.removeHeaders(context);
-
-		if (responseStr == null || responseStr.equals("")
-				|| responseStr.isEmpty()) {
-
-			throw new CustomException("SVC1000", "", new String[] { null });
-		} else {
-
-			executor.handlePluginException(responseStr);
-			responseStr = makeListTransactionResponse(responseStr);
-		}
-
-		// set response re-applied
-		executor.setResponse(context, responseStr);
-		((Axis2MessageContext) context).getAxis2MessageContext().setProperty(
-				"messageType", "application/json");
-		((Axis2MessageContext) context).getAxis2MessageContext().setProperty(
-				"ContentType", "application/json");
+        FileReader fileReader = new FileReader();
+        String file =
+                CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
+        Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
+        context.setProperty("hubGateway", mediatorConfMap.get("hubGateway"));
 
 		return true;
 	}

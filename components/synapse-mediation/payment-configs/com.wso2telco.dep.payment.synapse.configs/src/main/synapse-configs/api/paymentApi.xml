@@ -4,12 +4,7 @@
             <sequence key="paymentMainSeq"/>
         </inSequence>
         <outSequence>
-            <switch xmlns:ns="http://org.apache.synapse/xsd" source="$axis2:HTTP_SC">
-                <case regex="(200|201)">
-                    <sequence key="replaceResourceURLSeq"/>
-                </case>
-                <default/>
-            </switch>
+            <sequence key="paymentOutMainSeq"/>
             <respond/>
         </outSequence>
         <faultSequence/>
