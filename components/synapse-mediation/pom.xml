@@ -41,6 +41,7 @@
 
     <modules>
         <module>payment-configs</module>
+		<module>location-configs</module>
     </modules>
 
     <build>

@@ -27,9 +27,13 @@ import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.util.APIType;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.impl.location.ValidateLocation;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
+
+import java.util.Map;
+
 import org.apache.axis2.AxisFault;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
@@ -62,39 +66,21 @@ public class LocationExecutor extends RequestExecutor {
         String[] params = new ResourceURLUtil().getParamValues(getSubResourcePath());
         context.setProperty(MSISDNConstants.USER_MSISDN, params[0].substring(5));
         OperatorEndpoint endpoint = null;
-		if (ValidatorUtils.getValidatorForSubscription(context).validate(
+		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(
 				context)) {
-			// MIFE-805
-			OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
-			searchDTO.setApi(APIType.LOCATION);
-			searchDTO.setContext(context);
-			searchDTO.setIsredirect(true);
-			searchDTO.setMSISDN(params[0]);
-			searchDTO.setOperators(getValidoperators());
-			searchDTO.setRequestPathURL(getSubResourcePath());
-
-			endpoint = occi.getOperatorEndpoint(searchDTO);
-
 			
-			 //endpoint = occi.getAPIEndpointsByMSISDN(params[0].replace("tel:", ""), "location", getSubResourcePath(), true, getValidoperators());
-			 
-
+			endpoint = occi.getAPIEndpointsByMSISDN(params[0].replace("tel:", ""), "location", getSubResourcePath(), true, getValidoperators());
 		}
+		
         String sending_add = endpoint.getEndpointref().getAddress();
-
-        String responseStr = makeGetRequest(endpoint, sending_add, getSubResourcePath(), true, context, false);
-
-        removeHeaders(context);
         
-		if (responseStr == null || responseStr.equals("") || responseStr.isEmpty()) {
-			throw new CustomException("SVC1000", "", new String[] { null });
-		} else {
-			handlePluginException(responseStr);
-		}
-        //set response re-applied
-        setResponse(context, responseStr);
-        ((Axis2MessageContext) context).getAxis2MessageContext().setProperty("messageType", "application/json");
-        ((Axis2MessageContext) context).getAxis2MessageContext().setProperty("ContentType", "application/json");
+        HandlerUtils.setHandlerProperty(context,this.getClass().getSimpleName());
+		HandlerUtils.setEndpointProperty(context,sending_add);
+		HandlerUtils.setAuthorizationHeader(context,this,endpoint);
+
+		
+		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("messageType", "application/json");
+		
         return true;
     }
 
@@ -117,4 +103,6 @@ public class LocationExecutor extends RequestExecutor {
 
         return true;
     }
+
+	
 }
