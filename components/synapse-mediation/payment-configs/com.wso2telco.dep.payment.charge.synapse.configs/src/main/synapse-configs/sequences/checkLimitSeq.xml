@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="checkLimitSeq" onError="checkLimitError" xmlns="http://ws.apache.org/ns/synapse">
+    <property expression="get-property('CONSUMER_KEY')"
+              name="consumerKey" scope="default" type="STRING" xmlns:ns="http://org.apache.synapse/xsd"/>
+    <class name="com.wso2telco.dep.spend.limit.mediation.mediator.LimitCheckMediator"/>
+    <sequence key="chargeRequestSeq"/>
+</sequence>

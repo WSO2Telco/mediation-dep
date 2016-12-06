@@ -12,7 +12,7 @@
     <property name="API_PUBLISHER" expression="$trp:API_PUBLISHER"/>
     <property name="APPLICATION_NAME" expression="$trp:APPLICATION_NAME"/>
     <property name="APPLICATION_ID" expression="$trp:APPLICATION_ID"/>
-
+    <property name="API_ID" expression="$trp:API_ID"/>
     <!--log level="custom" >
         <property name="API_NAME" expression="get-property('API_NAME')"/>
     </log-->

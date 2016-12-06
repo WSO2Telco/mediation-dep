@@ -110,7 +110,7 @@ public class AmountRefundHandler implements PaymentHandler {
 		String msisdn = endUserId.substring(5);
 		context.setProperty(MSISDNConstants.USER_MSISDN, msisdn);
 		// OperatorEndpoint endpoint = null;
-		if (ValidatorUtils.getValidatorForSubscription(context).validate(
+		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(
 				context)) {
 			endpoint = occi.getAPIEndpointsByMSISDN(
 					endUserId.replace("tel:", ""), API_TYPE,
@@ -169,30 +169,11 @@ public class AmountRefundHandler implements PaymentHandler {
 		List<String> validCategoris = dbservice.getValidPayCategories();
 		PaymentUtil.validatePaymentCategory(chargingdmeta, validCategoris);
 
-		String responseStr = executor.makeRequest(endpoint, sending_add,
-				jsonBody.toString(), true, context, false);
-
-		// Payment Error Exception Correction
-		String base = PaymentUtil.str_piece(
-				PaymentUtil.str_piece(responseStr, '{', 2), ':', 1);
-
-		String errorReturn = "\"" + "requestError" + "\"";
-
-		executor.removeHeaders(context);
-
-		if (base.equals(errorReturn)) {
-			executor.handlePluginException(responseStr);
-		}
-
-		responseStr = makeRefundResponse(responseStr, requestid,
-				clientCorrelator);
-
-		// set response re-applied
-		executor.setResponse(context, responseStr);
-		((Axis2MessageContext) context).getAxis2MessageContext().setProperty(
-				"messageType", "application/json");
-		((Axis2MessageContext) context).getAxis2MessageContext().setProperty(
-				"ContentType", "application/json");
+		context.setProperty("HANDLER", this.getClass().getSimpleName());
+		context.setProperty("ENDPOINT", sending_add);
+		context.setProperty("hubGateway", mediatorConfMap.get("hubGateway"));
+		context.setProperty("requestResourceUrl", executor.getResourceUrl());
+		context.setProperty("requestID", requestid);
 
 		return true;
 	}
