@@ -31,6 +31,9 @@ import com.wso2telco.dep.mediator.internal.messageenum.MessageType;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.model.MessageDTO;
 import com.wso2telco.dep.mediator.service.PaymentService;
+import com.wso2telco.dep.mediator.unmarshaler.GroupDTO;
+import com.wso2telco.dep.mediator.unmarshaler.GroupEventUnmarshaller;
+import com.wso2telco.dep.mediator.unmarshaler.OparatorNotinListException;
 import com.wso2telco.dep.mediator.util.APIType;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.FileNames;
@@ -96,6 +99,8 @@ public class AmountChargeHandler implements PaymentHandler {
         		
         String hub_gateway_id = mediatorConfMap.get("hub_gateway_id");
         log.debug("Hub / Gateway Id : " + hub_gateway_id);
+
+		String hubGateway = mediatorConfMap.get("hubGateway");
 
         String appId = jwtDetails.get("applicationid");
         log.debug("Application Id : " + appId);
@@ -196,24 +201,41 @@ public class AmountChargeHandler implements PaymentHandler {
         messageDTO.setMessage(jsonBody.toString());
         messageDTO.setReportedTime(System.currentTimeMillis());
         MessagePersistor.getInstance().publishMessage(messageDTO);
-		
-		String responseStr = executor.makeRequest(endpoint, sending_add, jsonBody.toString(), true, context, false);
-		// Payment Error Exception Correction
-		String base = str_piece(str_piece(responseStr, '{', 2), ':', 1);
 
-		String errorReturn = "\"" + "requestError" + "\"";
+        context.setProperty("HANDLER", this.getClass().getSimpleName());
+        context.setProperty("ENDPOINT", sending_add);
+        context.setProperty("operator", endpoint.getOperator());
+        context.setProperty("hubGateway", hubGateway);
+        context.setProperty("requestResourceUrl", requestResourceURL);
+        context.setProperty("requestID", requestid);
 
-		executor.removeHeaders(context);
-		if (base.equals(errorReturn) ||"400".equals(context.getProperty(DataPublisherConstants.RESPONSE_CODE))) {
-            executor.handlePluginException(responseStr);
+        //Set the 'isUserInfoEnabled' property
+        GroupEventUnmarshaller unmarshaller = GroupEventUnmarshaller.getInstance();
+        try {
+            String consumerKey = (String) context.getProperty("CONSUMER_KEY");
+            GroupDTO groupDTO = unmarshaller.getGroupDTO(endpoint.getOperator(), consumerKey);
+            String isUserInfoEnabled = groupDTO.getUserInfoEnabled();
+            context.setProperty("IS_USER_INFO_ENABLED", isUserInfoEnabled);
+        } catch (OparatorNotinListException e) {
+            log.error("Operator not in list", e);
         }
 
-		//responseStr = responseHandler.makePaymentResponse(responseStr, clientCorrelator, requestResourceURL, requestid);
-		responseStr = responseHandler.makePaymentResponseContext(context, responseStr, clientCorrelator, requestResourceURL, requestid);
-		// set response re-applied
-		executor.setResponse(context, responseStr);
+        //Set authentication headers
+        context.setProperty("auth-header", "Bearer " + executor.getAccessToken(endpoint.getOperator(), context));
 
-		return true;
+        // Add JWT token header
+        org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) context)
+                .getAxis2MessageContext();
+        Object headers = axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+
+        if (headers != null && headers instanceof Map) {
+            Map headersMap = (Map) headers;
+            String jwtparam = (String) headersMap.get("x-jwt-assertion");
+            if (jwtparam != null) {
+                context.setProperty("jwt-header", jwtparam);
+            }
+        }
+        return true;
 
 	}
 

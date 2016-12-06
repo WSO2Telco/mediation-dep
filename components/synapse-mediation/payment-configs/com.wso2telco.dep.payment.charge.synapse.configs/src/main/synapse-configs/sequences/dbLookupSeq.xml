@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="dbLookupSeq" onError="userInfoSeq" xmlns="http://ws.apache.org/ns/synapse">
+    <!--<log level="custom">
+        <property expression="get-property('auth-header')"
+                  name="auth-header!!!!!!!!!!!!!1" xmlns:ns="http://org.apache.synapse/xsd"/>
+    </log>
+    <log level="custom">
+        <property expression="get-property('jwt-header')"
+                  name="jwt-header!!!!!!!!!!!!!" xmlns:ns="http://org.apache.synapse/xsd"/>
+    </log>-->
+    <property expression="get-property('endUserId')"
+              name="uri.var.userAddress" scope="default" type="STRING" xmlns:ns="http://org.apache.synapse/xsd"/>
+    <dblookup>
+        <connection>
+            <pool>
+                <dsName>jdbc/telco_ds</dsName>
+            </pool>
+        </connection>
+        <statement>
+            <sql><![CDATA[select package from userinfo where enduserid=?]]></sql>
+            <parameter expression="get-property('endUserId')"
+                       type="VARCHAR" xmlns:ns="http://org.apache.synapse/xsd"/>
+            <result column="package" name="packageType"/>
+        </statement>
+    </dblookup>
+    <filter regex="true" source="boolean(get-property('packageType'))" xmlns:ns="http://org.apache.synapse/xsd">
+        <then>
+            <sequence key="filterCheckLimitSeq"/>
+        </then>
+        <else>
+            <sequence key="userInfoSeq"/>
+        </else>
+    </filter>
+</sequence>

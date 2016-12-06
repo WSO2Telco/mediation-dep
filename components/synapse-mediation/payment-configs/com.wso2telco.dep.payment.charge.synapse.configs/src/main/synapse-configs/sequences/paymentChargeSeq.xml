@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="paymentChargeSeq" xmlns="http://ws.apache.org/ns/synapse">
+    <property action="remove" name="REST_URL_POSTFIX" scope="axis2"/>
+    <header expression="get-property('ENDPOINT')" name="To"
+            scope="default" xmlns:ns="http://org.apache.synapse/xsd"/>
+    <property expression="json-eval($.amountTransaction.endUserId)"
+              name="endUserId" scope="default" type="STRING" xmlns:ns="http://org.apache.synapse/xsd"/>
+    <property
+            expression="json-eval($.amountTransaction.paymentAmount.chargingInformation.amount)"
+            name="chargeAmount" scope="default" type="STRING" xmlns:ns="http://org.apache.synapse/xsd"/>
+    <property expression="get-property('IS_USER_INFO_ENABLED')"
+              name="isUserInfoEnabled" scope="default" type="STRING" xmlns:ns="http://org.apache.synapse/xsd"/>
+    <filter regex="true" source="get-property('isUserInfoEnabled')" xmlns:ns="http://org.apache.synapse/xsd">
+        <then>
+            <enrich>
+                <source clone="true" type="body"/>
+                <target action="replace" property="InitialMessage" type="property"/>
+            </enrich>
+            <sequence key="dbLookupSeq"/>
+        </then>
+        <else>
+            <sequence key="checkLimitSeq"/>
+        </else>
+    </filter>
+</sequence>

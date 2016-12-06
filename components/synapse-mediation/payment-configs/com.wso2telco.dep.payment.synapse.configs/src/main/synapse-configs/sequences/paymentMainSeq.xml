@@ -8,6 +8,15 @@
         <case regex="QueryPaymentStatusHandler">
             <sequence key="paymentStatusSeq"/>
         </case>
+        <case regex="AmountChargeHandler">
+            <sequence key="paymentChargeSeq"/>
+        </case>
+        <case regex="AmountRefundHandler">
+            <sequence key="paymentRefundSeq"/>
+        </case>
+        <case regex="ListTransactionsHandler">
+            <sequence key="paymentListTransactionsSeq"/>
+        </case>
         <default>
             <!-- TODO:handle error -->
         </default>
