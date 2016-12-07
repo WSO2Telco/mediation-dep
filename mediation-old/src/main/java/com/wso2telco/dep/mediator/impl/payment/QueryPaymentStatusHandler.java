@@ -60,7 +60,7 @@ public class QueryPaymentStatusHandler implements PaymentHandler {
 		String[] params = executor.getSubResourcePath().split("/");
 		context.setProperty(MSISDNConstants.USER_MSISDN, params[1].substring(5));
 		OperatorEndpoint endpoint = null;
-		if (ValidatorUtils.getValidatorForSubscription(context).validate(
+		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(
 				context)) {
 			OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
 			searchDTO.setApi(APIType.PAYMENT);
