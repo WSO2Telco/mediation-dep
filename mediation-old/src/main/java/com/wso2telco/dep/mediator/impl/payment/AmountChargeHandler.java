@@ -37,6 +37,7 @@ import com.wso2telco.dep.mediator.unmarshaler.OparatorNotinListException;
 import com.wso2telco.dep.mediator.util.APIType;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.mediator.util.MessagePersistor;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.payment.ValidatePaymentCharge;
@@ -99,8 +100,6 @@ public class AmountChargeHandler implements PaymentHandler {
         		
         String hub_gateway_id = mediatorConfMap.get("hub_gateway_id");
         log.debug("Hub / Gateway Id : " + hub_gateway_id);
-
-		String hubGateway = mediatorConfMap.get("hubGateway");
 
         String appId = jwtDetails.get("applicationid");
         log.debug("Application Id : " + appId);
@@ -202,10 +201,12 @@ public class AmountChargeHandler implements PaymentHandler {
         messageDTO.setReportedTime(System.currentTimeMillis());
         MessagePersistor.getInstance().publishMessage(messageDTO);
 
-        context.setProperty("HANDLER", this.getClass().getSimpleName());
-        context.setProperty("ENDPOINT", sending_add);
+        // set information to the message context, to be used in the sequence
+        HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
+        HandlerUtils.setEndpointProperty(context, sending_add);
+        HandlerUtils.setGatewayHost(context);
+        HandlerUtils.setAuthorizationHeader(context, executor, endpoint);
         context.setProperty("operator", endpoint.getOperator());
-        context.setProperty("hubGateway", hubGateway);
         context.setProperty("requestResourceUrl", requestResourceURL);
         context.setProperty("requestID", requestid);
 
@@ -220,21 +221,6 @@ public class AmountChargeHandler implements PaymentHandler {
             log.error("Operator not in list", e);
         }
 
-        //Set authentication headers
-        context.setProperty("auth-header", "Bearer " + executor.getAccessToken(endpoint.getOperator(), context));
-
-        // Add JWT token header
-        org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) context)
-                .getAxis2MessageContext();
-        Object headers = axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-
-        if (headers != null && headers instanceof Map) {
-            Map headersMap = (Map) headers;
-            String jwtparam = (String) headersMap.get("x-jwt-assertion");
-            if (jwtparam != null) {
-                context.setProperty("jwt-header", jwtparam);
-            }
-        }
         return true;
 
 	}

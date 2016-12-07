@@ -25,6 +25,7 @@ import com.wso2telco.dep.mediator.ResponseHandler;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.PaymentService;
 import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.payment.ValidateListTransactions;
@@ -85,19 +86,15 @@ public class ListTransactionsHandler implements PaymentHandler {
                     executor.getValidoperators());
         }
 
+        // set information to the message context, to be used in the sequence
         String sending_add = endpoint.getEndpointref().getAddress() + executor.getSubResourcePath();
-        context.setProperty("HANDLER", this.getClass().getSimpleName());
-        context.setProperty("ENDPOINT", sending_add);
+        HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
+        HandlerUtils.setEndpointProperty(context, sending_add);
+        HandlerUtils.setGatewayHost(context);
+        HandlerUtils.setAuthorizationHeader(context, executor, endpoint);
         context.setProperty("requestResourceUrl", executor.getResourceUrl());
-
-        FileReader fileReader = new FileReader();
-        String file =
-                CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
-        Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
-        context.setProperty("hubGateway", mediatorConfMap.get("hubGateway"));
-
-		return true;
-	}
+        return true;
+    }
 
 	private String makeListTransactionResponse(String responseStr) {
 
