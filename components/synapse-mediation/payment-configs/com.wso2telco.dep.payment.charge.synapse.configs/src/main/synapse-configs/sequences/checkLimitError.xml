@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sequence name="checkLimitError" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
-  <log level="full">
-    <property expression="get-property('FAULT_MSG')" name="FAULT_MSG"/>
-  </log>
   <switch source="get-property('FAULT_CODE')">
     <case regex="POL1001">
       <property name="HTTP_SC" scope="axis2" type="STRING" value="400"/>
