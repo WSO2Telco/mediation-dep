@@ -17,37 +17,31 @@
  */
 package com.wso2telco.dep.mediator.impl.smsmessaging;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
-import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.InboundSMSMessage;
-import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.SouthboundRetrieveResponse;
-import com.wso2telco.dep.mediator.internal.APICall;
 import com.wso2telco.dep.mediator.internal.ApiUtils;
 import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.ValidateRetrieveSms;
-import org.apache.axiom.soap.SOAPBody;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 // TODO: Auto-generated Javadoc
 
@@ -93,132 +87,72 @@ public class RetrieveSMSHandler implements SMSHandler {
 	@Override
 	public boolean handle(MessageContext context) throws CustomException, AxisFault, Exception {
 
-		SOAPBody body = context.getEnvelope().getBody();
-		Gson gson = new GsonBuilder().serializeNulls().create();
-
-		String reqType = "retrive_sms";
 		String requestid = UID.getUniqueID(Type.SMSRETRIVE.getCode(), context, executor.getApplicationid());
-		// String appID = apiUtil.getAppID(context, reqType);
 
-		int batchSize = 100;
+		List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp( API_TYPE, executor.getSubResourcePath(), executor.getValidoperators());
+		String endpoint = endpoints.get(0).getEndpointref().getAddress();
 
 		URL retrieveURL = new URL("http://example.com/smsmessaging/v1" + executor.getSubResourcePath());
 		String urlQuery = retrieveURL.getQuery();
-		
-			if (urlQuery != null) {
-				if (urlQuery.contains("maxBatchSize")) {
-					String queryParts[] = urlQuery.split("=");
-					if (queryParts.length > 1) {
-						if (Integer.parseInt(queryParts[1]) < 100) {
-							batchSize = Integer.parseInt(queryParts[1]);
-						}
+
+		if (urlQuery != null) {
+			if (urlQuery.contains("maxBatchSize")) {
+				String queryParts[] = urlQuery.split("=");
+				if (queryParts.length > 1) {
+					if (Integer.parseInt(queryParts[1]) > 100) {
+						// batchSize exceeds allowed limit, set it to 100
+						endpoint = modifyBatchSize(endpoint, "100");
 					}
 				}
-				
-			List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp( API_TYPE, executor.getSubResourcePath(), executor.getValidoperators());
-
-			log.info("Endpoints size: " + endpoints.size());
-
-			Collections.shuffle(endpoints);
-
-			int perOpCoLimit = batchSize / (endpoints.size());
-
-			log.info("Per OpCo limit :" + perOpCoLimit);
-
-			JSONArray results = new JSONArray();
-
-			int execCount = 0;
-			int forLoopCount=0;
-	        boolean retryFlag=true;
-	        FileReader fileReader = new FileReader();
-	        String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
-			Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
-	        Boolean retry = false;
-            retry =Boolean.valueOf(mediatorConfMap.get("retry_on_fail"));	       
-            Integer retryCount = Integer.valueOf(mediatorConfMap.get("retry_count"));
-	     
-			ArrayList<String> responses = new ArrayList<String>();
-			while ((results.length() < batchSize) &&  (retryFlag==true)) {
-	        	execCount++;
-	        	log.info("Default aEndpoint : "+endpoints.size());
-	        	for (int i = 0; i < endpoints.size(); i++) {
-	        		forLoopCount++;
-	        		log.info("Default forLoopCount : "+forLoopCount);
-	        		OperatorEndpoint aEndpoint = endpoints.remove(0);
-	        		log.info("Default aEndpoint : "+aEndpoint.getEndpointref().getAddress()); 
-	        		endpoints.add(aEndpoint);
-	        		String url = aEndpoint.getEndpointref().getAddress();
-	        		APICall ac = apiUtil.setBatchSize(url, body.toString(), reqType, perOpCoLimit);
-	
-	                 JSONObject obj = ac.getBody();
-	                 String retStr = null;
-	                 log.info("Retrieving messages of operator: " + aEndpoint.getOperator());
-	
-	                 if (context.isDoingGET()) {
-	                     log.info("Doing makeGetRequest");
-	                     retStr = executor.makeRetrieveSMSGetRequest(aEndpoint, ac.getUri(), null, true, context,false);
-	                 } else {
-	                     log.info("Doing makeRequest");
-	                     retStr = executor.makeRequest(aEndpoint, ac.getUri(), obj.toString(), true, context, false);
-	                 }
-	                 log.info("Retrieved messages of " + aEndpoint.getOperator() + " operator: " + retStr);
-	                 
-	                 if (retStr != null) {
-	                 
-		                 JSONArray resList = apiUtil.getResults(reqType, retStr);
-		                 if (resList != null) {
-		                	 for (int t = 0; t < resList.length(); t++) {
-	 	                         results.put(resList.get(t));
-		                     }
-		                     responses.add(retStr);
-		                 }
-		
-	                 }
-	
-	               if (results.length() >= batchSize) {
-	    				break;
-	    			}                 
 			}
-		        	
-	        	if (retry==false) {
-					retryFlag=false;
-					log.info("11 Final value of retryFlag :" + retryFlag);	        	}
-		        	
-	        	if (execCount>=retryCount) {
-					retryFlag=false;
-					log.info("22 Final value of retryFlag :" + retryFlag);
-				}
-		        	
-	            log.info("Final value of count :" + execCount);
-	            log.info("Results length of retrieve messages: " + results.length());
-				 
-			}
+		} else {
+			// no batchSize found, set it to 10
+			endpoint = setBatchSize(endpoint, "10");
+		}
 
-			JSONObject paylodObject = apiUtil.generateResponse(context,reqType, results, responses, requestid);
-			String strjsonBody = paylodObject.toString();
+		FileReader fileReader = new FileReader();
+		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
+		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
 
-			
-			/*add resourceURL to the southbound response*/
-			SouthboundRetrieveResponse sbRetrieveResponse = gson.fromJson(strjsonBody, SouthboundRetrieveResponse.class);
-			 if (sbRetrieveResponse!= null && sbRetrieveResponse.getInboundSMSMessageList() != null) {
-	            String resourceURL = sbRetrieveResponse.getInboundSMSMessageList().getResourceURL();            
-	            InboundSMSMessage[] inboundSMSMessageResponses = sbRetrieveResponse.getInboundSMSMessageList().getInboundSMSMessage();
-	 
-	        for (int i = 0; i < inboundSMSMessageResponses.length; i++) {   
-		                String messageId = inboundSMSMessageResponses[i].getMessageId();                
-		                 inboundSMSMessageResponses[i].setResourceURL(resourceURL + "/" + messageId);
-		             }
-		             sbRetrieveResponse.getInboundSMSMessageList().setInboundSMSMessage(inboundSMSMessageResponses);
-		         }
-			 
-			executor.removeHeaders(context);
-			executor.setResponse(context, gson.toJson(sbRetrieveResponse));
-			// routeToEndPoint(context, sendResponse, "", "", strjsonBody);
+		// use the first endpoint only
+		HandlerUtils.setAuthorizationHeader(context, executor, endpoints.get(0));
+		HandlerUtils.setEndpointProperty(context, endpoint);
+		HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
+		context.setProperty("GATEWAY_RESOURCE_URL_PREFIX", mediatorConfMap.get("hubGateway"));
+		context.setProperty("REQUEST_ID", requestid);
 
-			((Axis2MessageContext) context).getAxis2MessageContext().setProperty("messageType", "application/json");
-			
-		} 
 		return true;
+	}
+
+	/**
+	 * modifies the 'batchSize' query parameter
+	 *
+	 * @param endpoint endpoint url
+	 * @param batchSize batch size to set
+     * @return endpoint with batchSize query parameter modified
+     */
+	private static String modifyBatchSize(String endpoint, String batchSize) {
+
+		String regex = "(?i)(?<=maxBatchSize)=([^&#]*)";
+		Pattern p = Pattern.compile(regex);
+		Matcher m = p.matcher(endpoint);
+
+		if (m.find()) {
+			return m.replaceAll("=" + batchSize);
+		} else {
+			return setBatchSize(endpoint, batchSize);
+		}
+	}
+
+	/**
+	 * set the 'batchSize' query parameter
+	 *
+	 * @param endpoint endpoint url
+	 * @param batchSize batch size to set
+	 * @return endpoint with batchSize query parameter appended
+     */
+	private static String setBatchSize (String endpoint, String batchSize) {
+		return endpoint + ((endpoint.indexOf("?") == -1 ? "?" : "&") + "maxBatchSize=" + batchSize);
 	}
 
 	/*
