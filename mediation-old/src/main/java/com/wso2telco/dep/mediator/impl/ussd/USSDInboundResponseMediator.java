@@ -50,7 +50,8 @@ public class USSDInboundResponseMediator extends AbstractMediator {
         String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
                 + FileNames.MEDIATOR_CONF_FILE.getFileName();
         Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
-        String subscriptionId = "1";
+        String requestPath = (String) messageContext.getProperty("REST_SUB_REQUEST_PATH");
+        String subscriptionId = requestPath.substring(requestPath.lastIndexOf("/") + 1);
         ussdService = new USSDService();
         try {
             List<String> ussdSPDetails = ussdService.getUSSDNotify(Integer.valueOf(subscriptionId));
