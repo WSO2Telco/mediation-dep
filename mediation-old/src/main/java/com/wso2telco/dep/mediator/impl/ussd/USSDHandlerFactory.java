@@ -54,9 +54,9 @@ public class USSDHandlerFactory {
 			} else {
 				try {
                     if(!executor.getJsonBody().getJSONObject("subscription").isNull("shortCodes")){
-                        handler = new NBUSSDSubscriptionHandler(executor);
+                        handler = new NorthBoundUSSDSubscriptionHandler(executor);
                     } else {
-                        handler = new MOUSSDSubscribeHandler(executor);
+                        handler = new SouthBoundMOUSSDSubscribeHandler(executor);
                     }
 
                 } catch (Exception e) {
