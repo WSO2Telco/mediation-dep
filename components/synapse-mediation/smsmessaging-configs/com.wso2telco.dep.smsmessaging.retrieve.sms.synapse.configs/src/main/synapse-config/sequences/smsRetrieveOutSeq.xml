@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="smsRetrieveOutSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+    <script language="js"><![CDATA[var payload= mc.getPayloadJSON();
+    	var resourceUrlPrefix = mc.getProperty('GATEWAY_RESOURCE_URL_PREFIX').trim();
+    	var requestId = mc.getProperty('REQUEST_ID').trim();
+    	
+    	var messages = payload.inboundSMSMessageList.inboundSMSMessage;
+        for (var i in messages) {
+        	var messageId = messages[i].messageId;
+        	var registrationId = messages[i].destinationAddress;
+            messages[i].resourceURL = resourceUrlPrefix + '/' + registrationId + '/' + requestId + '/' + messageId;
+        }
+
+        payload.inboundSMSMessageList.resourceURL = resourceUrlPrefix + '/' + registrationId + '/' + requestId;
+        mc.setPayloadJSON(payload);]]></script>
+</sequence>

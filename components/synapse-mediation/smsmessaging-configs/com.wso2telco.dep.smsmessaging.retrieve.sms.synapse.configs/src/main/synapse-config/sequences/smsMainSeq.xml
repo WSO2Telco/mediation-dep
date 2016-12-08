@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="smsMainSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+    <sequence key="apiPropertySeq"/>
+    <class description="HandlerMediatorClass" name="com.wso2telco.dep.mediator.HandlerMediator">
+        <property name="executorClass" value="com.wso2telco.dep.mediator.impl.smsmessaging.SMSExecutor"/>
+    </class>
+    <switch source="get-property('HANDLER')">
+        <case regex="RetrieveSMSHandler">
+            <sequence key="smsRetrieveSeq"/>
+        </case>
+        <default/>
+    </switch>
+</sequence>
