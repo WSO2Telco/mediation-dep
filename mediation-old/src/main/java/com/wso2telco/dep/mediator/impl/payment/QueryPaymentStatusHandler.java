@@ -25,6 +25,7 @@ import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.PaymentService;
 import com.wso2telco.dep.mediator.util.APIType;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.payment.ValidateQueryPaymentStatus;
@@ -60,7 +61,7 @@ public class QueryPaymentStatusHandler implements PaymentHandler {
 		String[] params = executor.getSubResourcePath().split("/");
 		context.setProperty(MSISDNConstants.USER_MSISDN, params[1].substring(5));
 		OperatorEndpoint endpoint = null;
-		if (ValidatorUtils.getValidatorForSubscription(context).validate(
+		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(
 				context)) {
 			OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
 			searchDTO.setApi(APIType.PAYMENT);
@@ -80,33 +81,9 @@ public class QueryPaymentStatusHandler implements PaymentHandler {
 		String sending_add = endpoint.getEndpointref().getAddress();
 
 		// set information to the message context, to be used in the sequence
-		context.setProperty("HANDLER", this.getClass().getSimpleName());
-		context.setProperty("ENDPOINT", sending_add);
-		// set Authorization header
-		org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) context)
-				.getAxis2MessageContext();
-		Object headers = axis2MessageContext
-				.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-		if (headers != null && headers instanceof Map) {
-			Map headersMap = (Map) headers;
-			headersMap.put("Authorization", "Bearer " + executor.getAccessToken(endpoint
-					.getOperator(), context));
-		}
-
-//		String responseStr = executor.makeGetRequest(endpoint, sending_add,	executor.getSubResourcePath(), true, context, false);
-//
-//		executor.removeHeaders(context);
-//
-//		if (responseStr == null || responseStr.equals("") || responseStr.isEmpty()) {
-//			throw new CustomException("SVC1000", "", new String[] { null });
-//		} else {
-//			executor.handlePluginException(responseStr);
-//		}
-//
-//		// set response re-applied
-//		executor.setResponse(context, responseStr);
-//		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("messageType", "application/json");
-//		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("ContentType", "application/json");
+		HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
+		HandlerUtils.setEndpointProperty(context, sending_add);
+		HandlerUtils.setAuthorizationHeader(context, executor, endpoint);
 
 		return true;
 	}

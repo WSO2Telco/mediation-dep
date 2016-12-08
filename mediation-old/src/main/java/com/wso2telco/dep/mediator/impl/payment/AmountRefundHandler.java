@@ -28,6 +28,7 @@ import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.PaymentService;
 import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.payment.ValidateRefund;
@@ -169,11 +170,13 @@ public class AmountRefundHandler implements PaymentHandler {
 		List<String> validCategoris = dbservice.getValidPayCategories();
 		PaymentUtil.validatePaymentCategory(chargingdmeta, validCategoris);
 
-		context.setProperty("HANDLER", this.getClass().getSimpleName());
-		context.setProperty("ENDPOINT", sending_add);
-		context.setProperty("hubGateway", mediatorConfMap.get("hubGateway"));
-		context.setProperty("requestResourceUrl", executor.getResourceUrl());
-		context.setProperty("requestID", requestid);
+        // set information to the message context, to be used in the sequence
+        HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
+        HandlerUtils.setEndpointProperty(context, sending_add);
+        HandlerUtils.setGatewayHost(context);
+        HandlerUtils.setAuthorizationHeader(context, executor, endpoint);
+        context.setProperty("requestResourceUrl", executor.getResourceUrl());
+        context.setProperty("requestID", requestid);
 
 		return true;
 	}
