@@ -118,7 +118,16 @@ public class RetrieveSMSHandler implements SMSHandler {
 		HandlerUtils.setAuthorizationHeader(context, executor, endpoints.get(0));
 		HandlerUtils.setEndpointProperty(context, endpoint);
 		HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
-		context.setProperty("GATEWAY_RESOURCE_URL_PREFIX", mediatorConfMap.get("hubGateway"));
+		// if specific resource URL prefix for retrieve SMS is set in the mediator-conf.properties file, use that
+		String smsRetrieveResourceUrlPrefix = mediatorConfMap.get("smsRetrieveResourceUrlPrefix");
+		if (smsRetrieveResourceUrlPrefix != null && !smsRetrieveResourceUrlPrefix.isEmpty()) {
+			smsRetrieveResourceUrlPrefix = smsRetrieveResourceUrlPrefix.endsWith("/") ?
+					smsRetrieveResourceUrlPrefix.substring(0, smsRetrieveResourceUrlPrefix.length() - 1) :  smsRetrieveResourceUrlPrefix;
+			context.setProperty("SMS_RETRIEVE_GATEWAY_RESOURCE_URL_PREFIX", smsRetrieveResourceUrlPrefix);
+		} else {
+			// if specific resource URL prefix for retrieve SMS is not found, use generic hub ur prefix
+			context.setProperty("GATEWAY_RESOURCE_URL_PREFIX", mediatorConfMap.get("hubGateway"));
+		}
 		context.setProperty("REQUEST_ID", requestid);
 
 		return true;

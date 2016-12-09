@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sequence name="smsRetrieveOutSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
     <script language="js"><![CDATA[var payload= mc.getPayloadJSON();
-    	var resourceUrlPrefix = mc.getProperty('GATEWAY_RESOURCE_URL_PREFIX').trim();
+    	var gatewayResourceUrlPrefix = mc.getProperty('GATEWAY_RESOURCE_URL_PREFIX');
+    	var smsRetrieveResourceUrlPrefix = mc.getProperty('SMS_RETRIEVE_GATEWAY_RESOURCE_URL_PREFIX');
+    	var resourceUrlPrefix;
+    	if (smsRetrieveResourceUrlPrefix) {
+    	    resourceUrlPrefix = smsRetrieveResourceUrlPrefix.trim();
+    	} else if (gatewayResourceUrlPrefix) {
+    	    resourceUrlPrefix = gatewayResourceUrlPrefix.trim() + mc.getProperty('CONTEXT') + '/inbound/registrations'
+    	} else {
+    	    throw "ERROR - Unable to find valid value for SMS_RETRIEVE_GATEWAY_RESOURCE_URL_PREFIX and GATEWAY_RESOURCE_URL_PREFIX from message ctxt";
+    	}
     	var requestId = mc.getProperty('REQUEST_ID').trim();
     	
     	var messages = payload.inboundSMSMessageList.inboundSMSMessage;
