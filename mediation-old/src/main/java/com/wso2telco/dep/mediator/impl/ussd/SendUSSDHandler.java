@@ -116,16 +116,11 @@ public class SendUSSDHandler implements USSDHandler {
 		//Integer subscriptionId = ussdService.ussdRequestEntry(notifyUrl ,consumerKey);
 
 		OperatorEndpoint endpoint = null;
-		String validatorClassName = (String) context.getProperty("API_ID");
-		if(validatorClassName != null) {
-			MifeValidator validator = (MifeValidator) Class.forName(validatorClassName).newInstance();
-			//if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
-			if (validator.validate(context)) {
-				endpoint = occi.getAPIEndpointsByMSISDN(address.replace("tel:", ""), API_TYPE,
-						executor.getSubResourcePath(), false, executor.getValidoperators());
-			}
+		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
+			endpoint = occi.getAPIEndpointsByMSISDN(address.replace("tel:", ""), API_TYPE,
+					executor.getSubResourcePath(), false, executor.getValidoperators());
 		}
-        //operatorId=ussdService.getOperatorIdByOperator(endpoint.getOperator());
+		//operatorId=ussdService.getOperatorIdByOperator(endpoint.getOperator());
         
         Integer subscriptionId = ussdService.ussdRequestEntry(notifyUrl ,consumerKey,endpoint.getOperator(),userId);
         log.info("created subscriptionId  -  " + subscriptionId + " Request ID: " + UID.getRequestID(context));

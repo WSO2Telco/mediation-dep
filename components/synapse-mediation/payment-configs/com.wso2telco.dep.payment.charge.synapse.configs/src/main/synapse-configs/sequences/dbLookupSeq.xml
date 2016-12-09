@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <sequence name="dbLookupSeq" onError="userInfoSeq" xmlns="http://ws.apache.org/ns/synapse">
-    <!--<log level="custom">
-        <property expression="get-property('auth-header')"
-                  name="auth-header!!!!!!!!!!!!!1" xmlns:ns="http://org.apache.synapse/xsd"/>
-    </log>
-    <log level="custom">
-        <property expression="get-property('jwt-header')"
-                  name="jwt-header!!!!!!!!!!!!!" xmlns:ns="http://org.apache.synapse/xsd"/>
-    </log>-->
     <property expression="get-property('endUserId')"
               name="uri.var.userAddress" scope="default" type="STRING" xmlns:ns="http://org.apache.synapse/xsd"/>
     <dblookup>

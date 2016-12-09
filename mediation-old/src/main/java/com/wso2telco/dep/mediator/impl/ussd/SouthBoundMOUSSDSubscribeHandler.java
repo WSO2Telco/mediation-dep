@@ -44,13 +44,13 @@ import java.util.Map;
 // TODO: Auto-generated Javadoc
 
 /**
- * The Class MOUSSDSubscribeHandler.
+ * The Class SouthBoundMOUSSDSubscribeHandler.
  */
 
-public class MOUSSDSubscribeHandler implements USSDHandler {
+public class SouthBoundMOUSSDSubscribeHandler implements USSDHandler {
 
 	/** The log. */
-	private Log log = LogFactory.getLog(MOUSSDSubscribeHandler.class);
+	private Log log = LogFactory.getLog(SouthBoundMOUSSDSubscribeHandler.class);
 
 	/** The Constant API_TYPE. */
 	private static final String API_TYPE = "ussd";
@@ -72,7 +72,7 @@ public class MOUSSDSubscribeHandler implements USSDHandler {
 	 * @param ussdExecutor
 	 *            the ussd executor
 	 */
-	public MOUSSDSubscribeHandler(USSDExecutor ussdExecutor) {
+	public SouthBoundMOUSSDSubscribeHandler(USSDExecutor ussdExecutor) {
 
 		occi = new OriginatingCountryCalculatorIDD();
 		this.executor = ussdExecutor;

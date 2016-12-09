@@ -51,15 +51,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class NBUSSDSubscriptionHandler implements USSDHandler {
+public class NorthBoundUSSDSubscriptionHandler implements USSDHandler {
 	
-	private Log log = LogFactory.getLog(NBUSSDSubscriptionHandler.class);
+	private Log log = LogFactory.getLog(NorthBoundUSSDSubscriptionHandler.class);
     private static final String API_TYPE ="ussd";
     private OriginatingCountryCalculatorIDD occi;
     private USSDExecutor executor;
     private USSDService ussdService;
 
-    public NBUSSDSubscriptionHandler(USSDExecutor ussdExecutor){
+    public NorthBoundUSSDSubscriptionHandler(USSDExecutor ussdExecutor){
 
         occi = new OriginatingCountryCalculatorIDD();
         this.executor = ussdExecutor;

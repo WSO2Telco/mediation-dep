@@ -17,10 +17,6 @@
           name="Authorization" scope="transport" xmlns:ns="http://org.apache.synapse/xsd"/>
   <header expression="get-property('jwt-header')"
           name="x-jwt-assertion" scope="transport" xmlns:ns="http://org.apache.synapse/xsd"/>
-  <!--<log level="full">
-    <property name="action" value="sending!!!!!!!!!!!!!!!!"/>
-    <property name="ep" value="get-property('TO')"/>
-  </log>-->
   <send>
     <endpoint key="defaultPaymentEndpoint"/>
   </send>
