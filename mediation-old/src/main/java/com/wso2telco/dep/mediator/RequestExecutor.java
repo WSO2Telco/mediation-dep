@@ -402,17 +402,18 @@ public abstract class RequestExecutor {
 	   }
 		}
 
-        try {// check for charge operation. if true append ESB url
-            JSONObject jsonObj = new JSONObject(requestStr);
-            String transactionOperationStatus = jsonObj.getJSONObject("amountTransaction")
-                    .getString("transactionOperationStatus");
-            String status = "Charged";
-            if (status.equals(transactionOperationStatus)) {
-                url = modifyEndpoint(url, operatorendpoint.getOperator(), messageContext);
-            }
-        } catch (JSONException exception) {
-            log.error("Error parsing json object from request.", exception);
-        }
+		//Not needed anymore since mediation of the Payment API happens through synapse
+//        try {// check for charge operation. if true append ESB url
+//            JSONObject jsonObj = new JSONObject(requestStr);
+//            String transactionOperationStatus = jsonObj.getJSONObject("amountTransaction")
+//                    .getString("transactionOperationStatus");
+//            String status = "Charged";
+//            if (status.equals(transactionOperationStatus)) {
+//                url = modifyEndpoint(url, operatorendpoint.getOperator(), messageContext);
+//            }
+//        } catch (JSONException exception) {
+//            log.error("Error parsing json object from request.", exception);
+//        }
 
 		ICallresponse icallresponse = null;
 		String retStr = "";

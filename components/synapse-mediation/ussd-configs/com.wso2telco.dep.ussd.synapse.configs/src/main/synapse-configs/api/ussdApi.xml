@@ -4,5 +4,10 @@
         <inSequence>
             <sequence key="ussdMainSeq"/>
         </inSequence>
+        <outSequence>
+            <sequence key="ussdMainOutSeq"/>
+            <send/>
+        </outSequence>
+        <faultSequence/>
     </resource>
 </api>

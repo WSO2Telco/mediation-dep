@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="ussdMOSubscribeSeq" xmlns="http://ws.apache.org/ns/synapse">
+    <property action="remove" name="REST_URL_POSTFIX" scope="axis2"/>
+    <header expression="get-property('ENDPOINT')" name="To"
+            scope="default" xmlns:ns="http://org.apache.synapse/xsd"/>
+    <property expression="json-eval($.subscription.callbackReference.notifyURL)"
+            name="originalNotifyURL" xmlns:ns="http://org.apache.synapse/xsd"/>
+    <script language="js"><![CDATA[var payload= mc.getPayloadJSON();
+    	payload.subscription.callbackReference.notifyURL = mc.getProperty('subsEndPoint');
+ 		mc.setPayloadJSON(payload);]]></script>
+    <send>
+        <endpoint key="defaultUSSDEndpoint"/>
+    </send>
+</sequence>

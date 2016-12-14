@@ -275,7 +275,6 @@ public class USSDDAO {
 			DbUtils.closeAllConnections(insertStatement, con, null);
 		}
 	}
-	
 	/**
 	 * 
 	 * @param moSubscriptionId

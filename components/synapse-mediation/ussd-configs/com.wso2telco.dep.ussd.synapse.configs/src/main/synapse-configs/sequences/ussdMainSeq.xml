@@ -11,6 +11,9 @@
         <case regex="USSDInboundHandler">
             <sequence key="ussdInboundSeq"/>
         </case>
+        <case regex="SouthBoundMOUSSDSubscribeHandler">
+            <sequence key="ussdMOSubscribeSeq"/>
+        </case>
         <default>
             <!-- TODO:handle error -->
         </default>
