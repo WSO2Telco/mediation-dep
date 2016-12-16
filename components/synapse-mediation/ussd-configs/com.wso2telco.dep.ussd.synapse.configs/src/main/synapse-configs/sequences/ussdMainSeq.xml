@@ -14,6 +14,9 @@
         <case regex="SouthBoundMOUSSDSubscribeHandler">
             <sequence key="ussdMOSubscribeSeq"/>
         </case>
+        <case regex="StopMOUSSDSubscriptionHandler">
+            <sequence key="ussdMOStopSubscriptionSeq"/>
+        </case>
         <default>
             <!-- TODO:handle error -->
         </default>

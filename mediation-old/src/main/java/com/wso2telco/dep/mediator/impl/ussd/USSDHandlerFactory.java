@@ -50,7 +50,7 @@ public class USSDHandlerFactory {
 
 		if (ResourceURL.toLowerCase().contains(moUssdSubsciption.toLowerCase())) {
 			if ((!lastWord.equals(subscriptions))) {
-				handler = new StopMOUSSDSubscriptionHandler(executor);
+				handler = new SouthBoundStopMOUSSDSubscriptionHandler(executor);
 			} else {
 				try {
                     if(!executor.getJsonBody().getJSONObject("subscription").isNull("shortCodes")){
