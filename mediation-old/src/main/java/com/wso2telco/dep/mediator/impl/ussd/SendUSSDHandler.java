@@ -127,9 +127,7 @@ public class SendUSSDHandler implements USSDHandler {
 		
 		String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint") + subscriptionId;
 		log.info("Subsendpoint - " + subsEndpoint + " Request ID: " + UID.getRequestID(context));
-
-		jsonBody.getJSONObject("outboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL",
-				subsEndpoint);
+		context.setProperty("subsEndPoint", subsEndpoint);
 
 		context.setProperty(MSISDNConstants.USER_MSISDN, msisdn);
 		/*OperatorEndpoint endpoint = null;
@@ -155,15 +153,6 @@ public class SendUSSDHandler implements USSDHandler {
 		HandlerUtils.setHandlerProperty(context,this.getClass().getSimpleName());
 		HandlerUtils.setEndpointProperty(context,sending_add);
 		HandlerUtils.setAuthorizationHeader(context,executor,endpoint);
-
-		/*String responseStr = executor.makeRequest(endpoint, sending_add, jsonBody.toString(), true, context,false);
-		executor.handlePluginException(responseStr);
-		executor.removeHeaders(context);
-		executor.setResponse(context, responseStr);*/
-		
-		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("messageType", "application/json");
-		String transformedJson = jsonBody.toString();
-		JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), transformedJson, true, true);
 
 		return true;
 	}
