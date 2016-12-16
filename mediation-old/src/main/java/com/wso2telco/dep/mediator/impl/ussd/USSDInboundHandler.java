@@ -100,15 +100,16 @@ public class USSDInboundHandler implements USSDHandler {
 		
 		
 		List<String> ussdSPDetails = ussdService.getUSSDNotify(Integer.valueOf(subscriptionId));
-		log.info("notifyUrl found -  " + ussdSPDetails.get(0) + " Request ID: " + UID.getRequestID(context));
+		//log.info("notifyUrl found -  " + ussdSPDetails.get(0) + " Request ID: " + UID.getRequestID(context));
 		//log.info("consumerKey found - " + ussdSPDetails.get(1) + " Request ID: " + UID.getRequestID(context));
 		
 		
 
 		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
+		context.setProperty("spEndpoint", ussdSPDetails.get(0));
 
 		JSONObject jsonBody = executor.getJsonBody();
-		jsonBody.getJSONObject("inboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL", ussdSPDetails.get(0));
+		//jsonBody.getJSONObject("inboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL", ussdSPDetails.get(0));
 		
 		String msisdn = jsonBody.getJSONObject("inboundUSSDMessageRequest").getString("address").substring(5);
 		context.setProperty(MediatorConstants.USER_MSISDN, msisdn);
@@ -128,12 +129,6 @@ public class USSDInboundHandler implements USSDHandler {
         HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
         HandlerUtils.setEndpointProperty(context, sending_add);
         HandlerUtils.setAuthorizationHeader(context, executor, operatorendpoint);
-
-        ((Axis2MessageContext) context).getAxis2MessageContext().setProperty("messageType", "application/json");
-        String transformedJson = jsonBody.toString();
-        JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), transformedJson, true, true);
-
-        
 
 		return true;
 	}

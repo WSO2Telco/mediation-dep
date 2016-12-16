@@ -63,43 +63,26 @@ public class USSDInboundResponseMediator extends AbstractMediator {
                 throw new CustomException("POL0299", "", new String[]{"Error invoking Endpoint"});
             }
             String action = jsonBody.getJSONObject("outboundUSSDMessageRequest").getString("ussdAction");
+            String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint") + subscriptionId;
+            messageContext.setProperty("subsEndPoint", subsEndpoint);
 
             if (action.equalsIgnoreCase("mtcont")) {
-
-                String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint") + subscriptionId;
                 log.info("Subsendpoint - " + subsEndpoint + " Request ID: " + UID.getRequestID(messageContext));
-                jsonBody.getJSONObject("outboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL",
-                        subsEndpoint);
-
             }
 
             if (action.equalsIgnoreCase("mtfin")) {
-                String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint") + subscriptionId;
                 log.info("Subsendpoint - " + subsEndpoint + " Request ID: " + UID.getRequestID(messageContext));
-                jsonBody.getJSONObject("outboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL",
-                        subsEndpoint);
-
                 boolean deleted = ussdService.ussdEntryDelete(Integer.valueOf(subscriptionId));
                 log.info("Entry deleted " + deleted + " Request ID: " + UID.getRequestID(messageContext));
 
             }
 
             if (action.equalsIgnoreCase("mocont")) {
-
-                String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint") + subscriptionId;
                 log.info("Subsendpoint - " + subsEndpoint + " Request ID: " + UID.getRequestID(messageContext));
-                jsonBody.getJSONObject("outboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL", subsEndpoint);
-
             }
 
             if (action.equalsIgnoreCase("mofin")) {
-
-                String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint") + subscriptionId;
                 log.info("Subsendpoint - " + subsEndpoint + " Request ID: " + UID.getRequestID(messageContext));
-                jsonBody.getJSONObject("outboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL", subsEndpoint);
-
-                //log.info("Entry deleted after session expired" + deleted);
-
             }
 
             OperatorEndpoint endpoint = new OperatorEndpoint(new EndpointReference(ussdSPDetails.get(0)), null);
@@ -117,10 +100,10 @@ public class USSDInboundResponseMediator extends AbstractMediator {
             ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty("messageType", "application/json");
             ((Axis2MessageContext) messageContext).getAxis2MessageContext().setProperty("ContentType", "application/json");
             //executor.setResponse(context,jsonBody.toString());
-            String transformedJson = jsonBody.toString();
+            /*String transformedJson = jsonBody.toString();
             JsonUtil.newJsonPayload(
                     ((Axis2MessageContext) messageContext).getAxis2MessageContext(),
-                    transformedJson, true, true);
+                    transformedJson, true, true);*/
 
             //System.out.println("Transformed body:\n" + transformedJson);
 
