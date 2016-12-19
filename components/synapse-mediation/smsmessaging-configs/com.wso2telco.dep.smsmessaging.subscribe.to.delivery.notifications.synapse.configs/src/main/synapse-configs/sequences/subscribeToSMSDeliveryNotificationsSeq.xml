@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="subscribeToSMSDeliveryNotificationsSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+    <property action="remove" name="REST_URL_POSTFIX" scope="axis2"/>
+    <header expression="get-property('ENDPOINT')" name="To" scope="default"/>
+    <sequence key="modifySMSDeliverySubscriptionRequestPayloadSeq"/>
+    <call>
+        <endpoint key="defaultSMSEndpoint"/>
+    </call>
+    <switch source="$axis2:HTTP_SC">
+        <case regex="(200|201)">
+            <sequence key="storeSMSDeliverySubscriptionSeq"/>
+            <sequence key="modifySMSDeliverySubscriptionResponsePayloadSeq"/>
+        </case>
+        <default/>
+    </switch>
+    <respond/>
+</sequence>

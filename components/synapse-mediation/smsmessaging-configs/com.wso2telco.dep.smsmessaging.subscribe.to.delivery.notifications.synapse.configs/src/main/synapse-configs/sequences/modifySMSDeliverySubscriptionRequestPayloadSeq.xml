@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="modifySMSDeliverySubscriptionRequestPayloadSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+    <property expression="json-eval($.deliveryReceiptSubscription.callbackReference.notifyURL)" name="originalNotifyURL"
+              scope="default" type="STRING"/>
+    <property expression="json-eval($.deliveryReceiptSubscription.clientCorrelator)" name="originalClientCorrelator"
+              scope="default" type="STRING"/>
+    <script language="js"><![CDATA[var payload= mc.getPayloadJSON();
+    	payload.deliveryReceiptSubscription.callbackReference.notifyURL = mc.getProperty('notifyURL');
+    	payload.deliveryReceiptSubscription.clientCorrelator = mc.getProperty('clientCorrelator');
+ 		mc.setPayloadJSON(payload);]]></script>
+</sequence>
