@@ -26,6 +26,7 @@ import com.wso2telco.dep.mediator.internal.ApiUtils;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.USSDService;
 import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.operatorservice.model.OperatorSubscriptionDTO;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -90,57 +91,43 @@ public class SouthBoundMOUSSDSubscribeHandler implements USSDHandler {
 	@Override
 	public boolean handle(MessageContext context) throws Exception {
 
-		FileReader fileReader = new FileReader();
-		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
-		              + FileNames.MEDIATOR_CONF_FILE.getFileName();
 
-		JSONObject jsonBody = executor.getJsonBody();
-		String notifyUrl = jsonBody.getJSONObject("subscription").getJSONObject("callbackReference").getString("notifyURL");
-		Gson gson = new GsonBuilder().serializeNulls().create();
-		
-		AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(context);
-        String consumerKey = "";
-        String userId="";
-        if (authContext != null) {
-            consumerKey = authContext.getConsumerKey();
-            userId=authContext.getUsername();
-        }
+        JSONObject jsonBody = executor.getJsonBody();
+        String notifyUrl = jsonBody.getJSONObject("subscription").getJSONObject("callbackReference").getString("notifyURL");
+
+        String consumerKey = (String) context.getProperty("CONSUMER_KEY");
+        String userId = (String) context.getProperty("USER_ID");
         String operatorId="";
-		Integer subscriptionId = ussdService.ussdRequestEntry(notifyUrl,consumerKey,operatorId,userId);
+        Integer subscriptionId = ussdService.ussdRequestEntry(notifyUrl,consumerKey,operatorId,userId);
 
-		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
+        FileReader fileReader = new FileReader();
+        String file =
+                CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
+        Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
+        String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint") + subscriptionId;
+        log.info("Subsendpoint - " + subsEndpoint);
 
-		String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint") + subscriptionId;
-		log.info("Subsendpoint - " +subsEndpoint);
+        List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp(API_TYPE, executor.getSubResourcePath(),
+                                                                     executor.getValidoperators());
+        if (endpoints.size() > 1) {
+            log.warn("Multiple operator endpoints found. Picking first endpoint: " + endpoints.get(0).getEndpointref()
+                    .getAddress() + " for operator: " + endpoints.get(0).getOperator() + " to send request.");
+        }
+        OperatorEndpoint endpoint = endpoints.get(0);
+        ussdService.updateOperatorIdBySubscriptionId(subscriptionId, endpoint.getOperator());
 
-		jsonBody.getJSONObject("subscription").getJSONObject("callbackReference").put("notifyURL", subsEndpoint);
+        // set information to the message context, to be used in the sequence
+        HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
+        HandlerUtils.setEndpointProperty(context, endpoint.getEndpointref().getAddress());
+        HandlerUtils.setGatewayHost(context);
+        HandlerUtils.setAuthorizationHeader(context, executor, endpoint);
+        context.setProperty("subsEndPoint", subsEndpoint);
+        context.setProperty("operator", endpoint.getOperator());
+        context.setProperty("requestResourceUrl", executor.getResourceUrl());
+        context.setProperty("subscriptionID", subscriptionId);
 
-		List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp(API_TYPE, executor.getSubResourcePath(),executor.getValidoperators());
-
-		String responseStr = "";
-		SubscriptionRequest subscription_request;
-		List<OperatorSubscriptionDTO> operatorsubses = new ArrayList<OperatorSubscriptionDTO>();
-		
-		for (OperatorEndpoint endpoint : endpoints) {
-			//operatorId=ussdService.getOperatorIdByOperator(endpoint.getOperator());
-			ussdService.updateOperatorIdBySubscriptionId(subscriptionId,endpoint.getOperator());
-			responseStr = executor.makeRequest(endpoint, endpoint.getEndpointref().getAddress(), jsonBody.toString(),true, context,false);
-			subscription_request = gson.fromJson(responseStr, SubscriptionRequest.class);
-			operatorsubses.add(new OperatorSubscriptionDTO(endpoint.getOperator(), subscription_request.getSubscription().getResourceURL()));		
-			executor.handlePluginException(responseStr);
-
-		}
-		JSONObject jObject  = new JSONObject(responseStr);
-		jObject.getJSONObject("subscription").getJSONObject("callbackReference").put("notifyURL",notifyUrl);
-		jObject.getJSONObject("subscription").put("resourceURL",mediatorConfMap.get("hubGateway")+executor.getResourceUrl()+"/"+subscriptionId);
-		ussdService.moUssdSubscriptionEntry(operatorsubses, subscriptionId);
-		executor.removeHeaders(context);
-		String responseobj =jObject.toString();
-		executor.setResponse(context, responseobj);
-		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("messageType", "application/json");
-
-		return true;
-	}
+        return true;
+    }
 
 	/*
 	 * (non-Javadoc)

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="ussdMainOutSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+    <switch source="get-property('HANDLER')">
+        <case regex="USSDInboundResponseHandler">
+            <class name="com.wso2telco.dep.mediator.impl.ussd.USSDInboundResponseMediator"/>
+            <sequence key="ussdInboundResponseSeq"/>
+        </case>
+        <case regex="SouthBoundMOUSSDSubscribeHandler">
+            <switch source="$axis2:HTTP_SC">
+                <case regex="(200|201)">
+                    <property
+                            expression="json-eval($.subscription.resourceUrl)" name="resourseURL"/>
+                    <dbreport>
+                        <connection>
+                            <pool>
+                                <dsName>jdbc/WSO2TELCO_DEP_DB</dsName>
+                            </pool>
+                        </connection>
+                        <statement>
+                            <sql><![CDATA[insert into mo_ussd_subscription(ussd_request_did, domainurl, operator) values(?, ?, ?);]]></sql>
+                            <parameter
+                                    expression="get-property('subscriptionID')" type="VARCHAR"/>
+                            <parameter
+                                    expression="get-property('resourseURL')" type="VARCHAR"/>
+                            <parameter
+                                    expression="get-property('operator')" type="VARCHAR"/>
+                        </statement>
+                    </dbreport>
+                    <sequence key="modifyUSSDResponseSeq"/>
+                </case>
+                <default/>
+            </switch>
+        </case>
+        <default>
+            <!-- TODO:handle error -->
+        </default>
+    </switch>
+
+</sequence>
