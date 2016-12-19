@@ -1,6 +1,6 @@
 /*
  *
- *  Copyright (c) 2014, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
+ *  Copyright (c) 2016, WSO2 Inc. (http://www.wso2.org) All Rights Reserved.
  *
  *  Licensed under the Apache License, Version 2.0 (the "License");
  *  you may not use this file except in compliance with the License.
@@ -20,6 +20,7 @@ package com.wso2telco.dep.mediator.impl.smsmessaging;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.ResponseHandler;
@@ -31,6 +32,8 @@ import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.SMSMessagingService;
 import com.wso2telco.dep.mediator.util.APIType;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
+import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.ValidateDeliveryStatus;
@@ -40,7 +43,9 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
+import org.wso2.carbon.utils.CarbonUtils;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -128,47 +133,37 @@ public class QuerySMSStatusHandler implements SMSHandler {
 	@Override
 	public boolean handle(MessageContext context) throws Exception {
 
+		String encodedSenderAddress = URLEncoder.encode(senderAddress, "UTF-8");
 		Map<String, String> requestIdMap = smsMessagingService.getSMSRequestIds(requestId, senderAddress);
-		Map<String, QuerySMSStatusResponse> responseMap = sendStatusQueries(context, requestIdMap, senderAddress);
-		if (Util.isAllNull(responseMap.values())) {
-			throw new CustomException("SVC0001", "", new String[] { "Could not complete querying SMS statuses" });
-		}
-		executor.removeHeaders(context);
-		String responsePayload = responseHandler.makeQuerySmsStatusResponse(context, senderAddress, requestId,
-				responseMap);
-		executor.setResponse(context, responsePayload);
+		sendStatusQueries(context, requestIdMap, encodedSenderAddress);
+		String resourceURL = getSendSMSResourceUrlFromFile(context,encodedSenderAddress) + "/requests/" + requestId +
+				"/deliveryInfos";
+		context.setProperty("QUERY_SMS_DELIVERY_STATUS_RESOURCE_URL",resourceURL);
 
 		return true;
 	}
 
-	/**
-	 * Send status queries.
-	 *
-	 * @param context
-	 *            the context
-	 * @param requestIdMap
-	 *            the request id map
-	 * @param senderAddr
-	 *            the sender addr
-	 * @return the map
-	 * @throws Exception
-	 *             the exception
-	 */
-	private Map<String, QuerySMSStatusResponse> sendStatusQueries(MessageContext context,
-			Map<String, String> requestIdMap, String senderAddr) throws Exception {
 
-		String resourcePathPrefix = "/outbound/" + URLEncoder.encode(senderAddr, "UTF-8") + "/requests/";
+	/**
+	 * Set the end point to send the delivery status query request
+	 * @param context synapse message context
+	 * @param requestIdMap requestidmap
+	 * @param encodedSenderAddress url encoded sende adress ex: tel:+7788 -> tel%3A%2B7788
+	 * @throws Exception
+	 */
+	private void sendStatusQueries(MessageContext context,Map<String, String> requestIdMap, String encodedSenderAddress)
+			throws Exception {
+
+		String resourcePathPrefix = "/outbound/" + encodedSenderAddress + "/requests/";
 		Map<String, QuerySMSStatusResponse> statusResponses = new HashMap<String, QuerySMSStatusResponse>();
 		for (Map.Entry<String, String> entry : requestIdMap.entrySet()) {
 			String address = entry.getKey();
 			String reqId = entry.getValue();
-
 			if (reqId != null) {
 				context.setProperty(MSISDNConstants.USER_MSISDN, address.substring(5));
 				OperatorEndpoint endpoint = null;
 				String resourcePath = resourcePathPrefix + reqId + "/deliveryInfos";
-				if (ValidatorUtils.getValidatorForSubscription(context)
-						.validate(context)) {
+				if(ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)){
 					OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
 					searchDTO.setApi(APIType.SMS);
 					searchDTO.setContext(context);
@@ -186,38 +181,38 @@ public class QuerySMSStatusHandler implements SMSHandler {
 				}
 				String sending_add = endpoint.getEndpointref().getAddress();
 				log.info("sending endpoint found: " + sending_add + " Request ID: " + UID.getRequestID(context));
+				HandlerUtils.setHandlerProperty(context,this.getClass().getSimpleName());
+				HandlerUtils.setEndpointProperty(context,sending_add);
+				HandlerUtils.setAuthorizationHeader(context,executor,endpoint);
 
-				String responseStr = executor.makeGetRequest(endpoint, sending_add, resourcePath, true, context,false);
-				QuerySMSStatusResponse statusResponse = parseJsonResponse(responseStr);
-				statusResponses.put(address, statusResponse);
-			} else {
-				statusResponses.put(address, null);
 			}
 		}
-		return statusResponses;
 	}
 
 	/**
-	 * Parses the json response.
-	 *
-	 * @param responseString
-	 *            the response string
-	 * @return the query sms status response
+	 * read the send sms repsorce url from configuration file
+	 * @param mc synapse message context
+	 * @param senderAddress url encoded sender adress
+	 * @return send sms resource url
 	 */
-	private QuerySMSStatusResponse parseJsonResponse(String responseString) {
+	private String getSendSMSResourceUrlFromFile(MessageContext mc, String senderAddress){
+		FileReader fileReader = new FileReader();
+		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
+				+ FileNames.MEDIATOR_CONF_FILE.getFileName();
 
-		Gson gson = new GsonBuilder().create();
-		QuerySMSStatusResponse response;
-		try {
-			response = gson.fromJson(responseString, QuerySMSStatusResponse.class);
-			if (response.getDeliveryInfoList() == null) {
-				return null;
-			}
-		} catch (JsonSyntaxException e) {
-			return null;
+		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
+
+		String resourceURL = mediatorConfMap.get("sendSMSResourceURL");
+		if (resourceURL != null && !resourceURL.isEmpty()) {
+			resourceURL = resourceURL.substring(1, resourceURL.length() - 1) + senderAddress;
+		} else {
+			resourceURL = (String) mc.getProperty("REST_URL_PREFIX") + mc.getProperty("REST_FULL_REQUEST_PATH");
+			resourceURL = resourceURL.substring(0, resourceURL.indexOf("/requests"));
 		}
-		return response;
+		return resourceURL;
+
 	}
+	
 
 	/**
 	 * Load request params.
