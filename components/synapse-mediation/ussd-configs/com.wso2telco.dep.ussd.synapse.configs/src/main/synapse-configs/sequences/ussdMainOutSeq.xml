@@ -31,6 +31,24 @@
                 <default/>
             </switch>
         </case>
+        <case regex="StopMOUSSDSubscriptionHandler">
+            <switch source="$axis2:HTTP_SC">
+                <case regex="(200|201|204)">
+                    <dbreport>
+                        <connection>
+                            <pool>
+                                <dsName>jdbc/WSO2TELCO_DEP_DB</dsName>
+                            </pool>
+                        </connection>
+                        <statement>
+                            <sql><![CDATA[delete from mo_ussd_subscription where ussd_request_did=?;]]></sql>
+                            <parameter expression="get-property('subscriptionId')" type="VARCHAR"/>
+                        </statement>
+                    </dbreport>
+                </case>
+                <default/>
+            </switch>
+        </case>
         <default>
             <!-- TODO:handle error -->
         </default>

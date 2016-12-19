@@ -22,27 +22,32 @@ import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.service.USSDService;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.operatorservice.model.OperatorSubscriptionDTO;
 import org.apache.axis2.addressing.EndpointReference;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.List;
 
-public class StopMOUSSDSubscriptionHandler implements USSDHandler  {
+public class SouthBoundStopMOUSSDSubscriptionHandler implements USSDHandler {
 
     private USSDExecutor executor;
     private USSDService dbService;
+    private Log log = LogFactory.getLog(SouthBoundStopMOUSSDSubscriptionHandler.class);
 
-    public StopMOUSSDSubscriptionHandler(USSDExecutor ussdExecutor) {
+    public SouthBoundStopMOUSSDSubscriptionHandler(USSDExecutor ussdExecutor) {
 
         this.executor = ussdExecutor;
         dbService = new USSDService();
     }
 
     @Override
-    public boolean validate(String httpMethod, String requestPath, JSONObject jsonBody, MessageContext context) throws Exception {
+    public boolean validate(String httpMethod, String requestPath, JSONObject jsonBody, MessageContext context)
+            throws Exception {
         return false;
     }
 
@@ -54,31 +59,27 @@ public class StopMOUSSDSubscriptionHandler implements USSDHandler  {
         return false;
 
     }
+
     private boolean deleteSubscriptions(MessageContext context) throws Exception {
         UID.getUniqueID(Type.DELRETSUB.getCode(), context, executor.getApplicationid());
 
         String requestPath = executor.getSubResourcePath();
-        String subid = requestPath.substring(requestPath.lastIndexOf("/") + 1);
+        Integer subscriptionId = Integer.parseInt((requestPath.substring(
+                requestPath.lastIndexOf("/") + 1)).replaceFirst("sub", ""));
+        List<OperatorSubscriptionDTO> domainsubs = (dbService.moUssdSubscriptionQuery(Integer.valueOf(subscriptionId)));
 
-
-        Integer operatorid = Integer.parseInt(subid.replaceFirst("sub", ""));
-        List<OperatorSubscriptionDTO> domainsubs = (dbService.moUssdSubscriptionQuery(Integer.valueOf(operatorid)));
-
-        String resStr = "";
-
-        if(!domainsubs.isEmpty() && domainsubs != null){
-            for (OperatorSubscriptionDTO subs : domainsubs) {
-                 executor.makeDeleteRequest(new OperatorEndpoint(new EndpointReference(subs.getDomain()), subs
-                        .getOperator()), subs.getDomain(), null, true, context, false);
+        if (!domainsubs.isEmpty() && domainsubs != null) {
+            OperatorSubscriptionDTO sub = domainsubs.get(0);
+            if (domainsubs.size() > 1) {
+                log.warn("Multiple operators found for sbscription. Picking first endpoint: " + sub.getDomain()
+                         + " for operator: " + sub.getOperator() + " to send delete request.");
             }
-            new USSDService().moUssdSubscriptionDelete(Integer.valueOf(operatorid));
+            HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
+            HandlerUtils.setEndpointProperty(context, sub.getDomain());
+            HandlerUtils.setAuthorizationHeader(context, executor,
+                    new OperatorEndpoint(new EndpointReference(sub.getDomain()), sub.getOperator()));
+            context.setProperty("subscriptionId", subscriptionId);
         }
-
-
-
-        ((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 204);
-        executor.removeHeaders(context);
-
         return true;
     }
 }

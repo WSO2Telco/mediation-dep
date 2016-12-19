@@ -158,15 +158,13 @@ public class AmountChargeHandler implements PaymentHandler {
 			log.debug("clientCorrelator not provided by application and hub/plugin generating clientCorrelator on behalf of application");
 			String hashString = apiUtils.getHashString(jsonBody.toString());
 			log.debug("hashString : " + hashString);
-			objAmountTransaction.put("clientCorrelator", hashString + "-"
-					+ requestid + ":" + hub_gateway_id + ":" + appId);
-		} else {
+            clientCorrelator = hashString + "-" + requestid + ":" + hub_gateway_id + ":" + appId;
+        } else {
 
 			log.debug("clientCorrelator provided by application");
-			objAmountTransaction.put("clientCorrelator", clientCorrelator + ":"
-					+ hub_gateway_id + ":" + appId);
-		}
-			 
+            clientCorrelator = clientCorrelator + ":" + hub_gateway_id + ":" + appId;
+        }
+
 		JSONObject chargingdmeta = objAmountTransaction.getJSONObject(
 				"paymentAmount").getJSONObject("chargingMetaData");
 
@@ -209,6 +207,7 @@ public class AmountChargeHandler implements PaymentHandler {
         context.setProperty("operator", endpoint.getOperator());
         context.setProperty("requestResourceUrl", requestResourceURL);
         context.setProperty("requestID", requestid);
+        context.setProperty("clientCorrelator", clientCorrelator);
 
         //Set the 'isUserInfoEnabled' property
         GroupEventUnmarshaller unmarshaller = GroupEventUnmarshaller.getInstance();
