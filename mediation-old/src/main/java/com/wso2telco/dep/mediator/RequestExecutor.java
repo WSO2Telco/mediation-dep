@@ -239,10 +239,14 @@ public abstract class RequestExecutor {
 */
 		try {
 
-			org.apache.axis2.context.MessageContext a2mc = ((Axis2MessageContext) context)
+/*			org.apache.axis2.context.MessageContext a2mc = ((Axis2MessageContext) context)
 					.getAxis2MessageContext();
 			RelayUtils.buildMessage(a2mc);
-			String jsonPayloadToString = JsonUtil.jsonPayloadToString(a2mc);
+			String jsonPayloadToString = JsonUtil.jsonPayloadToString(a2mc);*/
+
+
+			String jsonPayloadToString = JsonUtil.jsonPayloadToString(((Axis2MessageContext) context)
+					.getAxis2MessageContext());
 
 			jsonBody = new JSONObject(jsonPayloadToString);
 
