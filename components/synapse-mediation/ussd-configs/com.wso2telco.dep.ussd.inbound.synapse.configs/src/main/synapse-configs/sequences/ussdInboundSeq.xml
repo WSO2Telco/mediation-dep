@@ -2,6 +2,9 @@
 <sequence name="ussdInboundSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
     <property name="REST_URL_POSTFIX" action="remove" scope="axis2"/>
     <header expression="get-property('ENDPOINT')" name="To" scope="default"/>
+    <script language="js"><![CDATA[var payload= mc.getPayloadJSON();
+    	payload.inboundUSSDMessageRequest.responseRequest.notifyURL = mc.getProperty('spEndpoint');
+ 		mc.setPayloadJSON(payload);]]></script>
     <call>
         <endpoint key="ussdInboundSeqEndpoint"/>
     </call>
