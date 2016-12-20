@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="smsQueryDeliveryStatusResponseSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+    <script language="js"><![CDATA[var payload = mc.getPayloadJSON();
+payload.deliveryInfoList.resourceURL = mc.getProperty('QUERY_SMS_DELIVERY_STATUS_RESOURCE_URL');
+mc.setPayloadJSON(payload);]]></script>
+</sequence>
