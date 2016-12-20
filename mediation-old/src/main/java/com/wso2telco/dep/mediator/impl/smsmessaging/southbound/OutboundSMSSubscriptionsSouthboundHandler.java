@@ -34,6 +34,7 @@ import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.ValidateCancelSubscription;
+import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.ValidateOutboundSubscription;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.southbound.ValidateSBOutboundSubscription;
 import com.wso2telco.dep.operatorservice.model.OperatorSubscriptionDTO;
 import org.apache.axis2.AxisFault;
@@ -119,7 +120,7 @@ public class OutboundSMSSubscriptionsSouthboundHandler implements SMSHandler {
 		// context.setProperty(DataPublisherConstants.OPERATION_TYPE, 205);
 		IServiceValidate validator;
 		if (httpMethod.equalsIgnoreCase("POST")) {
-			validator = new ValidateSBOutboundSubscription();
+			validator = new ValidateOutboundSubscription();
 			validator.validateUrl(requestPath);
 			validator.validate(jsonBody.toString());
 			return true;
@@ -188,7 +189,9 @@ public class OutboundSMSSubscriptionsSouthboundHandler implements SMSHandler {
             }
             OperatorEndpoint endpoint = endpoints.get(0);
             String url = endpoint.getEndpointref().getAddress();
-            //			url = url.replace("/subscriptions", "/subscriptionsMultipleOperators");
+            if (!jsondstaddr.isNull("operatorCode")) {
+                url = url.replace("/subscriptions", "/subscriptionsMultipleOperators");
+            }
             log.debug("Delivery notification adaptor request url of " + endpoint.getOperator() + " operator: " + url);
 
             HandlerUtils.setEndpointProperty(context, url);
