@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="sendSmsOutSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+    <script language="js"><![CDATA[var payload= mc.getPayloadJSON();
+    	var smsRetrieveResourceUrlPrefix = mc.getProperty('SEND_SMS_RESOURCE_URL_PREFIX').trim();
+    	var requestId = mc.getProperty('REQUEST_ID').trim();
+		var encodedSenderAddress = mc.getProperty('ENCODED_SENDER_ADDRESS').trim();
+		
+		// get the request id sent from operator side
+		var responseResourceUrl = payload.outboundSMSMessageRequest.resourceURL;
+		var operatorRequestId = responseResourceUrl.substring(responseResourceUrl.lastIndexOf('/') + 1);
+		if (!operatorRequestId) {
+			throw "ERROR - Unable extract operator request id (plugin_requestid) from response";
+		}
+		// set request id sent from operator side to message context
+		mc.setProperty('SEND_SMS_OPERATOR_REQUEST_ID', operatorRequestId); 
+		
+		var resourceUrl = smsRetrieveResourceUrlPrefix + '/' + encodedSenderAddress + '/requests/' + requestId;
+		payload.outboundSMSMessageRequest.resourceURL = resourceUrl;
+		payload.outboundSMSMessageRequest.deliveryInfoList.resourceURL = resourceUrl + '/deliveryInfos';
+		
+		mc.setPayloadJSON(payload);]]></script>
+    <class name="com.wso2telco.dep.mediator.impl.smsmessaging.SendSMSRequestIdPersistMediator"/>
+</sequence>

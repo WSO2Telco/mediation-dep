@@ -20,6 +20,7 @@ package com.wso2telco.dep.mediator.impl.smsmessaging;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
+import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.ResponseHandler;
@@ -32,6 +33,8 @@ import com.wso2telco.dep.mediator.internal.Util;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.SMSMessagingService;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
+import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.ValidateSendSms;
@@ -44,7 +47,11 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.wso2.carbon.utils.CarbonUtils;
 
+import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -120,19 +127,88 @@ public class SendSMSHandler implements SMSHandler {
 		int smsCount = getSMSMessageCount(subsrequest.getOutboundSMSMessageRequest().getOutboundTextMessage().getMessage());
 		context.setProperty(DataPublisherConstants.RESPONSE, String.valueOf(smsCount));
 
-		Map<String, SendSMSResponse> smsResponses = smssendmulti(context, subsrequest,
-				jsonBody.getJSONObject("outboundSMSMessageRequest").getJSONArray("address"), API_TYPE,
-				executor.getValidoperators());
-		if (Util.isAllNull(smsResponses.values())) {
-			throw new CustomException("POL0257", "Message not delivered %1", new String[] {
-					"Request failed. Errors " + "occurred while sending the request for all the destinations." });
+		// taking the operator endpoint with first address, since this is for same operator
+		OperatorEndpoint operatorEndpoint = getEndpoint(jsonBody.getJSONObject
+				("outboundSMSMessageRequest").getJSONArray("address").getString(0), context, API_TYPE);
+
+		String sending_add = operatorEndpoint.getEndpointref().getAddress();
+		log.info("sending endpoint found: " + sending_add + " Request ID: " + UID.getRequestID(context));
+		//-----URL DECODE
+		if (sending_add.contains("outbound") && sending_add.contains("requests") && sending_add.contains("tel:+")) {
+			sending_add.replace("tel:+", "tel:+");
+		}else{
+			sending_add = java.net.URLDecoder.decode(sending_add, "UTF-8");
 		}
-		// NB publish
-		executor.removeHeaders(context);
-		String resPayload = responseHandler.makeSmsSendResponse(context, jsonBody.toString(), smsResponses, requestid);
-		storeRequestIDs(requestid, senderAddress, smsResponses);
-		executor.setResponse(context, resPayload);
+		//-----URL DECODE
+
+		// set auth header, endpoint and handler to message context
+		HandlerUtils.setAuthorizationHeader(context, executor, operatorEndpoint);
+		HandlerUtils.setEndpointProperty(context, sending_add);
+		HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
+
+		FileReader fileReader = new FileReader();
+		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
+		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
+
+		// read sendSMSResourceURL from mediatorConfMap and set to message context
+		String sendSmsResourceUrlPrefix = mediatorConfMap.get("sendSMSResourceURL");
+		if (sendSmsResourceUrlPrefix != null && !sendSmsResourceUrlPrefix.isEmpty()) {
+			sendSmsResourceUrlPrefix = sendSmsResourceUrlPrefix.endsWith("/") ?
+					sendSmsResourceUrlPrefix.substring(0, sendSmsResourceUrlPrefix.length() - 1) :  sendSmsResourceUrlPrefix;
+
+		} else {
+			// sendSMSResourceURL not found in mediatorConfMap
+			sendSmsResourceUrlPrefix = (String) context.getProperty("REST_URL_PREFIX") + context.getProperty("REST_FULL_REQUEST_PATH");
+			sendSmsResourceUrlPrefix = sendSmsResourceUrlPrefix.substring(0, sendSmsResourceUrlPrefix.indexOf("/requests"));
+		}
+
+		// encode the sender address
+		String encodedSenderAddress = null;
+		try {
+			encodedSenderAddress = URLEncoder.encode(senderAddress, "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			log.error(e.getMessage(), e);
+			encodedSenderAddress = senderAddress;
+		}
+
+		context.setProperty("SEND_SMS_RESOURCE_URL_PREFIX", sendSmsResourceUrlPrefix);
+		context.setProperty("REQUEST_ID", requestid);
+		context.setProperty("SENDER_ADDRESS", senderAddress);
+		context.setProperty("ENCODED_SENDER_ADDRESS", encodedSenderAddress);
+		// create an array out of address element and set it to message context
+		JSONArray addressElement = jsonBody.getJSONObject("outboundSMSMessageRequest").getJSONArray("address");
+		String[] addresses = new String[addressElement.length()];
+		for (int i = 0 ; i < addressElement.length() ; i ++) {
+			addresses[i] = addressElement.getString(i);
+		}
+		context.setProperty("ADDRESSES", addresses);
+
+//		Map<String, SendSMSResponse> smsResponses = smssendmulti(context, subsrequest,
+//				jsonBody.getJSONObject("outboundSMSMessageRequest").getJSONArray("address"), API_TYPE,
+//				executor.getValidoperators());
+//		if (Util.isAllNull(smsResponses.values())) {
+//			throw new CustomException("POL0257", "Message not delivered %1", new String[] {
+//					"Request failed. Errors " + "occurred while sending the request for all the destinations." });
+//		}
+//		// NB publish
+//		executor.removeHeaders(context);
+//		String resPayload = responseHandler.makeSmsSendResponse(context, jsonBody.toString(), smsResponses, requestid);
+//		storeRequestIDs(requestid, senderAddress, smsResponses);
+//		executor.setResponse(context, resPayload);
 		return true;
+	}
+
+	private OperatorEndpoint getEndpoint (String address, MessageContext messageContext, String apiType) throws Exception {
+
+		OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
+		searchDTO.setApiName(apiType);
+		searchDTO.setContext(messageContext);
+		searchDTO.setIsredirect(false);
+		searchDTO.setMSISDN(address);
+		searchDTO.setOperators(executor.getValidoperators());
+		searchDTO.setRequestPathURL(executor.getSubResourcePath());
+
+		return occi.getOperatorEndpoint(searchDTO);
 	}
 
 	/*
