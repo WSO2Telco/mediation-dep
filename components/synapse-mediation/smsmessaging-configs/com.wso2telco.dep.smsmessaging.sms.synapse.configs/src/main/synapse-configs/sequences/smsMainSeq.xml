@@ -8,6 +8,9 @@
         <case regex="RetrieveSMSHandler">
             <sequence key="smsRetrieveSeq"/>
         </case>
+        <case regex="OutboundSMSSubscriptionsSouthboundHandler">
+            <sequence key="subscribeToSMSDeliveryNotificationsSeq"/>
+        </case>
         <default/>
     </switch>
 </sequence>

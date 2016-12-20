@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="storeSMSDeliverySubscriptionSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+    <property expression="json-eval($.deliveryReceiptSubscription.resourceURL)" name="resourseURL" scope="default" type="STRING"/>
+    <dbreport>
+        <connection>
+            <pool>
+                <dsName>jdbc/WSO2TELCO_DEP_DB</dsName>
+            </pool>
+        </connection>
+        <statement>
+            <sql><![CDATA[insert into outbound_operatorsubs(dn_subscription_did, domainurl, operator) values(?, ?, ?);]]></sql>
+            <parameter expression="get-property('subscriptionID')" type="VARCHAR"/>
+            <parameter expression="get-property('resourseURL')" type="VARCHAR"/>
+            <parameter expression="get-property('operator')" type="VARCHAR"/>
+        </statement>
+    </dbreport>
+</sequence>
