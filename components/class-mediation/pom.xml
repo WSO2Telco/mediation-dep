@@ -41,6 +41,7 @@
 
     <modules>
         <module>common/jwt-mediator</module>
+        <module>common/token-mediator</module>
         <module>payment-mediator</module>
     </modules>
 </project>
