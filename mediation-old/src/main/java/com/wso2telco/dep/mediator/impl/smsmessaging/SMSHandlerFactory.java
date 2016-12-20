@@ -112,15 +112,14 @@ public class SMSHandlerFactory {
 				&& lastWord.equals(subscriptionKeyString)) {
 
 			apiType = RequestType.START_OUTBOUND_SUBSCRIPTION;
-			//handler = new OutboundSMSSubscriptionsHandler(executor);//ADDED
 			if (ResourceURL.toLowerCase().contains("/outbound/subscriptions")) {
 
 				handler = new OutboundSMSSubscriptionsNorthboundHandler(executor);
 				log.debug("invoking outbound sms subscriptions NORTHBOUND HANDLER");
 			} else {
-
-				handler = findDeliveryNotificationSubscriptionsHandlerType(executor);
-			}
+                handler = new OutboundSMSSubscriptionsSouthboundHandler(executor);
+                log.debug("invoking outbound sms subscriptions SOUTHBOUND HANDLER");
+            }
 		} else if (ResourceURL.toLowerCase().contains(sendSMSKeyString.toLowerCase())
 				&& ResourceURL.toLowerCase().contains(subscriptionKeyString.toLowerCase())
 				&& (!lastWord.equals(subscriptionKeyString))) {
@@ -135,40 +134,6 @@ public class SMSHandlerFactory {
 			log.debug("invoking query sms status handler");
 		} else {
 
-			throw new CustomException("SVC0002", "", new String[] { null });
-		}
-
-		return handler;
-	}
-
-	/**
-	 * Find delivery notification subscription type.
-	 *
-	 * @param executor
-	 *            the executor
-	 * @return the SMS handler
-	 */
-	private static SMSHandler findDeliveryNotificationSubscriptionsHandlerType(SMSExecutor executor) {
-
-		SMSHandler handler = null;
-
-		try {
-
-			JSONObject objJSONObject = executor.getJsonBody();
-			JSONObject objDeliveryReceiptSubscription = objJSONObject.getJSONObject("deliveryReceiptSubscription");
-
-			if (!objDeliveryReceiptSubscription.isNull("operatorCode")) {
-
-				handler = new OutboundSMSSubscriptionsSouthboundHandler(executor);
-				log.debug("invoking outbound sms subscriptions southbound handler");
-			} else {
-
-				handler = new OutboundSMSSubscriptionsHandler(executor);
-				log.debug("invoking outbound sms subscriptions handler");
-			}
-		} catch (Exception e) {
-
-			log.error("error in findDeliveryNotificationSubscriptionsHandlerType : " + e.getMessage());
 			throw new CustomException("SVC0002", "", new String[] { null });
 		}
 
