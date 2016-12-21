@@ -29,6 +29,7 @@ import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.service.SMSMessagingService;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.northbound.ValidateNBDeliveryInfoNotification;
@@ -112,7 +113,6 @@ public class SMSOutboundNotificationsHandler implements SMSHandler {
 		}
 
         //Date Time issue
-		String formattedString = null;
 		String mcc = null;
         String operatormar = "+";
 
@@ -121,7 +121,6 @@ public class SMSOutboundNotificationsHandler implements SMSHandler {
        
 		if (executor.getJsonBody().toString().contains("operatorCode")) {
 			OutboundRequestOp outboundRequestOp = gson.fromJson(executor.getJsonBody().toString(), OutboundRequestOp.class);
-			formattedString = gson.toJson(outboundRequestOp);
 			String msisdn = outboundRequestOp.getDeliveryInfoNotification().getDeliveryInfo().getAddress();
 			if (msisdn.startsWith("tel:")) {
 				String[] params = outboundRequestOp.getDeliveryInfoNotification().getDeliveryInfo().getAddress().split(":");
@@ -138,7 +137,6 @@ public class SMSOutboundNotificationsHandler implements SMSHandler {
 		} else {
 
 			OutboundRequest outboundRequest = gson.fromJson(executor.getJsonBody().toString(), OutboundRequest.class);
-			formattedString = gson.toJson(outboundRequest);
 			String msisdn = outboundRequest.getDeliveryInfoNotification().getDeliveryInfo().getAddress();
 			if (msisdn.startsWith("tel:")) {
 				String[] params = outboundRequest.getDeliveryInfoNotification().getDeliveryInfo().getAddress().split(":");
@@ -153,15 +151,11 @@ public class SMSOutboundNotificationsHandler implements SMSHandler {
 			context.setProperty(DataPublisherConstants.OPERATOR_ID,operator);
 			context.setProperty(APIMgtGatewayConstants.USER_ID, serviceProvider);
 		}
-        	        
-        int notifyret = executor.makeNorthBoundRequest(new OperatorEndpoint(new EndpointReference(notifyurl), null), notifyurlRoute, formattedString, true, context, false);
-		executor.removeHeaders(context);
 
-		if (notifyret == 0) {
-			throw new CustomException("SVC1000", "", new String[]{null});
-		}
-		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 201);
-		//executor.setResponse(context, new JSONObject(notifyret).toString());
+		HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
+		HandlerUtils.setEndpointProperty(context, notifyurlRoute);
+		HandlerUtils.setAuthorizationHeader(context, executor,
+				                            new OperatorEndpoint(new EndpointReference(notifyurl), null));
 
 		return true;
 	}
