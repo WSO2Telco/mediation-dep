@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="sendSMSDeliveryNotificationsSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+    <property action="remove" name="REST_URL_POSTFIX" scope="axis2"/>
+    <header expression="get-property('ENDPOINT')" name="To" scope="default"/>
+    <send>
+        <endpoint key="DefaultSmsEndpoint"/>
+    </send>
+</sequence>
