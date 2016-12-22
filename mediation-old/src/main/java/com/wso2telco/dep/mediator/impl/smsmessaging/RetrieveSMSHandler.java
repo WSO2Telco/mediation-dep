@@ -54,16 +54,16 @@ public class RetrieveSMSHandler implements SMSHandler {
 	private static Log log = LogFactory.getLog(RetrieveSMSHandler.class);
 
 	/** The Constant API_TYPE. */
-	private static final String API_TYPE = "smsmessaging";
+	protected static final String API_TYPE = "smsmessaging";
 
 	/** The occi. */
-	private OriginatingCountryCalculatorIDD occi;
+	protected OriginatingCountryCalculatorIDD occi;
 
 	/** The api util. */
-	private ApiUtils apiUtil;
+	protected ApiUtils apiUtil;
 
 	/** The executor. */
-	private SMSExecutor executor;
+	protected SMSExecutor executor;
 
 	/**
 	 * Instantiates a new retrieve sms handler.
