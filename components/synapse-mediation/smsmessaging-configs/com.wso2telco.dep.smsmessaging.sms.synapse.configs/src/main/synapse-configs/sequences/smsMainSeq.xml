@@ -19,6 +19,9 @@
         <case regex="SendSMSHandler">
             <sequence key="sendSmsSeq"/>
         </case>
+        <case regex="SMSOutboundNotificationsHandler">
+            <sequence key="sendSMSDeliveryNotificationsSeq"/>
+        </case>
         <default/>
     </switch>
 </sequence>
