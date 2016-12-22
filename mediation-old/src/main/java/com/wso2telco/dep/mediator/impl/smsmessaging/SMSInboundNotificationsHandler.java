@@ -28,6 +28,7 @@ import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.service.SMSMessagingService;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.ValidateInboundSMSMessageNotification;
@@ -36,6 +37,7 @@ import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
 import org.wso2.carbon.apimgt.gateway.APIMgtGatewayConstants;
@@ -140,16 +142,13 @@ public class SMSInboundNotificationsHandler implements SMSHandler {
 		context.setProperty(DataPublisherConstants.OPERATOR_ID, operator);
 		context.setProperty(APIMgtGatewayConstants.USER_ID, serviceProvider);
 
-		int notifyret = executor.makeNorthBoundRequest(new OperatorEndpoint(new EndpointReference(notifyurl), null),
-				notifyurlRoute, formattedString, true, context, false);
+		// set the modified payload to message context
+		JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), formattedString, true, true);
 
-		executor.removeHeaders(context);
-
-		if (notifyret == 0) {
-			throw new CustomException("SVC1000", "", new String[] { null });
-		}
-
-		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 200);
+		// set auth header, endpoint and handler to message context
+		HandlerUtils.setAuthorizationHeader(context, executor, new OperatorEndpoint(new EndpointReference(notifyurl), null));
+		HandlerUtils.setEndpointProperty(context, notifyurlRoute);
+		HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
 
 		return true;
 	}
