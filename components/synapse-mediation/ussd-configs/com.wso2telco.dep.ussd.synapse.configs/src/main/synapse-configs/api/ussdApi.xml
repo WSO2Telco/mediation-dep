@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<api xmlns="http://ws.apache.org/ns/synapse" name="ussdApi" context="/ussd">
+<api context="/ussd" name="ussdApi" xmlns="http://ws.apache.org/ns/synapse">
     <resource methods="DELETE POST PUT GET" url-mapping="/*">
         <inSequence>
             <sequence key="ussdMainSeq"/>
         </inSequence>
         <outSequence>
-            <sequence key="ussdMainOutSeq"/>
             <send/>
         </outSequence>
         <faultSequence/>

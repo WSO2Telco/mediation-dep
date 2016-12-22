@@ -14,7 +14,7 @@
         <case regex="SouthBoundMOUSSDSubscribeHandler">
             <sequence key="ussdMOSubscribeSeq"/>
         </case>
-        <case regex="StopMOUSSDSubscriptionHandler">
+        <case regex="SouthBoundStopMOUSSDSubscriptionHandler">
             <sequence key="ussdMOStopSubscriptionSeq"/>
         </case>
         <default>
