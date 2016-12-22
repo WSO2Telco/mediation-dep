@@ -23,6 +23,7 @@ import com.wso2telco.dep.mediator.impl.smsmessaging.northbound.SMSInboundSubscri
 import com.wso2telco.dep.mediator.impl.smsmessaging.southbound.OutboundSMSSubscriptionsSouthboundHandler;
 import com.wso2telco.dep.mediator.impl.smsmessaging.southbound.RetrieveSMSSouthboundHandler;
 import com.wso2telco.dep.mediator.impl.smsmessaging.southbound.SMSInboundSubscriptionsSouthboundHandler;
+import com.wso2telco.dep.mediator.impl.smsmessaging.southbound.StopOutboundSMSSubscriptionsSouthBoundHandler;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -126,7 +127,7 @@ public class SMSHandlerFactory {
 				&& (!lastWord.equals(subscriptionKeyString))) {
 
 			apiType = RequestType.STOP_OUTBOUND_SUBSCRIPTION;
-			handler = new StopOutboundSMSSubscriptionsHandler(executor);
+			handler = new StopOutboundSMSSubscriptionsSouthBoundHandler(executor);
 			log.debug("invoking stop outbound sms subscriptions handler");
 		} else if (lastWord.equals(deliveryInfoKeyString)) {
 
