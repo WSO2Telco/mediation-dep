@@ -146,6 +146,7 @@ public class SMSInboundNotificationsHandler implements SMSHandler {
 		JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), formattedString, true, true);
 
 		// set auth header, endpoint and handler to message context
+		// TODO: check if this is the correct way to obtain a token for northbound call
 		HandlerUtils.setAuthorizationHeader(context, executor, new OperatorEndpoint(new EndpointReference(notifyurl), null));
 		HandlerUtils.setEndpointProperty(context, notifyurlRoute);
 		HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
