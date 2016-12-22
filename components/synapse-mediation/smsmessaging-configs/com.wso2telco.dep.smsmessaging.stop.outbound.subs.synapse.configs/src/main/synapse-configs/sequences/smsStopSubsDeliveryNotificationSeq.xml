@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sequence name="smsStopSubsDeliveryNotificationSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
+    <property name="HTTP_METHOD" scope="axis2" type="STRING" value="DELETE"/>
+    <property action="remove" name="REST_URL_POSTFIX" scope="axis2"/>
+    <header expression="get-property('ENDPOINT')" name="To" scope="default"/>
+    <property name="SUBSCRIPTION_ID" expression="get-property('dnSubscriptionId')" scope="default" type="INTEGER"/>
+    <call>
+        <endpoint key="smsStopSubsDeliveryNotificationEndpoint"/>
+    </call>
+    <switch source="$axis2:HTTP_SC">
+        <case regex="200|201|204">
+            <sequence key="smsStopSubsDeliveryNotificationResponseSeq"/>
+        </case>
+        <default/>
+    </switch>
+    <respond/>
+</sequence>
