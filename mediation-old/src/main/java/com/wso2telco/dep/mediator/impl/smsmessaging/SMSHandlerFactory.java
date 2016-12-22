@@ -22,6 +22,7 @@ import com.wso2telco.dep.mediator.impl.smsmessaging.northbound.RetrieveSMSNorthb
 import com.wso2telco.dep.mediator.impl.smsmessaging.northbound.SMSInboundSubscriptionsNorthboundHandler;
 import com.wso2telco.dep.mediator.impl.smsmessaging.southbound.OutboundSMSSubscriptionsSouthboundHandler;
 import com.wso2telco.dep.mediator.impl.smsmessaging.southbound.RetrieveSMSSouthboundHandler;
+import com.wso2telco.dep.mediator.impl.smsmessaging.southbound.SMSInboundSubscriptionsSouthboundHandler;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -94,7 +95,7 @@ public class SMSHandlerFactory {
 				&& ResourceURL.toLowerCase().contains(subscriptionKeyString.toLowerCase())) {
 
 			apiType = RequestType.RETRIEVE_SMS_SUBSCRIPTIONS;
-			handler = new RetrieveSMSSubscriptionsHandler(executor);
+			handler = findInboundNotificationSubscriptionsHandlerType(executor);
 			
 		} else if (ResourceURL.toLowerCase().contains(receivedInfoNotification.toLowerCase())) {
 
@@ -151,7 +152,7 @@ public class SMSHandlerFactory {
 
 			if (!objSubscription.isNull("criteria")) {
 
-				handler = new SMSInboundSubscriptionsHandler(executor);
+				handler = new SMSInboundSubscriptionsSouthboundHandler(executor);
 				log.debug("invoking sms inbound subscriptions handler");
 			} else {
 
