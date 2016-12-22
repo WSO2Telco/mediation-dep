@@ -15,13 +15,12 @@
  *  limitations under the License.
  * /
  */
-package com.wso2telco.dep.mediator.impl.smsmessaging;
+package com.wso2telco.dep.mediator.impl.smsmessaging.southbound;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
-import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.SouthboundSubscribeRequest;
+import com.wso2telco.dep.mediator.impl.smsmessaging.SMSExecutor;
+import com.wso2telco.dep.mediator.impl.smsmessaging.SMSHandler;
 import com.wso2telco.dep.mediator.internal.ApiUtils;
 import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
@@ -29,10 +28,10 @@ import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.SMSMessagingService;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.southbound.ValidateSBSubscription;
-import com.wso2telco.dep.operatorservice.model.OperatorSubscriptionDTO;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -42,7 +41,6 @@ import org.json.JSONObject;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,10 +50,10 @@ import java.util.Map;
 /**
  * The Class RetrieveSMSSubscriptionsHandler.
  */
-public class SMSInboundSubscriptionsHandler implements SMSHandler {
+public class SMSInboundSubscriptionsSouthboundHandler implements SMSHandler {
 
 	/** The log. */
-	private static Log log = LogFactory.getLog(SMSInboundSubscriptionsHandler.class);
+	private static Log log = LogFactory.getLog(SMSInboundSubscriptionsSouthboundHandler.class);
 
 	/** The Constant API_TYPE. */
 	private static final String API_TYPE = "sms";
@@ -78,7 +76,7 @@ public class SMSInboundSubscriptionsHandler implements SMSHandler {
 	 * @param executor
 	 *            the executor
 	 */
-	public SMSInboundSubscriptionsHandler(SMSExecutor executor) {
+	public SMSInboundSubscriptionsSouthboundHandler(SMSExecutor executor) {
 
 		this.executor = executor;
 		occi = new OriginatingCountryCalculatorIDD();
@@ -97,7 +95,6 @@ public class SMSInboundSubscriptionsHandler implements SMSHandler {
 	public boolean handle(MessageContext context) throws CustomException, AxisFault, Exception {
 
 		String requestid = UID.getUniqueID(Type.RETRIVSUB.getCode(), context, executor.getApplicationid());
-		Gson gson = new GsonBuilder().serializeNulls().create();
 
 		FileReader fileReader = new FileReader();
 		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
@@ -113,70 +110,40 @@ public class SMSInboundSubscriptionsHandler implements SMSHandler {
 		if (!jsondstaddr.isNull("clientCorrelator")) {
 			orgclientcl = jsondstaddr.getString("clientCorrelator");
 		}
-
+        String modifiedClientCorrelator = orgclientcl + ":" + requestid;
 		String serviceProvider = jwtDetails.get("subscriber");
 		log.debug("subscriber Name : " + serviceProvider);
 
-		SouthboundSubscribeRequest subsrequst = gson.fromJson(jsonBody.toString(), SouthboundSubscribeRequest.class);
-		String origNotiUrl = subsrequst.getSubscription().getCallbackReference().getNotifyURL();
+        Integer moSubscriptionId = smsMessagingService.subscriptionEntry(jsondstaddr
+                .getJSONObject("callbackReference").getString("notifyURL"), serviceProvider);
 
-		List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp(API_TYPE, executor.getSubResourcePath(),
-		                                                             executor.getValidoperators());
+        String subsEndpoint = mediatorConfMap.get("hubMOSubsGatewayEndpoint") + "/" + moSubscriptionId;
 
-		Integer moSubscriptionId = smsMessagingService
-				.subscriptionEntry(subsrequst.getSubscription().getCallbackReference().getNotifyURL(), serviceProvider);
+        List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp(API_TYPE, executor.getSubResourcePath(),
+                executor.getValidoperators());
 
-		String subsEndpoint = mediatorConfMap.get("hubSubsGatewayEndpoint") + "/" + moSubscriptionId;
-		jsondstaddr.getJSONObject("callbackReference").put("notifyURL", subsEndpoint);
+        if (!endpoints.isEmpty()) {
+            if (endpoints.size() > 1) {
+                log.warn("Multiple operator endpoints found. Picking first endpoint: "
+                         + endpoints.get(0).getEndpointref().getAddress() + " for operator: "
+                         + endpoints.get(0).getOperator() + " to send request.");
+            }
+            OperatorEndpoint endpoint = endpoints.get(0);
+            String url = endpoint.getEndpointref().getAddress();
 
-		jsondstaddr.put("clientCorrelator", orgclientcl + ":" + requestid);
+            log.debug("Delivery notification adaptor request url of " + endpoint.getOperator() + " operator: " + url);
 
-		List<OperatorSubscriptionDTO> domainsubs = new ArrayList<OperatorSubscriptionDTO>();
-		SouthboundSubscribeRequest subsresponse = null;
+            HandlerUtils.setEndpointProperty(context, url);
+            HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
+            HandlerUtils.setAuthorizationHeader(context, executor, endpoint);
+            HandlerUtils.setGatewayHost(context);
+            context.setProperty("clientCorrelator", modifiedClientCorrelator);
+            context.setProperty("notifyURL", subsEndpoint);
+            context.setProperty("subscriptionID", moSubscriptionId);
+            context.setProperty("operator", endpoint.getOperator());
 
-		for (OperatorEndpoint endpoint : endpoints) {
-
-			String notifyres = executor.makeRequest(endpoint, endpoint.getEndpointref().getAddress(),
-					jsonBody.toString(), true, context,false);
-
-			if (notifyres == null) {
-
-				throw new CustomException("POL0299", "", new String[] { "Error registering subscription" });
-			} else {
-
-				// plugin exception handling
-				subsresponse = gson.fromJson(notifyres, SouthboundSubscribeRequest.class);
-
-				if (subsresponse.getSubscription() == null) {
-
-					executor.handlePluginException(notifyres);
-				}
-
-				domainsubs.add(new OperatorSubscriptionDTO(endpoint.getOperator(),
-						subsresponse.getSubscription().getResourceURL()));
-			}
-		}
-
-		smsMessagingService.operatorSubsEntry(domainsubs, moSubscriptionId);
-
-		String ResourceUrlPrefix = mediatorConfMap.get("hubGateway");
-		subsresponse.getSubscription()
-				.setResourceURL(ResourceUrlPrefix + executor.getResourceUrl() + "/" + moSubscriptionId);
-
-		JSONObject replyobj = new JSONObject(subsresponse);
-		JSONObject replysubs = replyobj.getJSONObject("subscription");
-
-		replysubs.put("clientCorrelator", orgclientcl);
-
-		replysubs.getJSONObject("callbackReference").put("notifyURL", origNotiUrl);
-
-		jsondstaddr.put("resourceURL", ResourceUrlPrefix + executor.getResourceUrl() + "/" + moSubscriptionId);
-
-		executor.removeHeaders(context);
-		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 201);
-		executor.setResponse(context, replyobj.toString());
-
-		return true;
+        }
+        return true;
 	}
 
 	/*
