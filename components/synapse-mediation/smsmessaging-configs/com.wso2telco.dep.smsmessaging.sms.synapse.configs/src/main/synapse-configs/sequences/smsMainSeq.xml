@@ -32,6 +32,9 @@
         <case regex="StopOutboundSMSSubscriptionsSouthBoundHandler">
             <sequence key="smsStopSubsDeliveryNotificationSeq"/>
         </case>
+        <case regex="StopInboundSMSSubscriptionsHandler">
+            <sequence key="smsStopSubsMessageNotificationSeq"/>
+        </case>
         <default/>
     </switch>
 </sequence>

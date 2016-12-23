@@ -24,6 +24,7 @@ import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.SMSMessagingService;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.ValidateCancelSubscription;
@@ -109,18 +110,17 @@ public class StopInboundSMSSubscriptionsHandler implements SMSHandler {
 					new String[] { "SMS eceipt Subscription Not Found: " + moSubscriptionId });
 		}
 
-		String resStr = "";
-
-		for (OperatorSubscriptionDTO subs : domainsubs) {
-
-			resStr = executor.makeDeleteRequest(
-					new OperatorEndpoint(new EndpointReference(subs.getDomain()), subs.getOperator()), subs.getDomain(),
-					null, true, context, false);
-		}
-
-		smsMessagingService.subscriptionDelete(Integer.valueOf(moSubscriptionId));
-		executor.removeHeaders(context);
-		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 204);
+        //pick the first record since this is gateway
+        OperatorSubscriptionDTO sub = domainsubs.get(0);
+        if (domainsubs.size() > 1) {
+            log.warn("Multiple operators found for subscription. Picking first endpoint: " + sub.getDomain() +
+                    " for operator: " + sub.getOperator() + " to send delete request.");
+        }
+        HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
+        HandlerUtils.setEndpointProperty(context, sub.getDomain());
+        HandlerUtils.setAuthorizationHeader(context, executor,
+                new OperatorEndpoint(new EndpointReference(sub.getDomain()), sub.getOperator()));
+        context.setProperty("subscriptionId", moSubscriptionId);
 
 		return true;
 	}

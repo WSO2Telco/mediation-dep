@@ -94,10 +94,14 @@ public class SMSHandlerFactory {
 			}
 		} else if (ResourceURL.toLowerCase().contains(retrieveSMSString.toLowerCase())
 				&& ResourceURL.toLowerCase().contains(subscriptionKeyString.toLowerCase())) {
+            if (lastWord.equalsIgnoreCase(subscriptionKeyString)) {
+                apiType = RequestType.RETRIEVE_SMS_SUBSCRIPTIONS;
+                handler = findInboundNotificationSubscriptionsHandlerType(executor);
+            } else {
+                apiType = RequestType.STOP_INBOUND_SUBSCRIPTION;
+                handler = new StopInboundSMSSubscriptionsHandler(executor);
+            }
 
-			apiType = RequestType.RETRIEVE_SMS_SUBSCRIPTIONS;
-			handler = findInboundNotificationSubscriptionsHandlerType(executor);
-			
 		} else if (ResourceURL.toLowerCase().contains(receivedInfoNotification.toLowerCase())) {
 
 			apiType = RequestType.SMS_INBOUND_NOTIFICATIONS;
@@ -182,6 +186,9 @@ public class SMSHandlerFactory {
 
 		/** The retrieve sms subscriptions. */
 		RETRIEVE_SMS_SUBSCRIPTIONS,
+
+		/** The stop inbound subscription. */
+		STOP_INBOUND_SUBSCRIPTION,
 
 		/** The sms inbound notifications. */
 		SMS_INBOUND_NOTIFICATIONS,
