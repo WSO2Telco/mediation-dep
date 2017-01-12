@@ -55,10 +55,10 @@ public class PropertyLogHandler extends AbstractMediator {
 
 		String jsonBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
 
-		log.info("[" + dateFormat.format(new Date()) + "] >>>>> API Request id "
+		log.info("[" + dateFormat.format(new Date()) + "] <<<<< API Request id "
 				+ messageContext.getProperty(MessageConstants.REQUEST_ID));
 
-		log.debug("                                       >>>>> respBody :" + jsonBody);
+		log.debug("                                       <<<<< respBody :" + jsonBody);
 
 	}
 }
