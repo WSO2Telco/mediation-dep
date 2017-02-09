@@ -5,7 +5,7 @@
     <dblookup>
         <connection>
             <pool>
-                <dsName>jdbc/telco_ds</dsName>
+                <dsName>jdbc/WSO2TELCO_DEP_DB</dsName>
             </pool>
         </connection>
         <statement>
