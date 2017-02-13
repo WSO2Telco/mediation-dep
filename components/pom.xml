@@ -41,7 +41,6 @@
 
     <modules>
         <module>class-mediation</module>
-        <module>synapse-mediation</module>
         <module>logging-extension</module>
     </modules>
 </project>

@@ -32,7 +32,7 @@
     <artifactId>mediator</artifactId>
 
     <packaging>bundle</packaging>
-    <name>WSO2.Telco Mediator Module</name>
+    <name>WSO2.Telco Mediator Module (Old)</name>
     <description>WSO2.Telco Mediator Module</description>
 
     <dependencies>
