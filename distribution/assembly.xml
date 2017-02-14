@@ -15,14 +15,14 @@
 
 	<fileSets>
 		<fileSet>
-			<directory>../components/class-mediation/jwt-mediator/com.wso2telco.dep.jwt.mediator/target</directory>
+			<directory>../components/com.wso2telco.dep.jwt.mediator/target</directory>
 			<includes>
 				<include>com.wso2telco.dep.jwt.mediator-${pom.version}.jar</include>
 			</includes>
 			<outputDirectory>/libs</outputDirectory>
 		</fileSet>
 		<fileSet>
-			<directory>../components/class-mediation/payment-mediator/com.wso2telco.dep.spend.limit.mediator/target</directory>
+			<directory>../components/com.wso2telco.dep.spend.limit.mediator/target</directory>
 			<includes>
 				<include>com.wso2telco.dep.spend.limit.mediator-${pom.version}.jar</include>
 			</includes>
