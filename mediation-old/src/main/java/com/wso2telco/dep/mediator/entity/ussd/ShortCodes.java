@@ -22,7 +22,10 @@ public class ShortCodes {
     private String operatorCode;
     private String keyword;
 
-    private String status;
+//    private String status;
+    private String toAddress;
+    private String authorizationHeader;
+
     public String getShortCode() {
         return shortCode;
     }
@@ -47,12 +50,27 @@ public class ShortCodes {
         this.keyword = keyword;
     }
 
-    public String getStatus() {
+    /*public String getStatus() {
         return status;
     }
 
     public void setStatus(String status) {
         this.status = status;
     }
-	
+*/
+    public String getToAddress() {
+        return toAddress;
+    }
+
+    public void setToAddress(String toAddress) {
+        this.toAddress = toAddress;
+    }
+
+    public String getAuthorizationHeader() {
+        return authorizationHeader;
+    }
+
+    public void setAuthorizationHeader(String authorizationHeader) {
+        this.authorizationHeader = authorizationHeader;
+    }
 }

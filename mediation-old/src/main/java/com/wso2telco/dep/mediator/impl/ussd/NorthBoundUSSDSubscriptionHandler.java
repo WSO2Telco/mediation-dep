@@ -22,27 +22,21 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
-import com.wso2telco.dep.mediator.entity.SubscriptionResponse;
 import com.wso2telco.dep.mediator.entity.smsmessaging.CallbackReference;
-import com.wso2telco.dep.mediator.entity.ussd.ShortCodes;
-import com.wso2telco.dep.mediator.entity.ussd.Subscription;
-import com.wso2telco.dep.mediator.entity.ussd.SubscriptionGatewayRequest;
-import com.wso2telco.dep.mediator.entity.ussd.SubscriptionGatewayRequestDTO;
-import com.wso2telco.dep.mediator.entity.ussd.SubscriptionHubRequest;
-import com.wso2telco.dep.mediator.entity.ussd.SubscriptionHubResponse;
+import com.wso2telco.dep.mediator.entity.ussd.*;
 import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.USSDService;
 import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.operatorservice.model.OperatorSubscriptionDTO;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
-import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
@@ -59,11 +53,15 @@ public class NorthBoundUSSDSubscriptionHandler implements USSDHandler {
     private USSDExecutor executor;
     private USSDService ussdService;
 
+    private String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
+    private Map<String, String> mediatorConfMap;
+
     public NorthBoundUSSDSubscriptionHandler(USSDExecutor ussdExecutor){
 
         occi = new OriginatingCountryCalculatorIDD();
         this.executor = ussdExecutor;
         ussdService = new USSDService();
+        mediatorConfMap = new FileReader().readPropertyFile(file);
     }
 
 
@@ -75,22 +73,26 @@ public class NorthBoundUSSDSubscriptionHandler implements USSDHandler {
     @Override
     public boolean handle(MessageContext context) throws Exception {
 
+
         UID.getUniqueID(Type.MO_USSD.getCode(), context, executor.getApplicationid());
         JSONObject jsonBody = executor.getJsonBody();
         String notifyUrl = jsonBody.getJSONObject("subscription").getJSONObject("callbackReference").getString("notifyURL");
         Gson gson = new GsonBuilder().serializeNulls().create();
-        String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
-        FileReader fileReader = new FileReader();
-		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
+//        FileReader fileReader = new FileReader();
+//		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
 
         //Integer subscriptionId = ussdService.ussdRequestEntry(notifyUrl);
-        AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(context);
-        String consumerKey = "";
+//        AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(context);
+        /*String consumerKey = "";
         String userId="";
+
         if (authContext != null) {
             consumerKey = authContext.getConsumerKey();
             userId=authContext.getUsername();
-        }
+        }*/
+
+        String consumerKey = (String) context.getProperty("CONSUMER_KEY");
+        String userId = (String) context.getProperty("USER_ID");
 
         //Integer subscriptionId = ussdService.ussdRequestEntry(notifyUrl,consumerKey);
         String operatorId="";
@@ -99,28 +101,72 @@ public class NorthBoundUSSDSubscriptionHandler implements USSDHandler {
 
         String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint")+subscriptionId;
         log.info("Subsendpoint - " +subsEndpoint);
+        context.setProperty("subsEndPoint", subsEndpoint);
 
         jsonBody.getJSONObject("subscription").getJSONObject("callbackReference").put("notifyURL", subsEndpoint);
 
         List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp(API_TYPE, executor.getSubResourcePath(),
                 executor.getValidoperators());
 
-        String responseStr ="";
-
         List<OperatorSubscriptionDTO> operatorsubses = new ArrayList<OperatorSubscriptionDTO>();
-        JSONObject jObject = null ;
+//        JSONObject jObject = null ;
         SubscriptionHubRequest subscriptionHubRequest = gson.fromJson(jsonBody.toString(),SubscriptionHubRequest.class);
         ShortCodes[] shortCodes = subscriptionHubRequest.getSubscription().getShortCodes();
 
         SubscriptionGatewayRequest subscriptionGatewayRequest = new SubscriptionGatewayRequest();
         SubscriptionGatewayRequestDTO subscriptionGatewayRequestDTO = new SubscriptionGatewayRequestDTO();
         CallbackReference callbackReference = new CallbackReference();
-        SubscriptionHubResponse subscriptionHubResponse = new SubscriptionHubResponse();
-        Subscription subscription = new Subscription();
-        SubscriptionResponse subscription_rsponse = null;
-        Map<ShortCodes,Boolean> endpointToOperator=new HashMap<ShortCodes,Boolean>();
+//        SubscriptionHubResponse subscriptionHubResponse = new SubscriptionHubResponse();
+//        Subscription subscription = new Subscription();
+//        SubscriptionResponse subscription_rsponse = null;
+//        Map<ShortCodes,Boolean> endpointToOperator=new HashMap<ShortCodes,Boolean>();
 
-                for (OperatorEndpoint endpoint : endpoints) {
+        Map<String, OperatorEndpoint> operatorMap = new HashMap<String, OperatorEndpoint>();
+
+        for (OperatorEndpoint endpoint : endpoints) {
+
+            operatorMap.put(endpoint.getOperator(), endpoint);
+
+        }
+
+        // request creation
+        subscriptionGatewayRequestDTO.setClientCorrelator(jsonBody.getJSONObject("subscription").getString("clientCorrelator"));
+        callbackReference.setCallbackData(jsonBody.getJSONObject("subscription").getJSONObject("callbackReference").getString("callbackData"));
+        callbackReference.setNotifyURL(subsEndpoint);
+        subscriptionGatewayRequestDTO.setCallbackReference(callbackReference);
+
+        for (ShortCodes shortCodesObj :shortCodes) {
+
+            if (operatorMap.containsKey(shortCodesObj.getOperatorCode())) {
+
+                OperatorEndpoint endpoint = operatorMap.get(shortCodesObj.getOperatorCode());
+
+                shortCodesObj.setToAddress(endpoint.getEndpointref().getAddress());
+
+                ussdService.updateOperatorIdBySubscriptionId(subscriptionId,endpoint.getOperator());
+
+                log.info("sending endpoint found: " + endpoint.getEndpointref().getAddress() + " Request ID: " + UID.getRequestID(context));
+
+                shortCodesObj.setAuthorizationHeader("Bearer " + executor.getAccessToken(endpoint.getOperator(), context));
+
+
+            } else {
+
+                log.error("OperatorEndpoint not found. Operator Not Provisioned: " + shortCodesObj.getOperatorCode());
+
+                shortCodesObj.setToAddress("Not Provisioned");
+            }
+
+        }
+
+        subscriptionGatewayRequestDTO.setShortCodes(shortCodes);
+
+        subscriptionGatewayRequest.setSubscription(subscriptionGatewayRequestDTO);
+        String requestStr = gson.toJson(subscriptionGatewayRequest);
+
+
+
+                /*for (OperatorEndpoint endpoint : endpoints) {
 
                     for (ShortCodes shortCodeObj:shortCodes){
                         endpointToOperator.put(shortCodeObj,false);
@@ -128,9 +174,11 @@ public class NorthBoundUSSDSubscriptionHandler implements USSDHandler {
                         if (shortCodeObj.getOperatorCode().equalsIgnoreCase(endpoint.getOperator())){
 
                             endpointToOperator.put(shortCodeObj,true);
+
+                            // request creation
                             subscriptionGatewayRequestDTO.setClientCorrelator(jsonBody.getJSONObject("subscription").getString("clientCorrelator"));
                             subscriptionGatewayRequestDTO.setKeyword(shortCodeObj.getKeyword());
-                            subscriptionGatewayRequestDTO.setShortCode(shortCodeObj.getShortCode());
+                            subscriptionGatewayRequestDTO.setShortCodes(shortCodeObj.getShortCodes());
                             callbackReference.setCallbackData(jsonBody.getJSONObject("subscription").getJSONObject("callbackReference").getString("callbackData"));
                             callbackReference.setNotifyURL(subsEndpoint);
                             subscriptionGatewayRequestDTO.setCallbackReference(callbackReference);
@@ -153,7 +201,7 @@ public class NorthBoundUSSDSubscriptionHandler implements USSDHandler {
 
                                 if(subscription_rsponse.getSubscription() != null){
                                     shortCodeObj.setStatus("Created");
-                                    shortCodeObj.setShortCode(subscription_rsponse.getSubscription().getShortCode());
+                                    shortCodeObj.setShortCodes(subscription_rsponse.getSubscription().getShortCodes());
                                 } else {
                                     shortCodeObj.setStatus("Not Created");
                                 }
@@ -163,26 +211,35 @@ public class NorthBoundUSSDSubscriptionHandler implements USSDHandler {
                             subscription.setShortCodeses(shortCodes);
                         }
                     }
-            }
+            }*/
 
-        for ( Map.Entry<ShortCodes,Boolean> entry : endpointToOperator.entrySet()) {
+        /*for ( Map.Entry<ShortCodes,Boolean> entry : endpointToOperator.entrySet()) {
             if (entry.getValue()!= true) {
                 ShortCodes shortcode = entry.getKey();
                 shortcode.setStatus("Not Provisioned");
                 subscription.setShortCodeses(shortCodes);
             }
-        }
+        }*/
 
-        subscription.setClientCorrelator(subscription_rsponse.getSubscription().getClientCorrelator());
-        subscription.setResourceURL(mediatorConfMap.get("hubGateway")+executor.getResourceUrl()+"/"+subscriptionId);
-        subscriptionHubResponse.setSubscription(subscription);
-        jObject  = new JSONObject(subscriptionHubResponse);
+        // response creation -- to be removed
+//        subscription.setClientCorrelator(subscription_rsponse.getSubscription().getClientCorrelator());
+//        subscription.setResourceURL(mediatorConfMap.get("hubGateway")+executor.getResourceUrl()+"/"+subscriptionId);
+//        subscriptionHubResponse.setSubscription(subscription);
+//        jObject  = new JSONObject(subscriptionHubResponse);
 
-        ussdService.moUssdSubscriptionEntry(operatorsubses, subscriptionId);
-        executor.removeHeaders(context);
-        String responseobj =jObject.toString();
-        executor.setResponse(context, responseobj);
-        ((Axis2MessageContext) context).getAxis2MessageContext().setProperty("messageType", "application/json");
+        // todo: handle at response flow
+//        ussdService.moUssdSubscriptionEntry(operatorsubses, subscriptionId);
+
+
+//        executor.removeHeaders(context);
+//        String responseobj =jObject.toString();
+//        executor.setResponse(context, responseobj);
+//        ((Axis2MessageContext) context).getAxis2MessageContext().setProperty("messageType", "application/json");
+
+
+        HandlerUtils.setHandlerProperty(context,this.getClass().getSimpleName());
+
+        JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), requestStr, true, true);
 
         return true;
     }
