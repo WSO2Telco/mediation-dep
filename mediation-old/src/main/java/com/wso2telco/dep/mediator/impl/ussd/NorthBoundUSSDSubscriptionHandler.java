@@ -238,6 +238,8 @@ public class NorthBoundUSSDSubscriptionHandler implements USSDHandler {
 
 
         HandlerUtils.setHandlerProperty(context,this.getClass().getSimpleName());
+        context.setProperty("responseResourceURL", mediatorConfMap.get("hubGateway")+executor.getResourceUrl()+"/"+subscriptionId);
+        context.setProperty("subscriptionID", subscriptionId);
 
         JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), requestStr, true, true);
 
