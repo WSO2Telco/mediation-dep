@@ -17,6 +17,11 @@
     </properties>
     <dependencies>
         <dependency>
+            <groupId>com.wso2telco.core</groupId>
+            <artifactId>redis-client-wso2telco</artifactId>
+            <version>${redis.client.wso2telco.version}</version>
+        </dependency>
+        <dependency>
             <groupId>commons-codec.wso2</groupId>
             <artifactId>commons-codec</artifactId>
         </dependency>
