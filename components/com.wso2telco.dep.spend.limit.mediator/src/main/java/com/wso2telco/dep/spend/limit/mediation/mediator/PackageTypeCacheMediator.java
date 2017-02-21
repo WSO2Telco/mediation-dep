@@ -13,7 +13,6 @@ public class PackageTypeCacheMediator extends AbstractMediator {
     private static final int DEFAULT_TTL = 21600;
 
 
-
     public boolean mediate(MessageContext messageContext) {
 
         try {
