@@ -28,6 +28,8 @@ import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.FileNames;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
+import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
+import com.wso2telco.dep.oneapivalidation.service.impl.ussd.ValidateUssdSend;
 import com.wso2telco.dep.subscriptionvalidator.services.MifeValidator;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
 import org.apache.axis2.AxisFault;
@@ -66,6 +68,12 @@ public class SendUSSDHandler implements USSDHandler {
 	/** The ussdDAO. */
 	private USSDService ussdService;
 
+	/** Configuration file */
+	private String file = CarbonUtils.getCarbonConfigDirPath() + File.separator	+ FileNames.MEDIATOR_CONF_FILE.getFileName();
+
+	/** Loaded configurations */
+	private Map<String, String> mediatorConfMap;
+
 	/**
 	 * Instantiates a new send ussd handler.
 	 *
@@ -76,6 +84,7 @@ public class SendUSSDHandler implements USSDHandler {
 		occi = new OriginatingCountryCalculatorIDD();
 		this.executor = executor;
 		ussdService = new USSDService();
+		mediatorConfMap = new FileReader().readPropertyFile(file);
 	}
 
 	/*
@@ -90,38 +99,23 @@ public class SendUSSDHandler implements USSDHandler {
 
 		String requestid = UID.getUniqueID(Type.SEND_USSD.getCode(), context, executor.getApplicationid());
 		JSONObject jsonBody = executor.getJsonBody();
-		FileReader fileReader = new FileReader();
-		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
-		              + FileNames.MEDIATOR_CONF_FILE.getFileName();
 
 		String address = jsonBody.getJSONObject("outboundUSSDMessageRequest").getString("address");
 		String notifyUrl = jsonBody.getJSONObject("outboundUSSDMessageRequest").getJSONObject("responseRequest")
 				.getString("notifyURL");
 		String msisdn = address.substring(5);
 
-		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
-
-		/*AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(context);
-        String consumerKey = "";
-        String userId="";
-        //String operatorId="";
-        if (authContext != null) {
-            consumerKey = authContext.getConsumerKey();
-            userId=authContext.getUsername();
-        }*/
 		String consumerKey = "";
 		String userId = "";
 		consumerKey = (String) context.getProperty("CONSUMER_KEY");
 		userId = (String) context.getProperty("USER_ID");
-		//Integer subscriptionId = ussdService.ussdRequestEntry(notifyUrl ,consumerKey);
 
 		OperatorEndpoint endpoint = null;
 		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
 			endpoint = occi.getAPIEndpointsByMSISDN(address.replace("tel:", ""), API_TYPE,
 					executor.getSubResourcePath(), false, executor.getValidoperators());
 		}
-		//operatorId=ussdService.getOperatorIdByOperator(endpoint.getOperator());
-        
+
         Integer subscriptionId = ussdService.ussdRequestEntry(notifyUrl ,consumerKey,endpoint.getOperator(),userId);
         log.info("created subscriptionId  -  " + subscriptionId + " Request ID: " + UID.getRequestID(context));
 		
@@ -130,23 +124,7 @@ public class SendUSSDHandler implements USSDHandler {
 		context.setProperty("subsEndPoint", subsEndpoint);
 
 		context.setProperty(MSISDNConstants.USER_MSISDN, msisdn);
-		/*OperatorEndpoint endpoint = null;
-		if (ValidatorUtils.getValidatorForSubscription(context).validate(context)) {
-			endpoint = occi.getAPIEndpointsByMSISDN(address.replace("tel:", ""), API_TYPE,
-					executor.getSubResourcePath(), false, executor.getValidoperators());
-			
-			
-			OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
-			searchDTO.setApi(APIType.USSD);
-			searchDTO.setContext(context);
-			searchDTO.setIsredirect(false);
-			searchDTO.setMSISDN(address);
-			searchDTO.setOperators(executor.getValidoperators());
-			searchDTO.setRequestPathURL(executor.getSubResourcePath());
 
-			endpoint = occi.getOperatorEndpoint(searchDTO);
-			
-		}*/
 		String sending_add = endpoint.getEndpointref().getAddress();
 		log.info("sending endpoint found: " + sending_add + " Request ID: " + UID.getRequestID(context));
 
@@ -172,6 +150,12 @@ public class SendUSSDHandler implements USSDHandler {
 			((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 405);
 			throw new Exception("Method not allowed");
 		}
+
+		IServiceValidate validator;
+
+		validator = new ValidateUssdSend();
+		validator.validateUrl(requestPath);
+		validator.validate(jsonBody.toString());
 
 		return true;
 	}

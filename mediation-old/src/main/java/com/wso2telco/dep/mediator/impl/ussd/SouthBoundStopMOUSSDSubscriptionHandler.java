@@ -28,6 +28,8 @@ import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.service.USSDService;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
+import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
+import com.wso2telco.dep.oneapivalidation.service.impl.ussd.ValidateUssdCancelSubscription;
 import com.wso2telco.dep.operatorservice.model.OperatorSubscriptionDTO;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.logging.Log;
@@ -45,6 +47,7 @@ public class SouthBoundStopMOUSSDSubscriptionHandler implements USSDHandler {
     private USSDExecutor executor;
     private USSDService dbService;
     private Log log = LogFactory.getLog(SouthBoundStopMOUSSDSubscriptionHandler.class);
+    private Gson gson = new GsonBuilder().serializeNulls().create();
 
     public SouthBoundStopMOUSSDSubscriptionHandler(USSDExecutor ussdExecutor) {
 
@@ -55,7 +58,12 @@ public class SouthBoundStopMOUSSDSubscriptionHandler implements USSDHandler {
     @Override
     public boolean validate(String httpMethod, String requestPath, JSONObject jsonBody, MessageContext context)
             throws Exception {
-        return false;
+        IServiceValidate validator;
+
+        validator = new ValidateUssdCancelSubscription();
+        validator.validateUrl(requestPath);
+
+        return true;
     }
 
     @Override
@@ -70,7 +78,6 @@ public class SouthBoundStopMOUSSDSubscriptionHandler implements USSDHandler {
     private boolean deleteSubscriptions(MessageContext context) throws Exception {
         UID.getUniqueID(Type.DELRETSUB.getCode(), context, executor.getApplicationid());
 
-        Gson gson = new GsonBuilder().serializeNulls().create();
         String requestPath = executor.getSubResourcePath();
         Integer subscriptionId = Integer.parseInt((requestPath.substring(
                 requestPath.lastIndexOf("/") + 1)).replaceFirst("sub", ""));

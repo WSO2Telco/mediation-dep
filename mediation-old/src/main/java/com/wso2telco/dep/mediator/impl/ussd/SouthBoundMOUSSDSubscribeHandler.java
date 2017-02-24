@@ -27,6 +27,8 @@ import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.USSDService;
 import com.wso2telco.dep.mediator.util.FileNames;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
+import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
+import com.wso2telco.dep.oneapivalidation.service.impl.ussd.ValidateUssdSubscription;
 import com.wso2telco.dep.operatorservice.model.OperatorSubscriptionDTO;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,6 +69,13 @@ public class SouthBoundMOUSSDSubscribeHandler implements USSDHandler {
 	
 	private ApiUtils apiUtils;
 
+	/** Configurations file */
+	private String file =
+			CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
+
+	/** Loaded configurations */
+	private Map<String, String> mediatorConfMap;
+
 	/**
 	 * Instantiates a new MOUSSD subscribe handler.
 	 *
@@ -79,6 +88,7 @@ public class SouthBoundMOUSSDSubscribeHandler implements USSDHandler {
 		this.executor = ussdExecutor;
 		ussdService = new USSDService();
 		apiUtils = new ApiUtils();
+		mediatorConfMap = new FileReader().readPropertyFile(file);
 	}
 
 	/*
@@ -100,10 +110,6 @@ public class SouthBoundMOUSSDSubscribeHandler implements USSDHandler {
         String operatorId="";
         Integer subscriptionId = ussdService.ussdRequestEntry(notifyUrl,consumerKey,operatorId,userId);
 
-        FileReader fileReader = new FileReader();
-        String file =
-                CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
-        Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
         String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint") + subscriptionId;
         log.info("Subsendpoint - " + subsEndpoint);
 
@@ -139,6 +145,12 @@ public class SouthBoundMOUSSDSubscribeHandler implements USSDHandler {
 	@Override
 	public boolean validate(String httpMethod, String requestPath, JSONObject jsonBody, MessageContext context) throws Exception {
 
-		return false;
+		IServiceValidate validator;
+
+		validator = new ValidateUssdSubscription();
+		validator.validateUrl(requestPath);
+		validator.validate(jsonBody.toString());
+
+		return true;
 	}
 }
