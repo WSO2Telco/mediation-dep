@@ -18,19 +18,28 @@
 
 package com.wso2telco.dep.mediator.impl.ussd;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
+import com.wso2telco.dep.mediator.entity.ussd.DeleteOperator;
+import com.wso2telco.dep.mediator.entity.ussd.DeleteSubscriptionRequest;
+import com.wso2telco.dep.mediator.entity.ussd.DeleteSubscriptionRequestDTO;
 import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.service.USSDService;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
+import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
+import com.wso2telco.dep.oneapivalidation.service.impl.ussd.ValidateUssdCancelSubscription;
 import com.wso2telco.dep.operatorservice.model.OperatorSubscriptionDTO;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
-import org.json.JSONException;
+import org.apache.synapse.commons.json.JsonUtil;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class SouthBoundStopMOUSSDSubscriptionHandler implements USSDHandler {
@@ -38,6 +47,7 @@ public class SouthBoundStopMOUSSDSubscriptionHandler implements USSDHandler {
     private USSDExecutor executor;
     private USSDService dbService;
     private Log log = LogFactory.getLog(SouthBoundStopMOUSSDSubscriptionHandler.class);
+    private Gson gson = new GsonBuilder().serializeNulls().create();
 
     public SouthBoundStopMOUSSDSubscriptionHandler(USSDExecutor ussdExecutor) {
 
@@ -48,7 +58,12 @@ public class SouthBoundStopMOUSSDSubscriptionHandler implements USSDHandler {
     @Override
     public boolean validate(String httpMethod, String requestPath, JSONObject jsonBody, MessageContext context)
             throws Exception {
-        return false;
+        IServiceValidate validator;
+
+        validator = new ValidateUssdCancelSubscription();
+        validator.validateUrl(requestPath);
+
+        return true;
     }
 
     @Override
@@ -69,11 +84,26 @@ public class SouthBoundStopMOUSSDSubscriptionHandler implements USSDHandler {
         List<OperatorSubscriptionDTO> domainsubs = (dbService.moUssdSubscriptionQuery(Integer.valueOf(subscriptionId)));
 
         if (!domainsubs.isEmpty() && domainsubs != null) {
-            OperatorSubscriptionDTO sub = domainsubs.get(0);
-            if (domainsubs.size() > 1) {
-                log.warn("Multiple operators found for sbscription. Picking first endpoint: " + sub.getDomain()
-                         + " for operator: " + sub.getOperator() + " to send delete request.");
+
+            // If operator list also added as the payload, to be used in HUB
+            List<DeleteOperator> deleteOperators = new ArrayList<DeleteOperator>();
+
+            for (OperatorSubscriptionDTO domainSub : domainsubs) {
+                deleteOperators.add(new DeleteOperator(
+                        domainSub.getOperator(),
+                        domainSub.getDomain(),
+                        "Bearer " + executor.getAccessToken(domainSub.getOperator(), context))
+                );
             }
+
+            DeleteSubscriptionRequest deleteSubscriptionRequest = new DeleteSubscriptionRequest(new DeleteSubscriptionRequestDTO(deleteOperators));
+
+            String payload = gson.toJson(deleteSubscriptionRequest);
+
+            JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), payload, true, true);
+
+            // First operator is taken into variables to be used in GW
+            OperatorSubscriptionDTO sub = domainsubs.get(0);
             HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
             HandlerUtils.setEndpointProperty(context, sub.getDomain());
             HandlerUtils.setAuthorizationHeader(context, executor,

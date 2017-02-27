@@ -23,9 +23,9 @@ import com.wso2telco.dep.mediator.entity.smsmessaging.CallbackReference;
 public class SubscriptionGatewayRequestDTO {
 	private String clientCorrelator ;
 
-    private String shortCode ;
-    private String keyword;
     private CallbackReference callbackReference;
+
+    private ShortCodes[] shortCodes;
 
     public String getClientCorrelator() {
         return clientCorrelator;
@@ -33,22 +33,6 @@ public class SubscriptionGatewayRequestDTO {
 
     public void setClientCorrelator(String clientCorrelator) {
         this.clientCorrelator = clientCorrelator;
-    }
-
-    public String getShortCode() {
-        return shortCode;
-    }
-
-    public void setShortCode(String shortCode) {
-        this.shortCode = shortCode;
-    }
-
-    public String getKeyword() {
-        return keyword;
-    }
-
-    public void setKeyword(String keyword) {
-        this.keyword = keyword;
     }
 
     public CallbackReference getCallbackReference() {
@@ -59,4 +43,11 @@ public class SubscriptionGatewayRequestDTO {
         this.callbackReference = callbackReference;
     }
 
+    public ShortCodes[] getShortCodes() {
+        return shortCodes;
+    }
+
+    public void setShortCodes(ShortCodes[] shortCodes) {
+        this.shortCodes = shortCodes;
+    }
 }
