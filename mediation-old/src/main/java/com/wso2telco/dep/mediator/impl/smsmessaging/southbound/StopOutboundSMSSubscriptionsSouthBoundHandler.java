@@ -16,7 +16,12 @@
 package com.wso2telco.dep.mediator.impl.smsmessaging.southbound;
 
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
+import com.wso2telco.dep.mediator.entity.ussd.DeleteOperator;
+import com.wso2telco.dep.mediator.entity.ussd.DeleteSubscriptionRequest;
+import com.wso2telco.dep.mediator.entity.ussd.DeleteSubscriptionRequestDTO;
 import com.wso2telco.dep.mediator.impl.smsmessaging.SMSExecutor;
 import com.wso2telco.dep.mediator.impl.smsmessaging.SMSHandler;
 import com.wso2telco.dep.mediator.impl.smsmessaging.StopOutboundSMSSubscriptionsHandler;
@@ -34,9 +39,11 @@ import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -58,6 +65,8 @@ public class StopOutboundSMSSubscriptionsSouthBoundHandler implements SMSHandler
 
     /** The executor. */
     private SMSExecutor executor;
+
+    private Gson gson = new GsonBuilder().serializeNulls().create();
 
     /**
      * Instantiates a new stop outbound sms subscriptions handler.
@@ -134,16 +143,47 @@ public class StopOutboundSMSSubscriptionsSouthBoundHandler implements SMSHandler
      *             the exception
      */
     private boolean deleteSubscriptions(MessageContext context) throws Exception {
+        UID.getUniqueID(Type.DELRETSUB.getCode(), context, executor.getApplicationid());
+
         String requestPath = executor.getSubResourcePath();
         String subid = requestPath.substring(requestPath.lastIndexOf("/") + 1);
 
-        String requestid = UID.getUniqueID(Type.DELRETSUB.getCode(), context, executor.getApplicationid());
         Integer dnSubscriptionId = Integer.parseInt(subid.replaceFirst("sub", ""));
         List<OperatorSubscriptionDTO> domainsubs = (smsMessagingService
                 .outboudSubscriptionQuery(Integer.valueOf(dnSubscriptionId)));
-        if (domainsubs.isEmpty()) {
 
+        if (domainsubs != null && !domainsubs.isEmpty()) {
+
+            // If operator list also added as the payload, to be used in HUB
+            List<DeleteOperator> deleteOperators = new ArrayList<DeleteOperator>();
+
+            for (OperatorSubscriptionDTO domainSub : domainsubs) {
+                deleteOperators.add(new DeleteOperator(
+                        domainSub.getOperator(),
+                        domainSub.getDomain(),
+                        "Bearer " + executor.getAccessToken(domainSub.getOperator(), context))
+                );
+            }
+
+            DeleteSubscriptionRequest deleteSubscriptionRequest = new DeleteSubscriptionRequest(new DeleteSubscriptionRequestDTO(deleteOperators));
+
+            String payload = gson.toJson(deleteSubscriptionRequest);
+
+            JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), payload, true, true);
+
+            // First operator is taken into variables to be used in GW
+            OperatorSubscriptionDTO sub = domainsubs.get(0);
+            HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
+            HandlerUtils.setEndpointProperty(context, sub.getDomain());
+            HandlerUtils.setAuthorizationHeader(context, executor,
+                    new OperatorEndpoint(new EndpointReference(sub.getDomain()), sub.getOperator()));
+            context.setProperty("subscriptionId", dnSubscriptionId);
+        } else {
             throw new CustomException("POL0001", "",new String[] { "SMS Receipt Subscription Not Found: " + dnSubscriptionId });
+        }
+
+        /*if (domainsubs.isEmpty()) {
+
         }
         OperatorSubscriptionDTO sub = domainsubs.get(0);
         if (domainsubs.size() > 1) {
@@ -155,7 +195,7 @@ public class StopOutboundSMSSubscriptionsSouthBoundHandler implements SMSHandler
         HandlerUtils.setAuthorizationHeader(context, executor,
                 new OperatorEndpoint(new EndpointReference(sub.getDomain()), sub.getOperator()));
 
-        context.setProperty("dnSubscriptionId",dnSubscriptionId);
+        context.setProperty("dnSubscriptionId",dnSubscriptionId);*/
 
         return true;
     }
