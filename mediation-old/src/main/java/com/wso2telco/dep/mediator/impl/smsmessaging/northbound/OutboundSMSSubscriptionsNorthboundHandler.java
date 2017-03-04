@@ -201,7 +201,7 @@ public class OutboundSMSSubscriptionsNorthboundHandler implements SMSHandler {
 		SenderAddresses[] senderAddresses = nbDeliveryReceiptSubscriptionRequest.getDeliveryReceiptSubscription()
 		                                                                        .getSenderAddresses();
 
-		List<OperatorSubscriptionDTO> domainsubs = new ArrayList<OperatorSubscriptionDTO>();
+//		List<OperatorSubscriptionDTO> domainsubs = new ArrayList<OperatorSubscriptionDTO>();
 //		SouthboundDeliveryReceiptSubscriptionRequest sbDeliveryReceiptSubscriptionResponse = null;
 
 		for (SenderAddresses senderAddressesObj : senderAddresses) {
@@ -250,12 +250,6 @@ public class OutboundSMSSubscriptionsNorthboundHandler implements SMSHandler {
 		context.setProperty("original_callbackData", origCallbackData);
 
 		JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), requestStr, true, true);
-
-
-		// todo:
-//		smsMessagingService.outboundOperatorsubsEntry(domainsubs, dnSubscriptionId);
-//		nbDeliveryReceiptSubscriptionRequest.getDeliveryReceiptSubscription().getCallbackReference().setNotifyURL(origNotiUrl);
-
 
 		return true;
 	}
