@@ -182,21 +182,6 @@ public class StopOutboundSMSSubscriptionsSouthBoundHandler implements SMSHandler
             throw new CustomException("POL0001", "",new String[] { "SMS Receipt Subscription Not Found: " + dnSubscriptionId });
         }
 
-        /*if (domainsubs.isEmpty()) {
-
-        }
-        OperatorSubscriptionDTO sub = domainsubs.get(0);
-        if (domainsubs.size() > 1) {
-            log.warn("Multiple operators found for sbscription. Picking first endpoint: " + sub.getDomain()
-                    + " for operator: " + sub.getOperator() + " to send delete request.");
-        }
-        HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
-        HandlerUtils.setEndpointProperty(context, sub.getDomain());
-        HandlerUtils.setAuthorizationHeader(context, executor,
-                new OperatorEndpoint(new EndpointReference(sub.getDomain()), sub.getOperator()));
-
-        context.setProperty("dnSubscriptionId",dnSubscriptionId);*/
-
         return true;
     }
 }
