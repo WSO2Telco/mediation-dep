@@ -22,10 +22,10 @@ import com.google.gson.GsonBuilder;
 import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.entity.smsmessaging.CallbackReference;
+import com.wso2telco.dep.mediator.entity.smsmessaging.northbound.DeliveryReceiptGroupSubscription;
+import com.wso2telco.dep.mediator.entity.smsmessaging.northbound.NorthboundDeliveryReceiptGroupSubscriptionRequest;
 import com.wso2telco.dep.mediator.entity.smsmessaging.northbound.NorthboundDeliveryReceiptSubscriptionRequest;
 import com.wso2telco.dep.mediator.entity.smsmessaging.northbound.SenderAddresses;
-import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.DeliveryReceiptSubscription;
-import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.SouthboundDeliveryReceiptSubscriptionRequest;
 import com.wso2telco.dep.mediator.impl.smsmessaging.SMSExecutor;
 import com.wso2telco.dep.mediator.impl.smsmessaging.SMSHandler;
 import com.wso2telco.dep.mediator.internal.ApiUtils;
@@ -34,6 +34,7 @@ import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.SMSMessagingService;
 import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.ValidateCancelSubscription;
@@ -42,6 +43,7 @@ import com.wso2telco.dep.operatorservice.model.OperatorSubscriptionDTO;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -78,6 +80,15 @@ public class OutboundSMSSubscriptionsNorthboundHandler implements SMSHandler {
 	/** The api utils. */
 	private ApiUtils apiUtils;
 
+	/** The configuration file */
+	private String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
+
+	/** The configurations */
+	private Map<String, String> mediatorConfMap;
+
+	/** The Gson Builder */
+	private Gson gson = new GsonBuilder().serializeNulls().create();
+
 	/**
 	 * Instantiates a new NB outbound sms subscriptions handler.
 	 *
@@ -89,6 +100,7 @@ public class OutboundSMSSubscriptionsNorthboundHandler implements SMSHandler {
 		occi = new OriginatingCountryCalculatorIDD();
 		smsMessagingService = new SMSMessagingService();
 		apiUtils = new ApiUtils();
+		mediatorConfMap = new FileReader().readPropertyFile(file);
 	}
 
 	/*
@@ -152,36 +164,35 @@ public class OutboundSMSSubscriptionsNorthboundHandler implements SMSHandler {
 	private boolean createSubscriptions(MessageContext context) throws Exception {
 
 		String requestid = UID.getUniqueID(Type.RETRIVSUB.getCode(), context, executor.getApplicationid());
-		Gson gson = new GsonBuilder().serializeNulls().create();
-
-		FileReader fileReader = new FileReader();
-		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
-		
-		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
 
 		HashMap<String, String> jwtDetails = apiUtils.getJwtTokenDetails(context);
 		JSONObject jsonBody = executor.getJsonBody();
-		JSONObject jsondstaddr = jsonBody.getJSONObject("deliveryReceiptSubscription");
+//		JSONObject jsondstaddr = jsonBody.getJSONObject("deliveryReceiptSubscription");
 
 		String serviceProvider = jwtDetails.get("subscriber");
 		log.debug("Subscriber Name : " + serviceProvider);
 		
 		String hubDNSubsGatewayEndpoint = mediatorConfMap.get("hubDNSubsGatewayEndpoint");
-		log.debug("Hub / Gateway DN Notify URL : " + hubDNSubsGatewayEndpoint);
+		log.debug("Hub DN Notify URL : " + hubDNSubsGatewayEndpoint);
 		
 		NorthboundDeliveryReceiptSubscriptionRequest nbDeliveryReceiptSubscriptionRequest = gson.fromJson(jsonBody.toString(), NorthboundDeliveryReceiptSubscriptionRequest.class);
 		String orgclientcl = nbDeliveryReceiptSubscriptionRequest.getDeliveryReceiptSubscription().getClientCorrelator();
 		String origNotiUrl = nbDeliveryReceiptSubscriptionRequest.getDeliveryReceiptSubscription().getCallbackReference().getNotifyURL();
+		String origCallbackData = nbDeliveryReceiptSubscriptionRequest.getDeliveryReceiptSubscription().getCallbackReference().getCallbackData();
 
 		List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp(API_TYPE, executor.getSubResourcePath(),executor.getValidoperators());
 
+		Map<String, OperatorEndpoint> operatorMap = new HashMap<String, OperatorEndpoint>();
+
+		for (OperatorEndpoint endpoint : endpoints) {
+
+			operatorMap.put(endpoint.getOperator(), endpoint);
+
+		}
+
 		Integer dnSubscriptionId = smsMessagingService.outboundSubscriptionEntry(nbDeliveryReceiptSubscriptionRequest.getDeliveryReceiptSubscription().getCallbackReference().getNotifyURL(), serviceProvider);
 		String subsEndpoint = hubDNSubsGatewayEndpoint + "/" + dnSubscriptionId;
-		/*String subsEndpoint = mediatorConfMap.get("hubSubsGatewayEndpoint") + "/" + dnSubscriptionId;*/
-		
-		//jsondstaddr.getJSONObject("callbackReference").put("notifyURL", subsEndpoint);
-		
-		
+
 		nbDeliveryReceiptSubscriptionRequest.getDeliveryReceiptSubscription().getCallbackReference()
 				.setNotifyURL(subsEndpoint);
 		log.debug("Delivery notification subscription northbound request body : "
@@ -190,8 +201,60 @@ public class OutboundSMSSubscriptionsNorthboundHandler implements SMSHandler {
 		SenderAddresses[] senderAddresses = nbDeliveryReceiptSubscriptionRequest.getDeliveryReceiptSubscription()
 		                                                                        .getSenderAddresses();
 
-		List<OperatorSubscriptionDTO> domainsubs = new ArrayList<OperatorSubscriptionDTO>();
-		SouthboundDeliveryReceiptSubscriptionRequest sbDeliveryReceiptSubscriptionResponse = null;
+//		List<OperatorSubscriptionDTO> domainsubs = new ArrayList<OperatorSubscriptionDTO>();
+//		SouthboundDeliveryReceiptSubscriptionRequest sbDeliveryReceiptSubscriptionResponse = null;
+
+		for (SenderAddresses senderAddressesObj : senderAddresses) {
+
+			if (operatorMap.containsKey(senderAddressesObj.getOperatorCode())) {
+
+				OperatorEndpoint endpoint = operatorMap.get(senderAddressesObj.getOperatorCode());
+				String url = endpoint.getEndpointref().getAddress();
+				String southboundURLPart = "/" + senderAddressesObj.getSenderAddress() + "/subscriptions";
+				url = url.replace("/subscriptions", southboundURLPart);
+
+				senderAddressesObj.setToAddress(url);
+
+				senderAddressesObj.setAuthorizationHeader("Bearer " + executor.getAccessToken(endpoint.getOperator(), context));
+
+			} else {
+
+				log.error("OperatorEndpoint not found. Operator Not Provisioned: " + senderAddressesObj.getOperatorCode());
+
+				senderAddressesObj.setToAddress("Not Provisioned");
+			}
+		}
+
+		NorthboundDeliveryReceiptGroupSubscriptionRequest sbDeliveryReceiptSubscriptionRequest = new NorthboundDeliveryReceiptGroupSubscriptionRequest();
+		DeliveryReceiptGroupSubscription deliveryReceiptSubscriptionRequest = new DeliveryReceiptGroupSubscription();
+		CallbackReference callbackReference = new CallbackReference();
+
+		callbackReference.setCallbackData(nbDeliveryReceiptSubscriptionRequest.getDeliveryReceiptSubscription().getCallbackReference().getCallbackData());
+		callbackReference.setNotifyURL(subsEndpoint);
+
+		deliveryReceiptSubscriptionRequest.setCallbackReference(callbackReference);
+		deliveryReceiptSubscriptionRequest.setClientCorrelator(orgclientcl + ":" + requestid);
+		deliveryReceiptSubscriptionRequest.setSenderAddresses(senderAddresses);
+
+		sbDeliveryReceiptSubscriptionRequest.setDeliveryReceiptSubscription(deliveryReceiptSubscriptionRequest);
+
+		String requestStr = gson.toJson(sbDeliveryReceiptSubscriptionRequest);
+
+		HandlerUtils.setHandlerProperty(context,this.getClass().getSimpleName());
+
+		String ResourceUrlPrefix = mediatorConfMap.get("hubGateway");
+		context.setProperty("responseResourceURL", ResourceUrlPrefix + executor.getResourceUrl() + "/" + dnSubscriptionId);
+
+		context.setProperty("subscriptionID", dnSubscriptionId);
+		context.setProperty("original_notifyUrl", origNotiUrl);
+		context.setProperty("original_callbackData", origCallbackData);
+
+		JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), requestStr, true, true);
+
+		return true;
+	}
+
+		/*
 
 		for (OperatorEndpoint endpoint : endpoints) {			
 
@@ -215,7 +278,6 @@ public class OutboundSMSSubscriptionsNorthboundHandler implements SMSHandler {
 					String sbRequestBody = removeResourceURL(gson.toJson(sbDeliveryReceiptSubscriptionRequest));
 					log.debug("Delivery notification southbound request body of " + endpoint.getOperator()+ " operator: " + sbRequestBody);
 
-					 /*Create southbound request URL*/
 					String url = endpoint.getEndpointref().getAddress();
 					String southboundURLPart = "/" + senderAddresses[i].getSenderAddress() + "/subscriptions";
 					url = url.replace("/subscriptions", southboundURLPart);
@@ -244,7 +306,7 @@ public class OutboundSMSSubscriptionsNorthboundHandler implements SMSHandler {
 				}
 			}
 		}
-		
+		// todo: domainsubs contains successful attempts
 		smsMessagingService.outboundOperatorsubsEntry(domainsubs, dnSubscriptionId);
 		String ResourceUrlPrefix = mediatorConfMap.get("hubGateway");
 
@@ -262,6 +324,7 @@ public class OutboundSMSSubscriptionsNorthboundHandler implements SMSHandler {
 			senderAddressesCount++;
 		}
 
+		// todo: error if successful attempt count is zero
 		if (successResultCount == 0) {
 			throw new CustomException("POL0299", "", new String[] { "Error registering subscription" });
 		}
@@ -277,8 +340,10 @@ public class OutboundSMSSubscriptionsNorthboundHandler implements SMSHandler {
 		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 201);
 		executor.setResponse(context, nbDeliveryReceiptSubscriptionResponseBody);
 
-		return true;
-	}
+
+		*/
+
+
 
 	/**
 	 * Removes the resource url.
@@ -287,7 +352,7 @@ public class OutboundSMSSubscriptionsNorthboundHandler implements SMSHandler {
 	 *            the sb subsrequst
 	 * @return the string
 	 */
-	private String removeResourceURL(String sbSubsrequst) {
+	/*private String removeResourceURL(String sbSubsrequst) {
 
 		String sbDeliveryNotificationrequestString = "";
 
@@ -305,7 +370,7 @@ public class OutboundSMSSubscriptionsNorthboundHandler implements SMSHandler {
 		}
 
 		return "{\"deliveryReceiptSubscription\":" + sbDeliveryNotificationrequestString + "}";
-	}
+	}*/
 	
 	/*private boolean deleteSubscriptions(MessageContext context) throws Exception {
 		        String requestPath = executor.getSubResourcePath();

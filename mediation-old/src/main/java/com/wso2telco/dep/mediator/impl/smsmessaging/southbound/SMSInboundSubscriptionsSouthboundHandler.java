@@ -48,7 +48,7 @@ import java.util.Map;
 // TODO: Auto-generated Javadoc
 
 /**
- * The Class RetrieveSMSSubscriptionsHandler.
+ * The Class SMSInboundSubscriptionsSouthboundHandler.
  */
 public class SMSInboundSubscriptionsSouthboundHandler implements SMSHandler {
 

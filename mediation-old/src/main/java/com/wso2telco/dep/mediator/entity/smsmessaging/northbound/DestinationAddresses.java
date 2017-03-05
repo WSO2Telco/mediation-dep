@@ -86,24 +86,66 @@ public class DestinationAddresses {
     }
 
     /** The status. */
-    private String status;
+//    private String status;
 
     /**
      * Gets the status.
      *
      * @return the status
      */
-    public String getStatus() {
-        
-        return status;
-    }
+//    public String getStatus() {
+//
+//        return status;
+//    }
 
     /**
      * Sets the status.
      *
      * @param status the new status
      */
-    public void setStatus(String status) {
-        this.status = status;
+//    public void setStatus(String status) {
+//        this.status = status;
+//    }
+
+    /** sending Address */
+    private String toAddress;
+
+    /**
+     * Gets the sending Address
+     *
+     * @return
+     */
+    public String getToAddress() {
+        return toAddress;
+    }
+
+    /**
+     * Sets the sending Address
+     *
+     * @param toAddress
+     */
+    public void setToAddress(String toAddress) {
+        this.toAddress = toAddress;
+    }
+
+    /** sending Authorization header */
+    private String authorizationHeader;
+
+    /**
+     * Gets the authorization header
+     *
+     * @return
+     */
+    public String getAuthorizationHeader() {
+        return authorizationHeader;
+    }
+
+    /**
+     * Sets the authorization header
+     *
+     * @param authorizationHeader
+     */
+    public void setAuthorizationHeader(String authorizationHeader) {
+        this.authorizationHeader = authorizationHeader;
     }
 }

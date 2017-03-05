@@ -112,23 +112,23 @@ public class Subscription {
     }
     
     /** The resource url. */
-    private String resourceURL;
+//    private String resourceURL;
 
     /**
      * Gets the resource url.
      *
      * @return the resource url
      */
-    public String getResourceURL() {
-        return resourceURL;
-    }
+//    public String getResourceURL() {
+//        return resourceURL;
+//    }
 
     /**
      * Sets the resource url.
      *
      * @param resourceURL the new resource url
      */
-    public void setResourceURL(String resourceURL) {
-        this.resourceURL = resourceURL;
-    }
+//    public void setResourceURL(String resourceURL) {
+//        this.resourceURL = resourceURL;
+//    }
 }
