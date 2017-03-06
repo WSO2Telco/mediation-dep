@@ -135,10 +135,39 @@ public class PaymentHandlerFactory {
 						throw new CustomException("SVC0002", "",new String[] { "Missing mandatory parameter: transactionOperationStatus" });
 						
 					}
+<<<<<<< HEAD
+
+					JSONObject objPaymentAmount = (JSONObject) objAmountTransaction.get("paymentAmount");
+					JSONObject objchargingInformation = (JSONObject) objPaymentAmount.get("chargingInformation");
+
+
+
+					if(!objchargingInformation.get("currency").equals("") && objchargingInformation.get("amount").equals("")){
+						log.debug("createPaymentHandler -> parameter not found.");
+						throw new CustomException("SVC0002", "",new String[] { "Missing mandatory parameter: amount" });
+					}
+					else if (!objchargingInformation.get("amount").equals("") && objchargingInformation.get("currency").equals("")){
+						log.debug("createPaymentHandler -> parameter not found.");
+						throw new CustomException("SVC0002", "",new String[] { "Missing mandatory parameter: currency" });
+					}else if(objchargingInformation.get("amount").equals("") && objchargingInformation.get("currency").equals("")){
+
+						if(objchargingInformation.get("code").equals("")){
+							log.debug("createPaymentHandler -> parameter not found.");
+							throw new CustomException("SVC0007", "",new String[] { "" });
+						}
+
+					}
+
+				} catch (CustomException e) {
+					
+					log.error("createPaymentHandler -> Manipulating recived JSON Object: "+ e);
+					throw new CustomException(e.getErrcode(), "",new String[] { e.getErrvar()[0] });
+=======
 				} catch (CustomException e) {
 					
 					log.error("createPaymentHandler -> Manipulating recived JSON Object: "+ e);
 					throw new CustomException("SVC0002", "",new String[] { e.getErrvar()[0] });
+>>>>>>> 623279a79ea4f25fe8150e4d74172b72e4ae0b09
 
 				}
 			} else {
