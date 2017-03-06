@@ -20,7 +20,7 @@ public class MessageConstants {
 
 	public static final String REQUEST_ID = "mife.prop.requestId";
 	public static final String MESSAGE_TYPE = "message.type";
-	public static final String PAYLOAD_LOGGING_ENABLED = "payload_logging_enabled";
+	public static final String PAYLOAD_LOGGING_ENABLED = "payload.logging.enabled";
 	public static final String APPLICATION_ID = "api.ut.application.id";
 	
 }
