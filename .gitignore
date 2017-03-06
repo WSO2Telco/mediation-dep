@@ -23,6 +23,7 @@ target
 .idea
 *pom.xml.next
 *pom.xml.tag
+*.DS_STORE
 
 *pom.xml.releaseBackup
 *release.properties
