@@ -13,8 +13,8 @@
 
 	<modules>
 		<module>components</module>
-		<module>distribution</module>
 		<module>mediation-old</module>
+		<module>distribution</module>
 	</modules>
 	<distributionManagement>
 		<snapshotRepository>

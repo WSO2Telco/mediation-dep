@@ -19,23 +19,29 @@
 			<includes>
 				<include>com.wso2telco.dep.jwt.mediator-${pom.version}.jar</include>
 			</includes>
-			<outputDirectory>/libs</outputDirectory>
+			<outputDirectory>/others</outputDirectory>
 		</fileSet>
 		<fileSet>
 			<directory>../components/com.wso2telco.dep.spend.limit.mediator/target</directory>
 			<includes>
 				<include>com.wso2telco.dep.spend.limit.mediator-${pom.version}.jar</include>
 			</includes>
-			<outputDirectory>/libs</outputDirectory>
+			<outputDirectory>/others</outputDirectory>
 		</fileSet>
-		<!--fileSet>
-			<directory>../capps/payment-capp/com.wso2telco.dep.spend.limit.mediation.capp/target</directory>
+		<fileSet>
+			<directory>../components/logging-extension/target</directory>
 			<includes>
-				<include>com.wso2telco.dep.spend.limit.mediation.capp_${pom.version}.car</include>
+				<include>logging-extension-${pom.version}.jar</include>
 			</includes>
-			<outputDirectory>/capps</outputDirectory>
-		</fileSet-->
-
+			<outputDirectory>/others</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>../mediation-old/target</directory>
+			<includes>
+				<include>mediator-${pom.version}.jar</include>
+			</includes>
+			<outputDirectory>/others</outputDirectory>
+		</fileSet>
 	</fileSets>
 </assembly>
 
