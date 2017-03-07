@@ -90,4 +90,35 @@ public class Registrations {
     public void setCriteria(String criteria) {
         this.criteria = criteria;
     }
+
+    private String toAddress;
+
+    public String getToAddress() {
+        return toAddress;
+    }
+
+
+    public void setToAddress(String toAddress) {
+        this.toAddress = toAddress;
+    }
+
+    private String authorizationHeader;
+
+    public String getAuthorizationHeader() {
+        return authorizationHeader;
+    }
+
+    public void setAuthorizationHeader(String authorizationHeader) {
+        this.authorizationHeader = authorizationHeader;
+    }
+
+    private int batchSize;
+
+    public int getBatchSize() {
+        return batchSize;
+    }
+
+    public void setBatchSize(int batchSize) {
+        this.batchSize = batchSize;
+    }
 }
