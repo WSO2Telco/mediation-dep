@@ -34,6 +34,7 @@ import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.northbound.ValidateNBRetrieveSms;
@@ -42,6 +43,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
 import org.wso2.carbon.utils.CarbonUtils;
@@ -134,177 +136,47 @@ public boolean handle(MessageContext context) throws CustomException, AxisFault,
 		}
 	}
 
+     int perOpCoLimit = batchSize / (endpoints.size());
+     String getRequestURL = null;
+     String criteria= null;
+     String operatorCode=null;
+
 	for (OperatorEndpoint operatorEndpoint : endpoints) {
 
 		for (int i = 0; i < registrations.length; i++) {
-			if (registrations[i].getOperatorCode().equalsIgnoreCase(
-					operatorEndpoint.getOperator())) {
+			if (registrations[i].getOperatorCode().equalsIgnoreCase(operatorEndpoint.getOperator())) {
 				validEndpoints.add(operatorEndpoint);
-				break;
-			}
-		}
-	}
 
-	log.info("Endpoints size: " + validEndpoints.size());
-
-	Collections.shuffle(validEndpoints);
-	int perOpCoLimit = batchSize / (validEndpoints.size());
-
-	log.info("Per OpCo limit :" + perOpCoLimit);
-
-	List<InboundSMSMessage> inboundSMSMessageList = new ArrayList<InboundSMSMessage>();
-
-	int execCount = 0;
-	int forLoopCount=0;	
-	boolean retryFlag = true;
-	FileReader fileReader = new FileReader();
-	String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
-	Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
-    Boolean retry = false;
-    retry =Boolean.valueOf(mediatorConfMap.get("retry_on_fail"));
-    Integer retryCount = Integer.valueOf(mediatorConfMap.get("retry_count"));
- 
-	
-    
-	ArrayList<String> responses = new ArrayList<String>();
-	while ((inboundSMSMessageList.size() < batchSize)
-			&& (retryFlag == true)) {
-		execCount++;
-		log.info("NB aEndpoint : "+endpoints.size());
-		
-		for (int i = 0; i < validEndpoints.size(); i++) {
-			forLoopCount++;
-			log.info("NB forLoopCount : "+forLoopCount);
-			OperatorEndpoint aEndpoint = validEndpoints.remove(0);
-			log.info("NB aEndpoint : "+aEndpoint.getEndpointref().getAddress()); 
-			validEndpoints.add(aEndpoint);
-			String url = aEndpoint.getEndpointref().getAddress();
-			String getRequestURL = null;
-			String criteria = null;
-			String operatorCode = null;
-
-			for (int r = 0; r < registrations.length; r++) {
-				if (registrations[r].getOperatorCode().equalsIgnoreCase(
-						aEndpoint.getOperator())) {
-					/* create request url for southbound operators */
-					if (registrations[r].getCriteria() != null) {
-						criteria = registrations[r].getCriteria();
+					if (registrations[i].getCriteria() != null) {
+						criteria = registrations[i].getCriteria();
 					}
+                String url = operatorEndpoint.getEndpointref().getAddress();
 
 					if (criteria == null || criteria.equals("")) {
-						operatorCode = registrations[r].getOperatorCode();
+						operatorCode = registrations[i].getOperatorCode();
 						log.info("Operator RetrieveSMSHandler"+operatorCode);
-						getRequestURL = "/"+ registrations[r].getRegistrationID()+ "/messages?maxBatchSize=" + batchSize;
+						getRequestURL = "/"+ registrations[i].getRegistrationID()+ "/messages?maxBatchSize=" + batchSize;
 						url = url.replace("/messages", getRequestURL);
 						log.info("Invoke RetrieveSMSHandler of plugin");
 					} else {
-						operatorCode = registrations[r].getOperatorCode();
+						operatorCode = registrations[i].getOperatorCode();
 						log.info("Operator RetrieveSMSHandler"+operatorCode);
-						getRequestURL = "/"+ registrations[r].getRegistrationID()+ "/" + criteria+ "/messages?maxBatchSize=" + batchSize;
+						getRequestURL = "/"+ registrations[i].getRegistrationID()+ "/" + criteria+ "/messages?maxBatchSize=" + batchSize;
 						url = url.replace("/messages", getRequestURL);
 						log.info("Invoke SBRetrieveSMSHandler of plugin");
 					}
 
-					break;
-				}
-
-			}
-
-			APICall ac = apiUtil.setBatchSize(url, body.toString(), reqType, perOpCoLimit);//check if request json body incorrect
-			JSONObject obj = ac.getBody();
-			String retStr = null;
-			log.info("Retrieving messages of operator: "+ aEndpoint.getOperator());
-
-			context.setDoingGET(true);
-			if (context.isDoingGET()) {
-				log.info("Doing makeGetRequest");
-				retStr = executor.makeRetrieveSMSGetRequest(aEndpoint,ac.getUri(), null, true, context, false);
-			} else {
-				log.info("Doing makeRequest");
-				retStr = executor.makeRequest(aEndpoint, ac.getUri(),obj.toString(), true, context, false);
-			}
-
-			log.info("Retrieved messages of " + aEndpoint.getOperator() + " operator: " + retStr
-			         + " Request ID: " + UID.getRequestID(context));
-
-			/* add criteria and operatorCode to the southbound response */
-			NorthboundRetrieveResponse sbRetrieveResponse = gson.fromJson(retStr, NorthboundRetrieveResponse.class);
-
-			if (sbRetrieveResponse!= null && sbRetrieveResponse.getInboundSMSMessageList() != null) {
-				if (sbRetrieveResponse.getInboundSMSMessageList().getInboundSMSMessage() != null
-						&& sbRetrieveResponse.getInboundSMSMessageList().getInboundSMSMessage().length != 0) {
-					InboundSMSMessage[] inboundSMSMessageResponses = sbRetrieveResponse.getInboundSMSMessageList().getInboundSMSMessage();
-					log.info("001 SECTION");
-					for (int t = 0; t < inboundSMSMessageResponses.length; t++) {
-						inboundSMSMessageResponses[t].setCriteria(criteria);
-						inboundSMSMessageResponses[t].setOperatorCode(operatorCode);
-						inboundSMSMessageList.add(inboundSMSMessageResponses[t]);
-					}
-					sbRetrieveResponse.getInboundSMSMessageList().setInboundSMSMessage(inboundSMSMessageResponses);
-					responses.add(gson.toJson(sbRetrieveResponse));
-
-				} else {
-					log.info("002 SECTION");
-					InboundSMSMessage[] inboundSMSMessageResponses = new InboundSMSMessage[0];
-					InboundSMSMessageList inboundSMSMessageListN = new InboundSMSMessageList();
-					inboundSMSMessageListN.setInboundSMSMessage(inboundSMSMessageResponses);
-					inboundSMSMessageListN.setNumberOfMessagesInThisBatch("0");
-					inboundSMSMessageListN.setResourceURL("Not Available");
-					inboundSMSMessageListN.setTotalNumberOfPendingMessages("0");
-					sbRetrieveResponse.setInboundSMSMessageList(inboundSMSMessageListN);
-
-					for (int k = 0; k < inboundSMSMessageResponses.length; k++) {
-						inboundSMSMessageResponses[k].setCriteria(criteria);
-						inboundSMSMessageResponses[k].setOperatorCode(operatorCode);
-						inboundSMSMessageList.add(inboundSMSMessageResponses[k]);
-					}
-					sbRetrieveResponse.getInboundSMSMessageList().setInboundSMSMessage(inboundSMSMessageResponses);
-					responses.add(gson.toJson(sbRetrieveResponse));
-				}
-			}
-
-			if (inboundSMSMessageList.size() >= batchSize) {
+                registrations[i].setToAddress(url);
+                registrations[i].setAuthorizationHeader("Bearer " + executor.getAccessToken(operatorEndpoint.getOperator(), context));
+                registrations[i].setBatchSize(perOpCoLimit);
 				break;
 			}
 		}
-
-		log.info("Final value of count :" + execCount);
-		log.info("Results length of retrieve messages: "
-				+ inboundSMSMessageList.size());
-
-		if (retry == false) {
-			retryFlag = false;
-			log.info("11 Final value of retryFlag :" + retryFlag);
-		}
-
-		if (execCount >= retryCount) {
-			retryFlag = false;
-			log.info("22 Final value of retryFlag :" + retryFlag);
-		}
 	}
 
-	JSONObject paylodObject = apiUtil.generateResponse(context, reqType,
-			inboundSMSMessageList, responses, requestid);
-	String strjsonBody = paylodObject.toString();
-
-	/* create northbound response. add clientCorrelator and resourceURL */
-	NorthboundRetrieveResponse nbRetrieveResponse = gson.fromJson(strjsonBody, NorthboundRetrieveResponse.class);
-	nbRetrieveResponse.getInboundSMSMessageList().setClientCorrelator(nbRetrieveRequest.getInboundSMSMessages().getClientCorrelator());
-	String resourceURL = nbRetrieveResponse.getInboundSMSMessageList().getResourceURL();
-	InboundSMSMessage[] inboundSMSMessageResponses = nbRetrieveResponse.getInboundSMSMessageList().getInboundSMSMessage();
-	for (int q = 0; q < inboundSMSMessageResponses.length; q++) {
-		String operatorCode = inboundSMSMessageResponses[q].getOperatorCode();
-		String sestinationAddress = inboundSMSMessageResponses[q].getDestinationAddress();
-		String messageId = inboundSMSMessageResponses[q].getMessageId();
-		String inResourceURL = resourceURL.replace("registrations/","registrations/" + operatorCode + "/" + sestinationAddress+ "/") + "/" + messageId;
-		inboundSMSMessageResponses[q].setResourceURL(inResourceURL);
-	}
-	nbRetrieveResponse.getInboundSMSMessageList().setInboundSMSMessage(inboundSMSMessageResponses);
-
-	executor.removeHeaders(context);
-	executor.setResponse(context, gson.toJson(nbRetrieveResponse));
-	((Axis2MessageContext) context).getAxis2MessageContext().setProperty(
-			"messageType", "application/json");
+    String requestStr = gson.toJson(nbRetrieveRequest);
+    HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
+    JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), requestStr, true, true);
 
 	return true;
 }
