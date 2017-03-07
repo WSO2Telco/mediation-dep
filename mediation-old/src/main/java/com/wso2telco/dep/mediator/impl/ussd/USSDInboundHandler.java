@@ -28,6 +28,8 @@ import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.FileNames;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
+import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
+import com.wso2telco.dep.oneapivalidation.service.impl.ussd.ValidateReceiveUssd;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.logging.Log;
@@ -145,6 +147,13 @@ public class USSDInboundHandler implements USSDHandler {
 			throws Exception {
 
 		context.setProperty(DataPublisherConstants.OPERATION_TYPE, 407);
+
+		IServiceValidate validator;
+
+		validator = new ValidateReceiveUssd();
+		validator.validateUrl(requestPath);
+		validator.validate(jsonBody.toString());
+
 		return true;
 	}
 }
