@@ -107,8 +107,12 @@ public class PaymentHandlerFactory {
 				try {
 
 					JSONObject objAmountTransaction = (JSONObject) objJSONObject.get("amountTransaction");
-					
-					if (!objAmountTransaction.get("transactionOperationStatus").equals("")) {
+
+					if (!objAmountTransaction.has("transactionOperationStatus")) {
+						log.debug("createPaymentHandler -> API Type Not found");
+						throw new CustomException("SVC0002", "", new String[]{"Missing mandatory parameter: transactionOperationStatus"});
+					}
+					if (!objAmountTransaction.get("transactionOperationStatus").equals("") ) {
 
 						transactionOperationStatus = nullOrTrimmed(objAmountTransaction.get("transactionOperationStatus").toString());
 						log.debug("createPaymentHandler -> Transaction operation status"+ transactionOperationStatus);
@@ -127,20 +131,16 @@ public class PaymentHandlerFactory {
 							
 							log.debug("createPaymentHandler -> API Type Not found");
 							throw new CustomException("SVC0002", "",new String[] { "Invalid transactionOperationStatus" });
-							
+
 						}
 					} else {
-						
 						log.debug("createPaymentHandler -> API Type Not found");
 						throw new CustomException("SVC0002", "",new String[] { "Missing mandatory parameter: transactionOperationStatus" });
 						
 					}
 
-
 					JSONObject objPaymentAmount = (JSONObject) objAmountTransaction.get("paymentAmount");
 					JSONObject objchargingInformation = (JSONObject) objPaymentAmount.get("chargingInformation");
-
-
 
 					if(!objchargingInformation.get("currency").equals("") && objchargingInformation.get("amount").equals("")){
 						log.debug("createPaymentHandler -> parameter not found.");
@@ -155,9 +155,7 @@ public class PaymentHandlerFactory {
 							log.debug("createPaymentHandler -> parameter not found.");
 							throw new CustomException("SVC0007", "",new String[] { "" });
 						}
-
 					}
-
 				} catch (CustomException e) {
 					
 					log.error("createPaymentHandler -> Manipulating recived JSON Object: "+ e);
