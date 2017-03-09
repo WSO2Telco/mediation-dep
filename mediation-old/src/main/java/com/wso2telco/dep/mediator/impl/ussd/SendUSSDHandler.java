@@ -111,8 +111,14 @@ public class SendUSSDHandler implements USSDHandler {
 		userId = (String) context.getProperty("USER_ID");
 
 		OperatorEndpoint endpoint = null;
+
+		String filteredAddress = address.replace("etel:", "").replace("tel:", "");
+		if (!filteredAddress.startsWith("+")) {
+			filteredAddress = "+" + filteredAddress;
+		}
+
 		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
-			endpoint = occi.getAPIEndpointsByMSISDN(address.replace("tel:", ""), API_TYPE,
+			endpoint = occi.getAPIEndpointsByMSISDN(filteredAddress, API_TYPE,
 					executor.getSubResourcePath(), false, executor.getValidoperators());
 		}
 
