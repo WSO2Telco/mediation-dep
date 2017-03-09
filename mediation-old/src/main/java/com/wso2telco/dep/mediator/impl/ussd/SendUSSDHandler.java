@@ -112,7 +112,7 @@ public class SendUSSDHandler implements USSDHandler {
 
 		OperatorEndpoint endpoint = null;
 		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
-			endpoint = occi.getAPIEndpointsByMSISDN(address.replace("tel:", ""), API_TYPE,
+			endpoint = occi.getAPIEndpointsByMSISDN(address.replace("etel:+", "").replace("tel:+", "").replace("etel", "").replace("tel:", ""), API_TYPE,
 					executor.getSubResourcePath(), false, executor.getValidoperators());
 		}
 
