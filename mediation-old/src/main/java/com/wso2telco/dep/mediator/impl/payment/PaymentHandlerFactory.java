@@ -111,7 +111,6 @@ public class PaymentHandlerFactory {
 					if (!objAmountTransaction.has("transactionOperationStatus")) {
 						log.debug("createPaymentHandler -> API Type Not found");
 						throw new CustomException("SVC0002", "", new String[]{"Missing mandatory parameter: transactionOperationStatus"});
-
 					}
 					if (!objAmountTransaction.get("transactionOperationStatus").equals("") ) {
 
