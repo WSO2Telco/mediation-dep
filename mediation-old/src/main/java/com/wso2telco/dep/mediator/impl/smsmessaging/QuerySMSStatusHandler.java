@@ -181,6 +181,7 @@ public class QuerySMSStatusHandler implements SMSHandler {
 					 */
 				}
 				String sending_add = endpoint.getEndpointref().getAddress();
+				sending_add = sending_add + resourcePath;
 				log.info("sending endpoint found: " + sending_add + " Request ID: " + UID.getRequestID(context));
 				HandlerUtils.setHandlerProperty(context,this.getClass().getSimpleName());
 				HandlerUtils.setEndpointProperty(context,sending_add);
