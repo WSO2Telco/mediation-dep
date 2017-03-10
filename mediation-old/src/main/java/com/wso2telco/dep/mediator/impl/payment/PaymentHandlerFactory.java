@@ -33,179 +33,190 @@ public class PaymentHandlerFactory {
 		String transactionOperationStatus = null;
 		log.debug("createPaymentHandler -> Json string : " + executor.getJsonBody().toString());
 
+		try {
+
+			paymentHandler = process(resourceURL, executor);
+		} catch (CustomException e) {
+
+			log.error("createPaymentHandler -> Manipulating recived JSON Object: " + e);
+			throw new CustomException(e.getErrcode(), "", new String[] { e.getErrvar()[0] });
+		} catch (Exception e) {
+
+			log.error("createPaymentHandler -> Manipulating recived JSON Object: " + e);
+			throw new CustomException("SVC0002", "", new String[] { null });
+		}
+
+		return paymentHandler;
+	}
+
+	private static PaymentHandler process(String resourceURL, PaymentExecutor executor) throws Exception {
+
+		PaymentHandler paymentHandler = null;
+		String transactionOperationStatus = null;
+		log.debug("createPaymentHandler -> Json string : " + executor.getJsonBody().toString());
+
 		String httpMethod = executor.getHttpMethod();
 
 		if (httpMethod.equalsIgnoreCase("post")) {
+
 			if (resourceURL.contains("amountReservation")) {
-				
+
 				log.debug("Amount reservation transaction");
 				String parts[] = resourceURL.split("/transactions/");
 				String urlParts[] = parts[1].split("/");
 				log.debug("createPaymentHandler -> Payment url parts : " + urlParts.length);
 
 				if (urlParts.length == 1) {
-					
+
 					log.debug("createPaymentHandler -> Payment API type : Reserve an amount to charge");
 					paymentHandler = new AmountReserveHandler(executor);
-					
 				} else if (urlParts.length == 2) {
-					
+
 					JSONObject objJSONObject = executor.getJsonBody();
 
-					try {
-						
-						JSONObject objAmountReservationTransaction = (JSONObject) objJSONObject.get("amountReservationTransaction");
+					JSONObject objAmountReservationTransaction = (JSONObject) objJSONObject
+							.get("amountReservationTransaction");
 
-						if (objAmountReservationTransaction.get("transactionOperationStatus") != null) {
-							
-							transactionOperationStatus = nullOrTrimmed(objAmountReservationTransaction.get("transactionOperationStatus").toString());
-							log.debug("createPaymentHandler -> Transaction operation status"+ transactionOperationStatus);
-							
-							if (transactionOperationStatus.equalsIgnoreCase("Reserved")) {
-								
-								log.debug("createPaymentHandler -> Payment API type : Reserve an additional amount");
-								paymentHandler = new AmountReserveAdditionalHandler(executor);
-								
-							} else if (transactionOperationStatus.equalsIgnoreCase("Charged")) {
-								
-								log.debug("createPaymentHandler -> Payment API type : Charge against the reservation");
-								paymentHandler = new AmountReserveChargeHandler(executor);
-								
-							} else if (transactionOperationStatus.equalsIgnoreCase("Released")) {
-								
-								log.debug("createPaymentHandler -> Payment API type : Release the reservation");
-								paymentHandler = new AmountReserveReleaseHandler(executor);
-								
-							} else {
-								
-								log.debug("createPaymentHandler -> API Type Not found");
-								throw new CustomException("SVC0002", "",new String[] { null });
-								
-							}
+					if (objAmountReservationTransaction.get("transactionOperationStatus") != null) {
+
+						transactionOperationStatus = nullOrTrimmed(
+								objAmountReservationTransaction.get("transactionOperationStatus").toString());
+						log.debug("createPaymentHandler -> Transaction operation status" + transactionOperationStatus);
+
+						if (transactionOperationStatus.equalsIgnoreCase("Reserved")) {
+
+							log.debug("createPaymentHandler -> Payment API type : Reserve an additional amount");
+							paymentHandler = new AmountReserveAdditionalHandler(executor);
+
+						} else if (transactionOperationStatus.equalsIgnoreCase("Charged")) {
+
+							log.debug("createPaymentHandler -> Payment API type : Charge against the reservation");
+							paymentHandler = new AmountReserveChargeHandler(executor);
+
+						} else if (transactionOperationStatus.equalsIgnoreCase("Released")) {
+
+							log.debug("createPaymentHandler -> Payment API type : Release the reservation");
+							paymentHandler = new AmountReserveReleaseHandler(executor);
+
 						} else {
-							
+
 							log.debug("createPaymentHandler -> API Type Not found");
-							throw new CustomException("SVC0002", "",new String[] { null });
-							
-						}
-					} catch (Exception ex) {
-						
-						log.error("createPaymentHandler -> Manipulating recived JSON Object: "+ ex);
-						throw new CustomException("SVC0002", "",new String[] { null });
-						
-					}
-				} else {
-					
-					log.debug("createPaymentHandler -> API Type Not found");
-					throw new CustomException("SVC0002", "",new String[] { null });
-					
-				}
-			} else if (resourceURL.contains("amount")) {
-				
-				JSONObject objJSONObject = executor.getJsonBody();
-				
-				try {
-
-					JSONObject objAmountTransaction = (JSONObject) objJSONObject.get("amountTransaction");
-
-					if (!objAmountTransaction.has("transactionOperationStatus")) {
-						log.debug("createPaymentHandler -> API Type Not found");
-						throw new CustomException("SVC0002", "", new String[]{"Missing mandatory parameter: transactionOperationStatus"});
-					}
-					if (!objAmountTransaction.get("transactionOperationStatus").equals("") ) {
-
-						transactionOperationStatus = nullOrTrimmed(objAmountTransaction.get("transactionOperationStatus").toString());
-						log.debug("createPaymentHandler -> Transaction operation status"+ transactionOperationStatus);
-
-						if (transactionOperationStatus.equalsIgnoreCase("Charged")) {
-							
-							log.debug("createPaymentHandler -> Payment API type : Charge a user");
-							paymentHandler = new AmountChargeHandler(executor);
-							
-						} else if (transactionOperationStatus.equalsIgnoreCase("Refunded")) {
-							
-							log.debug("createPaymentHandler -> Payment API type : Refund a user");
-							paymentHandler = new AmountRefundHandler(executor);
-							
-						} else {
-							
-							log.debug("createPaymentHandler -> API Type Not found");
-							throw new CustomException("SVC0002", "",new String[] { "Invalid transactionOperationStatus" });
+							throw new CustomException("SVC0002", "", new String[] { null });
 
 						}
 					} else {
+
 						log.debug("createPaymentHandler -> API Type Not found");
-						throw new CustomException("SVC0002", "",new String[] { "Missing mandatory parameter: transactionOperationStatus" });
-						
+						throw new CustomException("SVC0002", "", new String[] { null });
 					}
+				} else {
 
-					JSONObject objPaymentAmount = (JSONObject) objAmountTransaction.get("paymentAmount");
-					JSONObject objchargingInformation = (JSONObject) objPaymentAmount.get("chargingInformation");
-
-					if(!objchargingInformation.has("currency") && objchargingInformation.has("amount")){
-						
-						log.debug("createPaymentHandler -> parameter not found.");
-						throw new CustomException("SVC0002", "",
-								new String[] { "Missing mandatory parameter: currency" });
-					}
-					else if (!objchargingInformation.has("amount") && objchargingInformation.has("currency")){
-						
-						log.debug("createPaymentHandler -> parameter not found.");
-						throw new CustomException("SVC0002", "",new String[] { "Missing mandatory parameter: amount" });
-					}else if(!objchargingInformation.has("amount") && !objchargingInformation.has("currency")){
-
-						if(!objchargingInformation.has("code")){
-							
-							log.debug("createPaymentHandler -> parameter not found.");
-							throw new CustomException("SVC0002", "",new String[] { "Missing mandatory parameter: amount or code" });
-						}
-					}
-				} catch (CustomException e) {
-					
-					log.error("createPaymentHandler -> Manipulating recived JSON Object: "+ e);
-					throw new CustomException(e.getErrcode(), "",new String[] { e.getErrvar()[0] });
+					log.debug("createPaymentHandler -> API Type Not found");
+					throw new CustomException("SVC0002", "", new String[] { null });
 
 				}
+			} else if (resourceURL.contains("amount")) {
+
+				JSONObject objJSONObject = executor.getJsonBody();
+
+				JSONObject objAmountTransaction = (JSONObject) objJSONObject.get("amountTransaction");
+
+				if (!objAmountTransaction.has("transactionOperationStatus")) {
+
+					log.debug("createPaymentHandler -> API Type Not found");
+					throw new CustomException("SVC0002", "",
+							new String[] { "Missing mandatory parameter: transactionOperationStatus" });
+				}
+
+				if (!objAmountTransaction.get("transactionOperationStatus").equals("")) {
+
+					transactionOperationStatus = nullOrTrimmed(
+							objAmountTransaction.get("transactionOperationStatus").toString());
+					log.debug("createPaymentHandler -> Transaction operation status" + transactionOperationStatus);
+
+					if (transactionOperationStatus.equalsIgnoreCase("Charged")) {
+
+						log.debug("createPaymentHandler -> Payment API type : Charge a user");
+						paymentHandler = new AmountChargeHandler(executor);
+					} else if (transactionOperationStatus.equalsIgnoreCase("Refunded")) {
+
+						log.debug("createPaymentHandler -> Payment API type : Refund a user");
+						paymentHandler = new AmountRefundHandler(executor);
+					} else {
+
+						log.debug("createPaymentHandler -> API Type Not found");
+						throw new CustomException("SVC0002", "", new String[] { "Invalid transactionOperationStatus" });
+					}
+				} else {
+
+					log.debug("createPaymentHandler -> API Type Not found");
+					throw new CustomException("SVC0002", "",
+							new String[] { "Missing mandatory parameter: transactionOperationStatus" });
+				}
+
+				JSONObject objPaymentAmount = (JSONObject) objAmountTransaction.get("paymentAmount");
+				JSONObject objchargingInformation = (JSONObject) objPaymentAmount.get("chargingInformation");
+
+				if ((!objchargingInformation.has("currency") || objchargingInformation.get("currency").equals(""))
+						&& (objchargingInformation.has("amount") && !objchargingInformation.get("amount").equals(""))) {
+
+					log.debug("createPaymentHandler -> parameter not found.");
+					throw new CustomException("SVC0002", "", new String[] { "Missing mandatory parameter: currency" });
+				} else if ((!objchargingInformation.has("amount") || objchargingInformation.get("amount").equals(""))
+						&& (objchargingInformation.has("currency")
+								&& !objchargingInformation.get("currency").equals(""))) {
+
+					log.debug("createPaymentHandler -> parameter not found.");
+					throw new CustomException("SVC0002", "", new String[] { "Missing mandatory parameter: amount" });
+				} else if ((!objchargingInformation.has("amount") || objchargingInformation.get("amount").equals(""))
+						&& (!objchargingInformation.has("currency")
+								|| objchargingInformation.get("currency").equals(""))) {
+
+					if (!objchargingInformation.has("code") || objchargingInformation.get("code").equals("")) {
+
+						log.debug("createPaymentHandler -> parameter not found.");
+						throw new CustomException("SVC0002", "",
+								new String[] { "Missing mandatory parameter: amount or code" });
+					}
+				}
+
 			} else {
-				
+
 				log.debug("createPaymentHandler -> API Type Not found");
 				throw new CustomException("SVC0002", "", new String[] { null });
-				
 			}
 		} else if (httpMethod.equalsIgnoreCase("get")) {
-			
+
 			if (resourceURL.contains("/transactions/amount/")) {
-				
+
 				log.debug("createPaymentHandler -> Payment API type : Query the status of a transaction");
 				paymentHandler = new QueryPaymentStatusHandler(executor);
-				
 			} else if (resourceURL.contains("/transactions")) {
-				
+
 				log.debug("createPaymentHandler -> Payment API type : List all transactions");
 				paymentHandler = new ListTransactionsHandler(executor);
-				
 			} else {
-				
+
 				log.debug("createPaymentHandler -> API Type Not found");
 				throw new CustomException("SVC0002", "", new String[] { null });
-				
 			}
 		} else {
-			
+
 			log.debug("createPaymentHandler -> API Type Not found");
 			throw new CustomException("SVC0002", "", new String[] { null });
-			
 		}
 
 		return paymentHandler;
 	}
 
 	private static String nullOrTrimmed(String s) {
-		
+
 		String rv = null;
 		if (s != null && s.trim().length() > 0) {
+
 			rv = s.trim();
 		}
+
 		return rv;
 	}
 }
