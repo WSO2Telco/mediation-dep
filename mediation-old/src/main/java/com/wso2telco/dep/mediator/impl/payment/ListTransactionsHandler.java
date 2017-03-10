@@ -78,6 +78,7 @@ public class ListTransactionsHandler implements PaymentHandler {
 	public boolean handle(MessageContext context) throws Exception {
 		String[] params = executor.getSubResourcePath().split("/");
 		context.setProperty(MSISDNConstants.USER_MSISDN, params[1].substring(5));
+		context.setProperty(MSISDNConstants.MSISDN, params[1]);
         OperatorEndpoint endpoint = null;
         if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
             endpoint = occi.getAPIEndpointsByMSISDN(

@@ -178,10 +178,13 @@ public class SendSMSHandler implements SMSHandler {
 		// create an array out of address element and set it to message context
 		JSONArray addressElement = jsonBody.getJSONObject("outboundSMSMessageRequest").getJSONArray("address");
 		String[] addresses = new String[addressElement.length()];
+		String addressList = "";
 		for (int i = 0 ; i < addressElement.length() ; i ++) {
 			addresses[i] = addressElement.getString(i);
+			addressList += (addresses[i] + ",");
 		}
 		context.setProperty("ADDRESSES", addresses);
+		context.setProperty("MSISDN_LIST", addressList.substring(0, addressList.length() - 1));
 
 //		Map<String, SendSMSResponse> smsResponses = smssendmulti(context, subsrequest,
 //				jsonBody.getJSONObject("outboundSMSMessageRequest").getJSONArray("address"), API_TYPE,

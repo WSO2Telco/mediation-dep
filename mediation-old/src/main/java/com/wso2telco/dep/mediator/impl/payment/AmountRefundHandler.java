@@ -110,6 +110,7 @@ public class AmountRefundHandler implements PaymentHandler {
 				.getString("endUserId");
 		String msisdn = endUserId.substring(5);
 		context.setProperty(MSISDNConstants.USER_MSISDN, msisdn);
+		context.setProperty(MSISDNConstants.MSISDN, endUserId);
 		// OperatorEndpoint endpoint = null;
 		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(
 				context)) {

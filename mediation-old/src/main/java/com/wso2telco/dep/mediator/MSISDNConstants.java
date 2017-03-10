@@ -24,6 +24,9 @@ public final class MSISDNConstants {
     
     /** The Constant USER_MSISDN. */
     public static final String USER_MSISDN = "UserMSISDN";
+
+    /** The Constant MSISDN. */
+    public static final String MSISDN = "MSISDN";
     
     /** The Constant AGGRIGATOR_ROLE. */
     public static final String AGGRIGATOR_ROLE = "aggregator";

@@ -130,6 +130,7 @@ public class SendUSSDHandler implements USSDHandler {
 		context.setProperty("subsEndPoint", subsEndpoint);
 
 		context.setProperty(MSISDNConstants.USER_MSISDN, msisdn);
+		context.setProperty(MSISDNConstants.MSISDN, address);
 
 		String sending_add = endpoint.getEndpointref().getAddress();
 		log.info("sending endpoint found: " + sending_add + " Request ID: " + UID.getRequestID(context));

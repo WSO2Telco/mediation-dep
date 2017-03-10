@@ -18,6 +18,7 @@ package com.wso2telco.dep.mediator;
 
 public final class MediatorConstants {
     public static final String USER_MSISDN = "UserMSISDN";
+    public static final String MSISDN = "MSISDN";
     public static final String AGGRIGATOR_ROLE = "aggregator";
 
     public static final String MSISDN_LOCATION_PROPERTY = "default.MSISDN.location";

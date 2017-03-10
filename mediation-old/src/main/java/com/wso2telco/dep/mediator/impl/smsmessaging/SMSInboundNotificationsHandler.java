@@ -21,6 +21,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.core.mnc.resolver.MNCQueryClient;
+import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.entity.smsmessaging.InboundRequest;
 import com.wso2telco.dep.mediator.internal.Type;
@@ -127,6 +128,7 @@ public class SMSInboundNotificationsHandler implements SMSHandler {
 		//String operator = mncQueryclient.QueryNetwork(mcc, operatormar.concat(inboundRequest.getInboundSMSMessageRequest().getInboundSMSMessage().getSenderAddress()));
 		
 		String msisdn = inboundRequest.getInboundSMSMessageRequest().getInboundSMSMessage().getSenderAddress();
+		context.setProperty(MSISDNConstants.MSISDN, msisdn);
 		if (msisdn.startsWith("tel:")) {
 			String[] params = inboundRequest.getInboundSMSMessageRequest().getInboundSMSMessage().getSenderAddress().split(":");
 			if (params[1].startsWith("+")) {

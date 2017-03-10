@@ -161,6 +161,7 @@ public class QuerySMSStatusHandler implements SMSHandler {
 			String reqId = entry.getValue();
 			if (reqId != null) {
 				context.setProperty(MSISDNConstants.USER_MSISDN, address.substring(5));
+				context.setProperty(MSISDNConstants.MSISDN, address);
 				OperatorEndpoint endpoint = null;
 				String resourcePath = resourcePathPrefix + reqId + "/deliveryInfos";
 				if(ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)){

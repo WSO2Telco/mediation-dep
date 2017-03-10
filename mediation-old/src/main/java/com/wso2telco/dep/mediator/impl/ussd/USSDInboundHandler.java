@@ -112,9 +112,11 @@ public class USSDInboundHandler implements USSDHandler {
 
 		JSONObject jsonBody = executor.getJsonBody();
 		//jsonBody.getJSONObject("inboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL", ussdSPDetails.get(0));
-		
-		String msisdn = jsonBody.getJSONObject("inboundUSSDMessageRequest").getString("address").substring(5);
+
+		String address = jsonBody.getJSONObject("inboundUSSDMessageRequest").getString("address");
+		String msisdn = address.substring(5);
 		context.setProperty(MediatorConstants.USER_MSISDN, msisdn);
+		context.setProperty(MediatorConstants.MSISDN, address);
 		context.setProperty(DataPublisherConstants.MSISDN, msisdn);
         context.setProperty(DataPublisherConstants.SP_CONSUMER_KEY, ussdSPDetails.get(1));
         context.setProperty(DataPublisherConstants.SP_OPERATOR_ID, ussdSPDetails.get(2));

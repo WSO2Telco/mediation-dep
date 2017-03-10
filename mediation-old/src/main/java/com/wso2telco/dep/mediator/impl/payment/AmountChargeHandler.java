@@ -113,6 +113,7 @@ public class AmountChargeHandler implements PaymentHandler {
         Double chargeamount = Double.parseDouble(jsonBody.getJSONObject("amountTransaction").getJSONObject("paymentAmount").getJSONObject("chargingInformation").getString("amount"));
 
 		context.setProperty(MSISDNConstants.USER_MSISDN, msisdn);
+		context.setProperty(MSISDNConstants.MSISDN, endUserId);
 		//OperatorEndpoint endpoint = null;
 
 		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {

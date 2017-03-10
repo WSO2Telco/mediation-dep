@@ -64,6 +64,7 @@ public class LocationExecutor extends RequestExecutor {
 
     	String requestid = UID.getUniqueID(Type.LOCREQ.getCode(), context, getApplicationid());
         String[] params = new ResourceURLUtil().getParamValues(getSubResourcePath());
+        context.setProperty(MSISDNConstants.MSISDN, params[0]);
         context.setProperty(MSISDNConstants.USER_MSISDN, params[0].substring(5));
         OperatorEndpoint endpoint = null;
 		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(
