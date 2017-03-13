@@ -106,11 +106,11 @@ public class SMSInboundSubscriptionsSouthboundHandler implements SMSHandler {
 		JSONObject jsonBody = executor.getJsonBody();
 		JSONObject jsondstaddr = jsonBody.getJSONObject("subscription");
 
-		String orgclientcl = "";
+		String orgclientcl = null;
 		if (!jsondstaddr.isNull("clientCorrelator")) {
 			orgclientcl = jsondstaddr.getString("clientCorrelator");
 		}
-        String modifiedClientCorrelator = orgclientcl + ":" + requestid;
+      /*  String modifiedClientCorrelator = orgclientcl + ":" + requestid;*/
 		String serviceProvider = jwtDetails.get("subscriber");
 		log.debug("subscriber Name : " + serviceProvider);
 
@@ -137,7 +137,7 @@ public class SMSInboundSubscriptionsSouthboundHandler implements SMSHandler {
             HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
             HandlerUtils.setAuthorizationHeader(context, executor, endpoint);
             HandlerUtils.setGatewayHost(context);
-            context.setProperty("clientCorrelator", modifiedClientCorrelator);
+            context.setProperty("clientCorrelator", orgclientcl);
             context.setProperty("notifyURL", subsEndpoint);
             context.setProperty("subscriptionID", moSubscriptionId);
             context.setProperty("operator", endpoint.getOperator());

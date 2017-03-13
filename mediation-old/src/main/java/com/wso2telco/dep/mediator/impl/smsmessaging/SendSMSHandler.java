@@ -107,8 +107,8 @@ public class SendSMSHandler implements SMSHandler {
 		String requestid = UID.getUniqueID(Type.SMSSEND.getCode(), context, executor.getApplicationid());
 		// append request id to client correlator
 		JSONObject jsonBody = executor.getJsonBody();
-		JSONObject clientclr = jsonBody.getJSONObject("outboundSMSMessageRequest");
-		clientclr.put("clientCorrelator", clientclr.getString("clientCorrelator") + ":" + requestid);
+		//JSONObject clientclr = jsonBody.getJSONObject("outboundSMSMessageRequest");
+		//clientclr.put("clientCorrelator", clientclr.getString("clientCorrelator") + ":" + requestid);
 
 		Gson gson = new GsonBuilder().serializeNulls().create();
 		SendSMSRequest subsrequest = gson.fromJson(jsonBody.toString(), SendSMSRequest.class);
