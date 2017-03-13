@@ -110,7 +110,6 @@ public class SMSInboundSubscriptionsSouthboundHandler implements SMSHandler {
 		if (!jsondstaddr.isNull("clientCorrelator")) {
 			orgclientcl = jsondstaddr.getString("clientCorrelator");
 		}
-      /*  String modifiedClientCorrelator = orgclientcl + ":" + requestid;*/
 		String serviceProvider = jwtDetails.get("subscriber");
 		log.debug("subscriber Name : " + serviceProvider);
 

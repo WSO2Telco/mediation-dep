@@ -303,10 +303,7 @@ public class SendSMSHandler implements SMSHandler {
 			searchDTO.setRequestPathURL(executor.getSubResourcePath());
 
 			endpoint = occi.getOperatorEndpoint(searchDTO);
-
-			/*endpoint = occi.getAPIEndpointsByMSISDN(address.replace("tel:", ""), apitype, executor.getSubResourcePath(),
-					false, operators); // smsSend;
-*/
+            
 			List<String> sendAdr = new ArrayList<String>();
 			sendAdr.add(address);
 			sendreq.getOutboundSMSMessageRequest().setAddress(sendAdr);

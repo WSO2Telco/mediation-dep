@@ -159,12 +159,12 @@ public class OutboundSMSSubscriptionsSouthboundHandler implements SMSHandler {
 		HashMap<String, String> jwtDetails = apiUtils.getJwtTokenDetails(context);
 		JSONObject jsonBody = executor.getJsonBody();
 		JSONObject jsondstaddr = jsonBody.getJSONObject("deliveryReceiptSubscription");
-		//String orgclientcl = jsondstaddr.getString("clientCorrelator");
+
 		String orgclientcl = null;
 		if (!jsondstaddr.isNull("clientCorrelator")) {
 			orgclientcl = jsondstaddr.getString("clientCorrelator");
 		}
-      /*  String modifiedClientCorrelator = orgclientcl + ":" + requestid;*/
+
 		String serviceProvider = jwtDetails.get("subscriber");
 		log.debug("Subscriber Name : " + serviceProvider);
 
