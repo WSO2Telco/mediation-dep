@@ -15,33 +15,62 @@
 
 	<fileSets>
 		<fileSet>
-			<directory>../components/com.wso2telco.dep.jwt.mediator/target</directory>
-			<includes>
-				<include>com.wso2telco.dep.jwt.mediator-${pom.version}.jar</include>
-			</includes>
-			<outputDirectory>/others</outputDirectory>
-		</fileSet>
-		<fileSet>
 			<directory>../components/com.wso2telco.dep.spend.limit.mediator/target</directory>
 			<includes>
 				<include>com.wso2telco.dep.spend.limit.mediator-${pom.version}.jar</include>
 			</includes>
-			<outputDirectory>/others</outputDirectory>
-		</fileSet>
-		<fileSet>
-			<directory>../components/logging-extension/target</directory>
-			<includes>
-				<include>logging-extension-${pom.version}.jar</include>
-			</includes>
-			<outputDirectory>/others</outputDirectory>
+			<outputDirectory>/others/lib</outputDirectory>
 		</fileSet>
 		<fileSet>
 			<directory>../mediation-old/target</directory>
 			<includes>
 				<include>mediator-${pom.version}.jar</include>
 			</includes>
-			<outputDirectory>/others</outputDirectory>
+			<outputDirectory>/others/lib</outputDirectory>
 		</fileSet>
+		<!-- External files -->
+		<fileSet>
+			<directory>.</directory>
+			<includes>
+				<include>dbutils-${com.wso2telco.core.version}.jar</include>
+			</includes>
+			<outputDirectory>/others/dropins</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>.</directory>
+			<includes>
+				<include>mnc-resolver-${com.wso2telco.core.version}.jar</include>
+			</includes>
+			<outputDirectory>/others/dropins</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>.</directory>
+			<includes>
+				<include>msisdn-validator-${com.wso2telco.core.version}.jar</include>
+			</includes>
+			<outputDirectory>/others/dropins</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>.</directory>
+			<includes>
+				<include>operator-service-${com.wso2telco.dep.version}.jar</include>
+			</includes>
+			<outputDirectory>/others/dropins</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>.</directory>
+			<includes>
+				<include>subscription-validator-${com.wso2telco.dep.version}.jar</include>
+			</includes>
+			<outputDirectory>/others/dropins</outputDirectory>
+		</fileSet>
+		<fileSet>
+			<directory>.</directory>
+			<includes>
+				<include>oneapi-validation-${com.wso2telco.dep.version}.jar</include>
+			</includes>
+			<outputDirectory>/others/lib</outputDirectory>
+		</fileSet>		
 	</fileSets>
 </assembly>
 

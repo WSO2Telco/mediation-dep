@@ -39,7 +39,6 @@
     </licenses>
 
     <modules>
-        <module>com.wso2telco.dep.jwt.mediator</module>
         <module>com.wso2telco.dep.spend.limit.mediator</module>
         <module>logging-extension</module>
     </modules>

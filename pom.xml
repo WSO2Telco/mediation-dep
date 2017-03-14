@@ -274,7 +274,7 @@
 		<org.apache.synapse.core.version>2.1.7-wso2v3</org.apache.synapse.core.version>
 		<org.apache.synapse.version>2.1.7-wso2v3</org.apache.synapse.version>
 		<commons-codec.wso2.version>1.4.0.wso2v1</commons-codec.wso2.version>
-		<org.wso2.carbon.apimgt.version>6.0.4</org.wso2.carbon.apimgt.version>
+		<org.wso2.carbon.apimgt.version>6.0.4</org.wso2.carbon.apimgt.version>		
 	</properties>
 
 </project>
