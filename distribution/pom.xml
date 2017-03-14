@@ -40,6 +40,80 @@
 
     <build>
         <plugins>
+			<!-- Download external dependancies -->
+			<plugin>
+				<groupId>com.googlecode.maven-download-plugin</groupId>
+				<artifactId>download-maven-plugin</artifactId>
+				<version>1.2.1</version>
+				<executions>
+				    <execution>
+						<id>dbutils</id>
+				        <phase>generate-resources</phase>
+				        <goals>
+				            <goal>wget</goal>
+				        </goals>
+				        <configuration>
+				            <url>${com.wso2telco.nexus.release.repo.url}core/dbutils/${com.wso2telco.core.version}/dbutils-${com.wso2telco.core.version}.jar</url>
+				            <outputDirectory>.</outputDirectory>
+				        </configuration>
+				    </execution>
+				    <execution>
+						<id>mnc-resolver</id>
+				        <phase>generate-resources</phase>
+				        <goals>
+				            <goal>wget</goal>
+				        </goals>
+				        <configuration>
+				            <url>${com.wso2telco.nexus.release.repo.url}core/mnc-resolver/${com.wso2telco.core.version}/mnc-resolver-${com.wso2telco.core.version}.jar</url>
+				            <outputDirectory>.</outputDirectory>			            
+				        </configuration>
+				    </execution>
+				    <execution>
+						<id>msisdn-validator</id>
+				        <phase>generate-resources</phase>
+				        <goals>
+				            <goal>wget</goal>
+				        </goals>
+				        <configuration>
+				            <url>${com.wso2telco.nexus.release.repo.url}core/msisdn-validator/${com.wso2telco.core.version}/msisdn-validator-${com.wso2telco.core.version}.jar</url>
+				            <outputDirectory>.</outputDirectory>		            
+				        </configuration>
+				    </execution>
+				    <execution>
+						<id>operator-service</id>
+				        <phase>generate-resources</phase>
+				        <goals>
+				            <goal>wget</goal>
+				        </goals>
+				        <configuration>
+				            <url>${com.wso2telco.nexus.release.repo.url}dep/operator-service/${com.wso2telco.dep.version}/operator-service-${com.wso2telco.dep.version}.jar</url>
+				            <outputDirectory>.</outputDirectory>										            
+				        </configuration>
+				    </execution>
+				    <execution>
+						<id>subscription-validator</id>
+				        <phase>generate-resources</phase>
+				        <goals>
+				            <goal>wget</goal>
+				        </goals>
+				        <configuration>				            
+							<url>${com.wso2telco.nexus.release.repo.url}dep/subscription-validator/${com.wso2telco.dep.version}/subscription-validator-${com.wso2telco.dep.version}.jar</url>
+				            <outputDirectory>.</outputDirectory>
+				        </configuration>
+				    </execution>
+				    <execution>
+						<id>oneapi-validation</id>
+				        <phase>generate-resources</phase>
+				        <goals>
+				            <goal>wget</goal>
+				        </goals>
+				        <configuration>
+				            <url>${com.wso2telco.nexus.release.repo.url}dep/oneapi-validation/${com.wso2telco.dep.version}/oneapi-validation-${com.wso2telco.dep.version}.jar</url>
+				            <outputDirectory>.</outputDirectory>			            
+				        </configuration>
+				    </execution>				    
+				</executions>
+			</plugin>
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-assembly-plugin</artifactId>
@@ -56,24 +130,6 @@
                     </execution>
                 </executions>
             </plugin>
-            <!--<plugin>-->
-            <!--<artifactId>maven-assembly-plugin</artifactId>-->
-            <!--<version>2.5.5</version>-->
-            <!--<configuration>-->
-            <!--<appendAssemblyId>false</appendAssemblyId>-->
-            <!--<descriptors>-->
-            <!--<descriptor>capps/assembly.xml</descriptor>-->
-            <!--</descriptors>-->
-            <!--</configuration>-->
-            <!--<executions>-->
-            <!--<execution>-->
-            <!--<phase>package</phase>-->
-            <!--<goals>-->
-            <!--<goal>single</goal>-->
-            <!--</goals>-->
-            <!--</execution>-->
-            <!--</executions>-->
-            <!--</plugin>-->
         </plugins>
     </build>
 
