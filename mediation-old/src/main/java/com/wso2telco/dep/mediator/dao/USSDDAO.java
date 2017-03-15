@@ -52,7 +52,6 @@ public class USSDDAO {
 		PreparedStatement insert_statement=null;
 		PreparedStatement select_statement =null;
 		ResultSet insert_result = null;
-		ResultSet select_result = null;
 		Integer selectId = 0;
 		Integer newId = 0;
 
@@ -65,30 +64,19 @@ public class USSDDAO {
 			}
 
 			con.setAutoCommit(false);
-			StringBuilder queryString = new StringBuilder(" SELECT MAX(ussd_request_did) maxid ");
-			queryString.append("FROM ");
-			queryString.append(DatabaseTables.USSD_REQUEST_ENTRY.getTableName());
-			
-			select_statement = con.prepareStatement(queryString.toString());
-			select_result = select_statement.executeQuery(queryString.toString());
-           
-			if (select_result.next()) {
-            	selectId = select_result.getInt("maxid") + 1;
-            }
             
 			
 			StringBuilder insertQueryString = new StringBuilder(" INSERT INTO ");
 			insertQueryString.append(DatabaseTables.USSD_REQUEST_ENTRY.getTableName());
-			insertQueryString.append(" (ussd_request_did,notifyurl,sp_consumerKey,operatorId,userId) ");
-			insertQueryString.append("VALUES (?, ? ,? ,? ,? )");
+			insertQueryString.append(" (notifyurl,sp_consumerKey,operatorId,userId) ");
+			insertQueryString.append("VALUES ( ? ,? ,? ,? )");
 
 			insert_statement = con.prepareStatement(insertQueryString.toString(), Statement.RETURN_GENERATED_KEYS);
 
-			insert_statement.setInt(1, selectId);
-			insert_statement.setString(2, notifyURL);
-			insert_statement.setString(3, consumerKey);
-			insert_statement.setString(4, operatorId);
-			insert_statement.setString(5, userId);
+			insert_statement.setString(1, notifyURL);
+			insert_statement.setString(2, consumerKey);
+			insert_statement.setString(3, operatorId);
+			insert_statement.setString(4, userId);
 			
 			log.debug("sql query in ussdRequestEntry : " + insert_statement);
 
@@ -111,7 +99,6 @@ public class USSDDAO {
 		} finally {
 
 			DbUtils.closeAllConnections(insert_statement, con, insert_result);
-			DbUtils.closeAllConnections(select_statement, null, select_result);
 			
 		}
 
