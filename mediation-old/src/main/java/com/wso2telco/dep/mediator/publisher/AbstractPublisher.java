@@ -49,14 +49,6 @@ abstract class AbstractPublisher implements Publishable {
 	@Override
 	synchronized public void publish(MessageContext messageContext,
 			JSONObject paymentRes) throws Exception {
-		
-//		AuthenticationContext authContext = APISecurityUtils
-//				.getAuthenticationContext(messageContext);
-//		String consumerKey = "";
-//		if (authContext != null) {
-//			consumerKey = authContext.getConsumerKey();
-//
-//		}
 
         String consumerKey = (String) messageContext.getProperty("CONSUMER_KEY");
 		GroupEventUnmarshaller unmarshaller = GroupEventUnmarshaller.getInstance();
@@ -95,15 +87,6 @@ abstract class AbstractPublisher implements Publishable {
         } catch (OparatorNotinListException e){
             LOG.debug("NOt publish to database");
         }
-
-
-
-        /* GroupEventUnmarshaller groupEventUnmarshaller = GroupEventUnmarshaller.getInstance();
-
-        try {
-            GroupDTO groupDTO= groupEventUnmarshaller.getGroupDTO(operator,consumerKey);*/
-
-		//nothing to publish
 
 
 	}

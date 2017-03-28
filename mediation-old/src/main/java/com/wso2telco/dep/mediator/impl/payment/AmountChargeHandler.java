@@ -200,9 +200,7 @@ public class AmountChargeHandler implements PaymentHandler {
         messageDTO.setReportedTime(System.currentTimeMillis());
         MessagePersistor.getInstance().publishMessage(messageDTO);
 
-
-
-        // set information to the message context, to be used in the sequence
+		// set information to the message context, to be used in the sequence
         HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
         HandlerUtils.setEndpointProperty(context, sending_add);
         HandlerUtils.setGatewayHost(context);

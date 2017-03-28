@@ -69,7 +69,7 @@ public class MessagePersistor {
 			}
 		});
 
-	}
+			}
 
 	public void persistSpendDate(final SpendChargeDTO spendChargeDTO) throws Exception{
 

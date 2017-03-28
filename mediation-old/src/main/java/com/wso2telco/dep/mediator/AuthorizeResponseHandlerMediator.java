@@ -64,13 +64,10 @@ public class AuthorizeResponseHandlerMediator extends AbstractMediator {
         JSONObject paymentRes = null;
 
         if (retStr != null && !retStr.isEmpty()) {
-            // get serverReferenceCode property for payment API response
 
-            // get exception property for exception response
             JSONObject exception = null;
             JSONObject response = null;
             try {
-                //JSONObject response = new JSONObject(retStr);
                 response  = new JSONObject(retStr);
                 paymentRes = response.optJSONObject("amountTransaction");
                 messageContext.setProperty(DataPublisherConstants.CHARGE_AMOUNT,paymentRes.optJSONObject("paymentAmount").optJSONObject("chargingInformation").opt("amount"));
@@ -109,11 +106,10 @@ public class AuthorizeResponseHandlerMediator extends AbstractMediator {
         }
 
         if ( isPaymentReq ) {
-            log.debug("Publish to CEP");
             try {
                 PublishFactory.getPublishable(paymentRes).publish(messageContext, paymentRes);
             } catch (Exception e) {
-                log.error("ERROR occured at data publishing to CEP ", e);
+                log.error("ERROR occurred while data publishing data. ", e);
             }
         }
 

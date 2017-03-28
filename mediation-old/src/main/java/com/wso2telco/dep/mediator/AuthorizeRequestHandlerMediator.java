@@ -46,13 +46,6 @@ public class AuthorizeRequestHandlerMediator extends AbstractMediator {
             String[] paramKeyValue = queryParam.split("=");
             context.setProperty("uri.var." + paramKeyValue[0], paramKeyValue[1]);
         }
-        /*
-        String operator = (String) context.getProperty("uri.var.operator");
-        String url = "http://ids-host-name/oauth/authorize/operator/" + operator + "?transactionId=" + transactionId
-                + queryParamsPart;
-
-        publishRequestData(operator, url, null, context);
-        */
 
         return true;
     }
