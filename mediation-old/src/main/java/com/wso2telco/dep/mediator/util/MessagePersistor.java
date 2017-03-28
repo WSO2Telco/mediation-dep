@@ -20,7 +20,6 @@ package com.wso2telco.dep.mediator.util;
 
 import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.dao.RequestDAO;
-import com.wso2telco.dep.mediator.internal.Util;
 import com.wso2telco.dep.mediator.model.MessageDTO;
 import com.wso2telco.dep.mediator.model.SpendChargeDTO;
 import org.apache.commons.logging.Log;

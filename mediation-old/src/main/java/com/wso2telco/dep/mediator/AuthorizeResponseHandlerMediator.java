@@ -18,11 +18,15 @@
 
 package com.wso2telco.dep.mediator;
 
+import com.wso2telco.dep.mediator.publisher.PublishFactory;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
+import org.apache.commons.httpclient.HttpStatus;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.apache.synapse.commons.json.JsonUtil;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 
 public class AuthorizeResponseHandlerMediator extends AbstractMediator {
 
@@ -32,8 +36,9 @@ public class AuthorizeResponseHandlerMediator extends AbstractMediator {
      */
     public boolean mediate(MessageContext context) {
 
-        String statusCode = (String) context.getProperty("$axis2:HTTP_SC");
-//        publishResponseData(statusCode, requestStr, context);
+        String requestStr = JsonUtil.jsonPayloadToString(((Axis2MessageContext) context)
+                .getAxis2MessageContext());
+       publishResponseData(requestStr, context);
 
         return true;
     }
@@ -42,33 +47,30 @@ public class AuthorizeResponseHandlerMediator extends AbstractMediator {
     /**
      * Publish response data.
      *
-     * @param statusCode
-     *            the status code
+
      * @param retStr
      *            the ret str
      * @param messageContext
      *            the message context
      */
-    private void publishResponseData(int statusCode, String retStr, MessageContext messageContext) {
+    private void publishResponseData(String retStr, MessageContext messageContext) {
         // set properties for response data publisher
-        messageContext.setProperty(DataPublisherConstants.RESPONSE_CODE, Integer.toString(statusCode));
+
         messageContext.setProperty(DataPublisherConstants.MSISDN,
                 messageContext.getProperty(MSISDNConstants.USER_MSISDN));
 
         boolean isPaymentReq = false;
         String paymentType=null;
-
+        JSONObject paymentRes = null;
 
         if (retStr != null && !retStr.isEmpty()) {
-            // get serverReferenceCode property for payment API response
-            JSONObject paymentRes = null;
-            // get exception property for exception response
+
             JSONObject exception = null;
             JSONObject response = null;
             try {
-                //JSONObject response = new JSONObject(retStr);
                 response  = new JSONObject(retStr);
                 paymentRes = response.optJSONObject("amountTransaction");
+                messageContext.setProperty(DataPublisherConstants.CHARGE_AMOUNT,paymentRes.optJSONObject("paymentAmount").optJSONObject("chargingInformation").opt("amount"));
                 
                 if (paymentRes != null) {
                     if (paymentRes.has("serverReferenceCode")) {
@@ -100,6 +102,14 @@ public class AuthorizeResponseHandlerMediator extends AbstractMediator {
                 }
             } catch (JSONException e) {
                 log.error("Error in converting response to json. " + e.getMessage(), e);
+            }
+        }
+
+        if ( isPaymentReq ) {
+            try {
+                PublishFactory.getPublishable(paymentRes).publish(messageContext, paymentRes);
+            } catch (Exception e) {
+                log.error("ERROR occurred while data publishing data. ", e);
             }
         }
 

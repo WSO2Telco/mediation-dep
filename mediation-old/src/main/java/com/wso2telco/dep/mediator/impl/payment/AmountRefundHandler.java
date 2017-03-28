@@ -123,13 +123,6 @@ public class AmountRefundHandler implements PaymentHandler {
 		String sending_add = endpoint.getEndpointref().getAddress();
 		log.debug("sending endpoint found: " + sending_add);
 
-		/*
-		 * JSONObject clientclr = jsonBody.getJSONObject("amountTransaction");
-		 * String originalClientCorrelator =
-		 * clientclr.getString("clientCorrelator");
-		 * clientclr.put("clientCorrelator", originalClientCorrelator + ":" +
-		 * requestid);
-		 */
 
 		JSONObject objAmountTransaction = jsonBody
 				.getJSONObject("amountTransaction");
@@ -177,7 +170,7 @@ public class AmountRefundHandler implements PaymentHandler {
         context.setProperty("requestResourceUrl", executor.getResourceUrl());
         context.setProperty("requestID", requestid);
         context.setProperty("clientCorrelator", clientCorrelator);
-
+        context.setProperty("operator", endpoint.getOperator());
 		return true;
 	}
 
