@@ -81,8 +81,7 @@ public class NorthBoundUSSDSubscriptionHandler implements USSDHandler {
     @Override
     public boolean handle(MessageContext context) throws Exception {
 
-
-        UID.getUniqueID(Type.MO_USSD.getCode(), context, executor.getApplicationid());
+        String requestid = UID.getUniqueID(Type.MO_USSD.getCode(), context, executor.getApplicationid());
         JSONObject jsonBody = executor.getJsonBody();
         String notifyUrl = jsonBody.getJSONObject("subscription").getJSONObject("callbackReference").getString("notifyURL");
         Gson gson = new GsonBuilder().serializeNulls().create();
@@ -106,6 +105,7 @@ public class NorthBoundUSSDSubscriptionHandler implements USSDHandler {
 
         SubscriptionHubRequest subscriptionHubRequest = gson.fromJson(jsonBody.toString(),SubscriptionHubRequest.class);
         ShortCodes[] shortCodes = subscriptionHubRequest.getSubscription().getShortCodes();
+        String originalClientCorrelator = subscriptionHubRequest.getSubscription().getClientCorrelator();
 
         SubscriptionGatewayRequest subscriptionGatewayRequest = new SubscriptionGatewayRequest();
         SubscriptionGatewayRequestDTO subscriptionGatewayRequestDTO = new SubscriptionGatewayRequestDTO();
@@ -150,6 +150,7 @@ public class NorthBoundUSSDSubscriptionHandler implements USSDHandler {
         }
 
         subscriptionGatewayRequestDTO.setShortCodes(shortCodes);
+        subscriptionGatewayRequestDTO.setClientCorrelator(originalClientCorrelator + ":" + requestid);
 
         subscriptionGatewayRequest.setSubscription(subscriptionGatewayRequestDTO);
         String requestStr = gson.toJson(subscriptionGatewayRequest);
@@ -157,6 +158,7 @@ public class NorthBoundUSSDSubscriptionHandler implements USSDHandler {
         HandlerUtils.setHandlerProperty(context,this.getClass().getSimpleName());
         context.setProperty("responseResourceURL", mediatorConfMap.get("hubGateway")+executor.getResourceUrl()+"/"+subscriptionId);
         context.setProperty("subscriptionID", subscriptionId);
+        context.setProperty("original_clientCorrelator", originalClientCorrelator);
 
         JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), requestStr, true, true);
 
