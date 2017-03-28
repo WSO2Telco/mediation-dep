@@ -24,7 +24,7 @@ import java.util.Map;
 
 public enum PaymentType {
 
-    REFUND("Refund"),CHARGED("Charged"),UNDEFINED("undefined");;
+    REFUND("Refunded"),CHARGED("Charged"),UNDEFINED("undefined");;
 
     private String type;
     private PaymentType(String code){

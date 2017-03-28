@@ -177,6 +177,7 @@ public class AmountRefundHandler implements PaymentHandler {
         context.setProperty("requestResourceUrl", executor.getResourceUrl());
         context.setProperty("requestID", requestid);
         context.setProperty("clientCorrelator", clientCorrelator);
+		context.setProperty("operator", endpoint.getOperator());
 
 		return true;
 	}

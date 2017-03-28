@@ -27,8 +27,8 @@ import com.wso2telco.dep.mediator.util.MessagePersistor;
 import org.apache.commons.logging.Log;
 import org.apache.synapse.MessageContext;
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
-import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
+//import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
+//import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
@@ -50,18 +50,19 @@ abstract class AbstractPublisher implements Publishable {
 	synchronized public void publish(MessageContext messageContext,
 			JSONObject paymentRes) throws Exception {
 		
-		AuthenticationContext authContext = APISecurityUtils
-				.getAuthenticationContext(messageContext);
-		String consumerKey = "";
-		if (authContext != null) {
-			consumerKey = authContext.getConsumerKey();
+//		AuthenticationContext authContext = APISecurityUtils
+//				.getAuthenticationContext(messageContext);
+//		String consumerKey = "";
+//		if (authContext != null) {
+//			consumerKey = authContext.getConsumerKey();
+//
+//		}
 
-		}
-
+        String consumerKey = (String) messageContext.getProperty("CONSUMER_KEY");
 		GroupEventUnmarshaller unmarshaller = GroupEventUnmarshaller.getInstance();
         try {
 
-            GroupDTO groupDTO=   unmarshaller.getGroupDTO((String)messageContext.getProperty(DataPublisherConstants.OPERATOR_ID),
+            GroupDTO groupDTO=   unmarshaller.getGroupDTO((String)messageContext.getProperty("operator"),
                                                           consumerKey);
             final Long orginalPaymentTime = dbservice.getPaymentTime(MessageType.PAYMENT_RESPONSE.getMessageDid(), getRefvalue(paymentRes));
 
@@ -79,9 +80,11 @@ abstract class AbstractPublisher implements Publishable {
                     if(orginalPaymentTime>0 && (MessageType.REFUND_RESPONSE.getMessageDid() == (Integer)messageContext.getProperty(DataPublisherConstants.PAYMENT_TYPE))){
                         spendChargeDTO.setOrginalTime(orginalPaymentTime);
                         spendChargeDTO.setAmount(-Double.parseDouble((String)messageContext.getProperty(DataPublisherConstants.CHARGE_AMOUNT)));
+                        spendChargeDTO.setOperatorId((String)messageContext.getProperty("operator"));
                     } else {
                         spendChargeDTO.setAmount(Double.parseDouble((String)messageContext.getProperty(DataPublisherConstants.CHARGE_AMOUNT)));
                         spendChargeDTO.setOrginalTime(currentTime);
+                        spendChargeDTO.setOperatorId((String)messageContext.getProperty("operator"));
                     }
                     spendChargeDTO.setMessageType((Integer)messageContext.getProperty(DataPublisherConstants.PAYMENT_TYPE));
 
