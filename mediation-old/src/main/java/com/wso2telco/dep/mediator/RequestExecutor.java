@@ -1491,7 +1491,7 @@ public abstract class RequestExecutor {
                 token = jsontoken.getString("access_token");
                 operatorService.updateOperatorToken(op.getOperatorid(),
                         jsontoken.getString("refresh_token"),
-                        Long.parseLong(jsontoken.getString("expires_in")),
+                        Long.parseLong(String.valueOf(jsontoken.get("expires_in"))),
                         new Date().getTime(), token);
 
             } else {
