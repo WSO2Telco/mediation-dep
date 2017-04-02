@@ -87,7 +87,6 @@ public class ListTransactionsHandler implements PaymentHandler {
 		String[] params = null;
 
 		if (!executor.getSubResourcePath().contains("+")) {
-
 			params = URLDecoder.decode(executor.getSubResourcePath(), "UTF-8").split("/");
 		} else {
 			params = executor.getSubResourcePath().split("/");
