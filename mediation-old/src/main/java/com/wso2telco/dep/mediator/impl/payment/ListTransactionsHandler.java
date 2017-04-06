@@ -39,6 +39,7 @@ import org.json.JSONObject;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
+import java.net.URLDecoder;
 import java.util.Map;
 
 public class ListTransactionsHandler implements PaymentHandler {
@@ -58,14 +59,21 @@ public class ListTransactionsHandler implements PaymentHandler {
 
 	@Override
 	public boolean validate(String httpMethod, String requestPath,
-			JSONObject jsonBody, MessageContext context) throws Exception {
+							JSONObject jsonBody, MessageContext context) throws Exception {
 		if (!httpMethod.equalsIgnoreCase("GET")) {
 			((Axis2MessageContext) context).getAxis2MessageContext()
-			                               .setProperty("HTTP_SC", 405);
+					.setProperty("HTTP_SC", 405);
 			throw new Exception("Method not allowed");
 		}
+		String[] params = null;
 
-		String[] params = executor.getSubResourcePath().split("/");
+		if (!executor.getSubResourcePath().contains("+")) {
+
+			params = URLDecoder.decode(executor.getSubResourcePath(), "UTF-8").split("/");
+		} else {
+			params = executor.getSubResourcePath().split("/");
+		}
+
 		IServiceValidate validator = new ValidateListTransactions();
 		validator.validateUrl(requestPath);
 		validator.validate(params);
@@ -76,26 +84,33 @@ public class ListTransactionsHandler implements PaymentHandler {
 
 	@Override
 	public boolean handle(MessageContext context) throws Exception {
-		String[] params = executor.getSubResourcePath().split("/");
+		String[] params = null;
+
+		if (!executor.getSubResourcePath().contains("+")) {
+			params = URLDecoder.decode(executor.getSubResourcePath(), "UTF-8").split("/");
+		} else {
+			params = executor.getSubResourcePath().split("/");
+		}
+
 		context.setProperty(MSISDNConstants.USER_MSISDN, params[1].substring(5));
 		context.setProperty(MSISDNConstants.MSISDN, params[1]);
-        OperatorEndpoint endpoint = null;
-        if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
-            endpoint = occi.getAPIEndpointsByMSISDN(
-                    params[1].replace("tel:", ""), API_TYPE,
-                    executor.getSubResourcePath(), true,
-                    executor.getValidoperators());
-        }
+		OperatorEndpoint endpoint = null;
+		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
+			endpoint = occi.getAPIEndpointsByMSISDN(
+					params[1].replace("tel:", ""), API_TYPE,
+					executor.getSubResourcePath(), true,
+					executor.getValidoperators());
+		}
 
-        // set information to the message context, to be used in the sequence
-        String sending_add = endpoint.getEndpointref().getAddress() + executor.getSubResourcePath();
-        HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
-        HandlerUtils.setEndpointProperty(context, sending_add);
-        HandlerUtils.setGatewayHost(context);
-        HandlerUtils.setAuthorizationHeader(context, executor, endpoint);
-        context.setProperty("requestResourceUrl", executor.getResourceUrl());
-        return true;
-    }
+		// set information to the message context, to be used in the sequence
+		String sending_add = endpoint.getEndpointref().getAddress() + executor.getSubResourcePath();
+		HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
+		HandlerUtils.setEndpointProperty(context, sending_add);
+		HandlerUtils.setGatewayHost(context);
+		HandlerUtils.setAuthorizationHeader(context, executor, endpoint);
+		context.setProperty("requestResourceUrl", executor.getResourceUrl());
+		return true;
+	}
 
 	private String makeListTransactionResponse(String responseStr) {
 

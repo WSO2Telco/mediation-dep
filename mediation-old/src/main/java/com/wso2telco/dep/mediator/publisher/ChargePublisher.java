@@ -42,7 +42,7 @@ class ChargePublisher extends AbstractPublisher {
 	protected MessageContext modifyMessageContext(MessageContext messageContext, final Long orginalPaymentTime, final GroupDTO groupDTO)
 			throws Exception {
 		MessageContext returnContext= null;
-		if (orginalPaymentTime != null && orginalPaymentTime != 0) {
+		if (orginalPaymentTime != null) {
 			returnContext = messageContext;
 			messageContext.setProperty(DataPublisherConstants.PAYMENT_TYPE, MessageType.PAYMENT_RESPONSE.getMessageDid());
 		}
