@@ -186,6 +186,8 @@ public class SendSMSHandler implements SMSHandler {
 		context.setProperty("ADDRESSES", addresses);
 		context.setProperty("MSISDN_LIST", addressList.substring(0, addressList.length() - 1));
 
+		context.setProperty("RESPONSE_DELIVERY_INFO_RESOURCE_URL", mediatorConfMap.get("hubGateway")+executor.getResourceUrl() + "/" +requestid + "/deliveryInfos");
+
 //		Map<String, SendSMSResponse> smsResponses = smssendmulti(context, subsrequest,
 //				jsonBody.getJSONObject("outboundSMSMessageRequest").getJSONArray("address"), API_TYPE,
 //				executor.getValidoperators());
@@ -359,7 +361,7 @@ public class SendSMSHandler implements SMSHandler {
 	 *            the sms responses
 	 * @throws Exception
 	 */
-	private void storeRequestIDs(String requestID, String senderAddress, Map<String, SendSMSResponse> smsResponses)
+	/*private void storeRequestIDs(String requestID, String senderAddress, Map<String, SendSMSResponse> smsResponses)
 			throws Exception {
 
 		Map<String, String> reqIdMap = new HashMap<String, String>(smsResponses.size());
@@ -380,7 +382,7 @@ public class SendSMSHandler implements SMSHandler {
 		}
 
 		smsMessagingService.insertSMSRequestIds(requestID, senderAddress, reqIdMap);
-	}
+	}*/
 
 	/**
 	 * Gets the SMS message count.
