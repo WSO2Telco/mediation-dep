@@ -71,10 +71,10 @@ abstract class AbstractPublisher implements Publishable {
                     spendChargeDTO.setCurrentTime(currentTime);
                     if(orginalPaymentTime>0 && (MessageType.REFUND_RESPONSE.getMessageDid() == (Integer)messageContext.getProperty(DataPublisherConstants.PAYMENT_TYPE))){
                         spendChargeDTO.setOrginalTime(orginalPaymentTime);
-                        spendChargeDTO.setAmount(-Double.parseDouble((String)messageContext.getProperty(DataPublisherConstants.CHARGE_AMOUNT)));
+                        spendChargeDTO.setAmount(-Double.parseDouble(String.valueOf(messageContext.getProperty(DataPublisherConstants.CHARGE_AMOUNT))));
                         spendChargeDTO.setOperatorId((String)messageContext.getProperty("operator"));
                     } else {
-                        spendChargeDTO.setAmount(Double.parseDouble((String)messageContext.getProperty(DataPublisherConstants.CHARGE_AMOUNT)));
+                        spendChargeDTO.setAmount(Double.parseDouble(String.valueOf(messageContext.getProperty(DataPublisherConstants.CHARGE_AMOUNT))));
                         spendChargeDTO.setOrginalTime(currentTime);
                         spendChargeDTO.setOperatorId((String)messageContext.getProperty("operator"));
                     }
