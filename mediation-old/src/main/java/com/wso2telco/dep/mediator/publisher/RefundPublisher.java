@@ -50,7 +50,7 @@ class RefundPublisher extends AbstractPublisher {
                                                   GroupDTO groupDTO) throws Exception {
         MessageContext returnMessageContext = null;
 
-        if (orginalPaymentTime != null) {
+        if (orginalPaymentTime != null && orginalPaymentTime==0) {
 
 
             final Calendar calendar = Calendar.getInstance();
