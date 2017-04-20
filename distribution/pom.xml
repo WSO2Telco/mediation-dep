@@ -110,6 +110,17 @@
 								</configuration>
 							</execution>
 							<execution>
+								<id>redis-client-wso2telco</id>
+								<phase>generate-resources</phase>
+								<goals>
+									<goal>wget</goal>
+								</goals>
+								<configuration>
+									<url>${com.wso2telco.repo.url}/core/redis-client-wso2telco/${com.wso2telco.core.version}/redis-client-wso2telco-${com.wso2telco.core.version}.jar</url>
+									<outputDirectory>.</outputDirectory>		            
+								</configuration>
+							</execution>
+							<execution>
 								<id>operator-service</id>
 								<phase>generate-resources</phase>
 								<goals>
