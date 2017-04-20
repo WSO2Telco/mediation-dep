@@ -70,7 +70,14 @@
 				<include>oneapi-validation-${com.wso2telco.dep.version}.jar</include>
 			</includes>
 			<outputDirectory>/others/lib</outputDirectory>
-		</fileSet>		
+		</fileSet>
+		<fileSet>
+			<directory>.</directory>
+			<includes>
+				<include>redis-client-wso2telco-${com.wso2telco.core.version}.jar</include>
+			</includes>
+			<outputDirectory>/others/lib</outputDirectory>
+		</fileSet>
 	</fileSets>
 </assembly>
 
