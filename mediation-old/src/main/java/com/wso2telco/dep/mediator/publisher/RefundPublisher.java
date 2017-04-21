@@ -50,7 +50,7 @@ class RefundPublisher extends AbstractPublisher {
                                                   GroupDTO groupDTO) throws Exception {
         MessageContext returnMessageContext = null;
 
-        if (orginalPaymentTime != null && orginalPaymentTime==0) {
+        if (orginalPaymentTime != null && orginalPaymentTime!=0) {
 
 
             final Calendar calendar = Calendar.getInstance();
@@ -105,7 +105,7 @@ class RefundPublisher extends AbstractPublisher {
         String refundclientrefcode = dbservice.getRefundDetails(MessageType.REFUND_RESPONSE.getMessageDid(), refvalue);
         String refundclientcorrelator = paymentRes.getString("clientCorrelator");
 
-        if (refundclientrefcode != null || (refundclientrefcode != null && !refundclientcorrelator.equalsIgnoreCase(refundclientrefcode))) {
+        if (refundclientrefcode == null || (refundclientrefcode != null && !refundclientcorrelator.equalsIgnoreCase(refundclientrefcode))) {
             super.publish(messageContext, paymentRes);
         } else {
             LOG.debug("WILL NOT publish to database as refund ");

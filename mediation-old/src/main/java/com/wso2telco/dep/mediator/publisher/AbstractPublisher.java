@@ -69,19 +69,23 @@ abstract class AbstractPublisher implements Publishable {
                     spendChargeDTO.setConsumerKey(consumerKey);
                     spendChargeDTO.setMsisdn((String)messageContext.getProperty(DataPublisherConstants.MSISDN));
                     spendChargeDTO.setCurrentTime(currentTime);
-                    if(orginalPaymentTime>0 && (MessageType.REFUND_RESPONSE.getMessageDid() == (Integer)messageContext.getProperty(DataPublisherConstants.PAYMENT_TYPE))){
-                        spendChargeDTO.setOrginalTime(orginalPaymentTime);
-                        spendChargeDTO.setAmount(-Double.parseDouble(String.valueOf(messageContext.getProperty(DataPublisherConstants.CHARGE_AMOUNT))));
-                        spendChargeDTO.setOperatorId((String)messageContext.getProperty("operator"));
-                    } else {
-                        spendChargeDTO.setAmount(Double.parseDouble(String.valueOf(messageContext.getProperty(DataPublisherConstants.CHARGE_AMOUNT))));
-                        spendChargeDTO.setOrginalTime(currentTime);
-                        spendChargeDTO.setOperatorId((String)messageContext.getProperty("operator"));
-                    }
-                    spendChargeDTO.setMessageType((Integer)messageContext.getProperty(DataPublisherConstants.PAYMENT_TYPE));
 
-                    MessagePersistor.getInstance().persistSpendDate(spendChargeDTO);
-                    //eventsPublisherClient.publishEvent(messageContext);
+                    if(!messageContext.getPropertyKeySet().contains("userpackagetype")||!messageContext.getProperty("userpackagetype").equals("Prepaid")) {
+
+                        if (orginalPaymentTime > 0 && (MessageType.REFUND_RESPONSE.getMessageDid() == (Integer) messageContext.getProperty(DataPublisherConstants.PAYMENT_TYPE))) {
+                            spendChargeDTO.setOrginalTime(orginalPaymentTime);
+                            spendChargeDTO.setAmount(-Double.parseDouble(String.valueOf(messageContext.getProperty(DataPublisherConstants.CHARGE_AMOUNT))));
+                            spendChargeDTO.setOperatorId((String) messageContext.getProperty("operator"));
+                        } else {
+                            spendChargeDTO.setAmount(Double.parseDouble(String.valueOf(messageContext.getProperty(DataPublisherConstants.CHARGE_AMOUNT))));
+                            spendChargeDTO.setOrginalTime(currentTime);
+                            spendChargeDTO.setOperatorId((String) messageContext.getProperty("operator"));
+                        }
+                        spendChargeDTO.setMessageType((Integer) messageContext.getProperty(DataPublisherConstants.PAYMENT_TYPE));
+
+                        MessagePersistor.getInstance().persistSpendDate(spendChargeDTO);
+                        //eventsPublisherClient.publishEvent(messageContext);
+                    }
                 }
 
         } catch (OparatorNotinListException e){
