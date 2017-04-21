@@ -48,7 +48,7 @@ public class GroupEventUnmarshaller {
     private static GroupEventUnmarshaller instance;
     private Map<String , Set<GroupDTO>> consumerKeyVsGroup = new HashMap<String, Set<GroupDTO>>() ;
     private Map<String ,  Set<ServiceProviderDTO>> consumerKeyVsSp = new HashMap<String,  Set<ServiceProviderDTO>>();
-    private Map<String ,  GroupDTO> oparatorGP = new HashMap<String,  GroupDTO>();
+    private Map<String ,  ArrayList<GroupDTO>> oparatorGP = new HashMap<String,  ArrayList<GroupDTO>>();
 
     public static GroupEventUnmarshaller getInstance(){
         return instance;
@@ -87,7 +87,14 @@ private  void init() throws JAXBException {
             gpDTO.setMonthAmount(group.getMonthAmount());
             gpDTO.setOperator(group.getOperator());
             gpDTO.setUserInfoEnabled(group.getUserInfoEnabled());
-            oparatorGP.put(group.getOperator(),gpDTO);
+
+            if (oparatorGP.containsKey(group.getOperator())) {
+                oparatorGP.get(group.getOperator()).add(gpDTO);
+            } else {
+                ArrayList<GroupDTO> groupArrayList = new ArrayList<GroupDTO>();
+                groupArrayList.add(gpDTO);
+                oparatorGP.put(group.getOperator(),groupArrayList);
+            }
 
             for(ServiceProvider sp : group.getServiceProviderList()){
                 ServiceProviderDTO serviceProviderDTO = new ServiceProviderDTO();
@@ -148,33 +155,38 @@ public ConsumerSecretWrapperDTO getGroupEventDetailDTO(final String consumerKey)
             throw new OparatorNotinListException(OparatorNotinListException.ErrorHolder.OPRATOR_NOT_DEFINED);
         }
 
-        GroupDTO groupDTO = oparatorGP.get(oparator.trim());
+        ArrayList<GroupDTO> groupDTOList = oparatorGP.get(oparator.trim());
 
-        if (groupDTO.getServiceProviderList() == null || groupDTO.getServiceProviderList().isEmpty()) {
-            throw new OparatorNotinListException(OparatorNotinListException.ErrorHolder.NO_SP_DEFINED);
-        }
+        for (GroupDTO groupDTO : groupDTOList) {
 
-        for (ServiceProviderDTO sp : groupDTO.getServiceProviderList()) {
-
-            if (sp.getApplicationList() == null || sp.getApplicationList().isEmpty()) {
-                throw new OparatorNotinListException(OparatorNotinListException.ErrorHolder.APPS_NOT_DEFIED);
+            // check for empty sp list
+            if (groupDTO.getServiceProviderList() == null || groupDTO.getServiceProviderList().isEmpty()) {
+                throw new OparatorNotinListException(OparatorNotinListException.ErrorHolder.NO_SP_DEFINED);
             }
 
-            for (Application app : sp.getApplicationList()) {
-                if (app.getConsumerKey().equalsIgnoreCase(consumerKey.trim())) {
+            for (ServiceProviderDTO sp : groupDTO.getServiceProviderList()) {
 
-
-                    ServiceProviderDTO retunSP = sp.clone();
-                    retunSP.getApplicationList().add(app.clone());
-
-                    GroupDTO returnDTOGP = groupDTO.clone();
-
-                    returnDTOGP.getServiceProviderList().add(retunSP);
-                    return returnDTOGP;
-
+                // checks for empty application list
+                if (sp.getApplicationList() == null || sp.getApplicationList().isEmpty()) {
+                    throw new OparatorNotinListException(OparatorNotinListException.ErrorHolder.APPS_NOT_DEFIED);
                 }
-            }
 
+                for (Application app : sp.getApplicationList()) {
+                    if (app.getConsumerKey().equalsIgnoreCase(consumerKey.trim())) {
+
+
+                        ServiceProviderDTO retunSP = sp.clone();
+                        retunSP.getApplicationList().add(app.clone());
+
+                        GroupDTO returnDTOGP = groupDTO.clone();
+
+                        returnDTOGP.getServiceProviderList().add(retunSP);
+                        return returnDTOGP;
+
+                    }
+                }
+
+            }
         }
         throw new OparatorNotinListException(OparatorNotinListException.ErrorHolder.OPRATOR_NOT_DEFINED);
 

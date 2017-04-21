@@ -70,7 +70,7 @@ abstract class AbstractPublisher implements Publishable {
                     spendChargeDTO.setMsisdn((String)messageContext.getProperty(DataPublisherConstants.MSISDN));
                     spendChargeDTO.setCurrentTime(currentTime);
 
-                    if(!messageContext.getProperty("userpackagetype").equals("Prepaid")) {
+                    if(!messageContext.getPropertyKeySet().contains("userpackagetype")||!messageContext.getProperty("userpackagetype").equals("Prepaid")) {
 
                         if (orginalPaymentTime > 0 && (MessageType.REFUND_RESPONSE.getMessageDid() == (Integer) messageContext.getProperty(DataPublisherConstants.PAYMENT_TYPE))) {
                             spendChargeDTO.setOrginalTime(orginalPaymentTime);
