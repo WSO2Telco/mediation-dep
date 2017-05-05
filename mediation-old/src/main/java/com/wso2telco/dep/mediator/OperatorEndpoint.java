@@ -33,6 +33,9 @@ public class OperatorEndpoint {
     /** The operator. */
     String operator;
 
+    /** The operator id */
+    private int operatorId;
+
     /**
      * Instantiates a new operator endpoint.
      *
@@ -42,6 +45,19 @@ public class OperatorEndpoint {
     public OperatorEndpoint(EndpointReference endpointref, String operator) {
         this.endpointref = endpointref;
         this.operator = operator;
+    }
+
+    /**
+     * Instantiates a new operator endpoint with id
+     *
+     * @param endpointref  the endpointref
+     * @param operator     the operator
+     * @param operatorId   the operator id
+     */
+    public OperatorEndpoint(EndpointReference endpointref, String operator, int operatorId) {
+        this(endpointref, operator);
+
+        this.operatorId = operatorId;
     }
     
     /**
@@ -79,5 +95,23 @@ public class OperatorEndpoint {
     public void setOperator(String operator) {
         this.operator = operator;
     }
-    
+
+
+    /**
+     * Gets the operator id
+     *
+     * @return
+     */
+    public int getOperatorId() {
+        return operatorId;
+    }
+
+    /**
+     * Sets the operator id
+     *
+     * @param operatorId
+     */
+    public void setOperatorId(int operatorId) {
+        this.operatorId = operatorId;
+    }
 }

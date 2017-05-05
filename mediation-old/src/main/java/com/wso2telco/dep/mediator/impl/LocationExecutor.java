@@ -81,7 +81,10 @@ public class LocationExecutor extends RequestExecutor {
 		HandlerUtils.setAuthorizationHeader(context,this,endpoint);
 
         context.setProperty("operator", endpoint.getOperator());
-		
+
+        context.setProperty("OPERATOR_NAME", endpoint.getOperator());
+        context.setProperty("OPERATOR_ID", endpoint.getOperatorId());
+
 		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("messageType", "application/json");
 		
         return true;
