@@ -285,9 +285,12 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
 			extremeEndpoint = validOperatorendpoint.getEndpoint()
 					+ searchDTO.getRequestPathURL();
 		}
+
+		int operatorId = validOperatorendpoint.getOperatorid();
+
 		EndpointReference eprMSISDN = new EndpointReference(extremeEndpoint);
 
-		return new OperatorEndpoint(eprMSISDN, operator.toUpperCase());
+		return new OperatorEndpoint(eprMSISDN, operator.toUpperCase(),operatorId);
 
 	}
 	

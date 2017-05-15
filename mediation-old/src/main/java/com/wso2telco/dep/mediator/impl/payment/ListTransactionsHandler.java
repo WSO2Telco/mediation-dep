@@ -109,6 +109,8 @@ public class ListTransactionsHandler implements PaymentHandler {
 		HandlerUtils.setGatewayHost(context);
 		HandlerUtils.setAuthorizationHeader(context, executor, endpoint);
 		context.setProperty("requestResourceUrl", executor.getResourceUrl());
+		context.setProperty("OPERATOR_NAME", endpoint.getOperator());
+		context.setProperty("OPERATOR_ID", endpoint.getOperatorId());
 		return true;
 	}
 
