@@ -169,6 +169,7 @@ public boolean handle(MessageContext context) throws CustomException, AxisFault,
                 registrations[i].setToAddress(url);
                 registrations[i].setAuthorizationHeader("Bearer " + executor.getAccessToken(operatorEndpoint.getOperator(), context));
                 registrations[i].setBatchSize(perOpCoLimit);
+                registrations[i].setOperatorId(operatorEndpoint.getOperatorId());
 				break;
 			}
 		}

@@ -155,4 +155,25 @@ public class SenderAddresses {
     public void setAuthorizationHeader(String authorizationHeader) {
         this.authorizationHeader = authorizationHeader;
     }
+
+    /** Operator Id **/
+    private int operatorId;
+
+    /**
+     * Gets the operator Id
+     *
+     * @return
+     */
+    public int getOperatorId() {
+        return operatorId;
+    }
+
+    /**
+     * Sets the operator Id
+     *
+     * @param operatorId
+     */
+    public void setOperatorId(int operatorId) {
+        this.operatorId = operatorId;
+    }
 }
