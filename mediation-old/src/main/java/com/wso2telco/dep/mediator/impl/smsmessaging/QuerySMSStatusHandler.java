@@ -187,6 +187,9 @@ public class QuerySMSStatusHandler implements SMSHandler {
 				HandlerUtils.setEndpointProperty(context,sending_add);
 				HandlerUtils.setAuthorizationHeader(context,executor,endpoint);
 
+				context.setProperty("OPERATOR_NAME", endpoint.getOperator());
+				context.setProperty("OPERATOR_ID", endpoint.getOperatorId());
+
 			}
 		}
 	}
