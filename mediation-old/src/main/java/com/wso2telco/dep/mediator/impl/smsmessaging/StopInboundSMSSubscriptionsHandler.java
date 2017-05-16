@@ -19,6 +19,7 @@ package com.wso2telco.dep.mediator.impl.smsmessaging;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.wso2telco.core.dbutils.exception.BusinessException;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.entity.ussd.DeleteOperator;
 import com.wso2telco.dep.mediator.entity.ussd.DeleteSubscriptionRequest;
@@ -33,7 +34,9 @@ import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.ValidateCancelSubscription;
+import com.wso2telco.dep.operatorservice.model.OperatorEndPointDTO;
 import com.wso2telco.dep.operatorservice.model.OperatorSubscriptionDTO;
+import com.wso2telco.dep.operatorservice.service.OparatorService;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -51,7 +54,8 @@ public class StopInboundSMSSubscriptionsHandler implements SMSHandler {
 	private static Log log = LogFactory.getLog(StopInboundSMSSubscriptionsHandler.class);
 
 	/** The Constant API_TYPE. */
-	private static final String API_TYPE = "sms";
+	private static final String API_TYPE = "smsmessaging";
+
 
 	/** The occi. */
 	private OriginatingCountryCalculatorIDD occi;
@@ -67,19 +71,25 @@ public class StopInboundSMSSubscriptionsHandler implements SMSHandler {
 
 	private Gson gson = new GsonBuilder().serializeNulls().create();
 
+	private List<OperatorEndPointDTO> operatorEndpoints;
+
 	public StopInboundSMSSubscriptionsHandler(SMSExecutor executor) {
 
 		this.executor = executor;
 		occi = new OriginatingCountryCalculatorIDD();
 		smsMessagingService = new SMSMessagingService();
 		apiUtils = new ApiUtils();
+
+		try {
+			operatorEndpoints = new OparatorService().getOperatorEndpoints();
+		} catch (BusinessException e) {
+			log.warn("Error while retrieving operator endpoints", e);
+		}
 	}
 
 	/**
 	 * Instantiates a new retrieve sms subscriptions handler.
 	 *
-	 * @param executor
-	 *            the executor
 	 */
 
 	@Override
@@ -112,6 +122,14 @@ public class StopInboundSMSSubscriptionsHandler implements SMSHandler {
 		String moSubscriptionId = requestPath.substring(requestPath.lastIndexOf("/") + 1);
 
 		List<OperatorSubscriptionDTO> domainsubs = (smsMessagingService.subscriptionQuery(Integer.valueOf(moSubscriptionId)));
+
+		for (OperatorSubscriptionDTO operatorSubscriptionDTO : domainsubs) {
+			OperatorEndPointDTO endPointDTO = getValidEndpoints(API_TYPE, operatorSubscriptionDTO.getOperator());
+			if (endPointDTO != null)
+				operatorSubscriptionDTO.setOperatorId(endPointDTO.getOperatorid());
+			else
+				log.warn("Valid endpoint is empty: " + operatorSubscriptionDTO.getOperator());
+		}
 
 		if (domainsubs != null && !domainsubs.isEmpty()) {
 
@@ -146,4 +164,24 @@ public class StopInboundSMSSubscriptionsHandler implements SMSHandler {
 		return true;
 	}
 
+	/**
+	 * Gets the valid endpoints.
+	 *
+	 * @param api             the api
+	 * @param validoperator   the validoperator
+	 * @return the valid endpoints
+	 */
+	private OperatorEndPointDTO getValidEndpoints(String api, final String validoperator) {
+
+		OperatorEndPointDTO validoperendpoint = null;
+
+		for (OperatorEndPointDTO d : operatorEndpoints) {
+			if ((d.getApi().equalsIgnoreCase(api)) && (validoperator.equalsIgnoreCase(d.getOperatorcode()) ) ) {
+				validoperendpoint = d;
+				break;
+			}
+		}
+
+		return validoperendpoint;
+	}
 }
