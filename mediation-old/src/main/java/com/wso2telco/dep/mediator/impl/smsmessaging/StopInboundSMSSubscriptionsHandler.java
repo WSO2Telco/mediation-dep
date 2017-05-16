@@ -139,7 +139,8 @@ public class StopInboundSMSSubscriptionsHandler implements SMSHandler {
 				deleteOperators.add(new DeleteOperator(
 						domainSub.getOperator(),
 						domainSub.getDomain(),
-						"Bearer " + executor.getAccessToken(domainSub.getOperator(), context))
+						"Bearer " + executor.getAccessToken(domainSub.getOperator(), context),
+						domainSub.getOperatorId())
 				);
 			}
 
