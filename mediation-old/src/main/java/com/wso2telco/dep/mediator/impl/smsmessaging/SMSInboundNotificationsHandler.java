@@ -19,6 +19,7 @@ package com.wso2telco.dep.mediator.impl.smsmessaging;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.wso2telco.core.dbutils.exception.BusinessException;
 import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.core.mnc.resolver.MNCQueryClient;
 import com.wso2telco.dep.mediator.MSISDNConstants;
@@ -33,6 +34,8 @@ import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.ValidateInboundSMSMessageNotification;
+import com.wso2telco.dep.operatorservice.model.OperatorEndPointDTO;
+import com.wso2telco.dep.operatorservice.service.OparatorService;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.logging.Log;
@@ -49,6 +52,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 // TODO: Auto-generated Javadoc
@@ -68,6 +72,12 @@ public class SMSInboundNotificationsHandler implements SMSHandler {
 	MNCQueryClient mncQueryclient = null;
 
 	private static Log log = LogFactory.getLog(SMSInboundNotificationsHandler.class);
+
+	/** The Constant API_TYPE. */
+	private static final String API_TYPE = "smsmessaging";
+
+	private List<OperatorEndPointDTO> operatorEndpoints;
+
 	/**
 	 * Instantiates a new SMS inbound notifications handler.
 	 *
@@ -79,6 +89,12 @@ public class SMSInboundNotificationsHandler implements SMSHandler {
 		this.executor = executor;
 		smsMessagingService = new SMSMessagingService();
 		mncQueryclient = new MNCQueryClient();
+
+		try {
+			operatorEndpoints = new OparatorService().getOperatorEndpoints();
+		} catch (BusinessException e) {
+			log.warn("Error while retrieving operator endpoints", e);
+		}
 	}
 
 	/*
@@ -138,8 +154,9 @@ public class SMSInboundNotificationsHandler implements SMSHandler {
 			}
 		}
 		String operator = mncQueryclient.QueryNetwork(mcc, msisdn);
-		context.setProperty(DataPublisherConstants.MSISDN, msisdn);
-		
+//		context.setProperty(DataPublisherConstants.MSISDN, msisdn);
+		context.setProperty("MSISDN", msisdn);
+
 		//context.setProperty(DataPublisherConstants.MSISDN,inboundRequest.getInboundSMSMessageRequest().getInboundSMSMessage().getSenderAddress());
 		context.setProperty(DataPublisherConstants.OPERATOR_ID, operator);
 		context.setProperty(APIMgtGatewayConstants.USER_ID, serviceProvider);
@@ -152,6 +169,11 @@ public class SMSInboundNotificationsHandler implements SMSHandler {
 		HandlerUtils.setAuthorizationHeader(context, executor, new OperatorEndpoint(new EndpointReference(notifyurl), null));
 		HandlerUtils.setEndpointProperty(context, notifyurlRoute);
 		HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
+
+		int operatorId = getValidEndpoints(API_TYPE, operator).getOperatorid();
+
+		context.setProperty("OPERATOR_NAME", operator);
+		context.setProperty("OPERATOR_ID", operatorId);
 
 		return true;
 	}
@@ -176,5 +198,26 @@ public class SMSInboundNotificationsHandler implements SMSHandler {
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
 		return true;
+	}
+
+	/**
+	 * Gets the valid endpoints.
+	 *
+	 * @param api             the api
+	 * @param validoperator   the validoperator
+	 * @return the valid endpoints
+	 */
+	private OperatorEndPointDTO getValidEndpoints(String api, final String validoperator) {
+
+		OperatorEndPointDTO validoperendpoint = null;
+
+		for (OperatorEndPointDTO d : operatorEndpoints) {
+			if ((d.getApi().equalsIgnoreCase(api)) && (validoperator.equalsIgnoreCase(d.getOperatorcode()) ) ) {
+				validoperendpoint = d;
+				break;
+			}
+		}
+
+		return validoperendpoint;
 	}
 }

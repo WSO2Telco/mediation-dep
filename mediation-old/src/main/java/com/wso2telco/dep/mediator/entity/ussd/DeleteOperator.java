@@ -20,11 +20,17 @@ public class DeleteOperator {
     private String operatorCode;
     private String toAddress;
     private String authorizationHeader;
+    private int operatorId;
 
     public DeleteOperator(String operatorCode, String toAddress, String authorizationHeader) {
         this.operatorCode = operatorCode;
         this.toAddress = toAddress;
         this.authorizationHeader = authorizationHeader;
+    }
+
+    public DeleteOperator(String operatorCode, String toAddress, String authorizationHeader, int operatorId) {
+        this(operatorCode, toAddress, authorizationHeader);
+        this.operatorId = operatorId;
     }
 
     public String getOperatorCode() {

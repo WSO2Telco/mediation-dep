@@ -188,6 +188,9 @@ public class SendSMSHandler implements SMSHandler {
 
 		context.setProperty("RESPONSE_DELIVERY_INFO_RESOURCE_URL", mediatorConfMap.get("hubGateway")+executor.getResourceUrl() + "/" +requestid + "/deliveryInfos");
 
+		context.setProperty("OPERATOR_NAME", operatorEndpoint.getOperator());
+		context.setProperty("OPERATOR_ID", operatorEndpoint.getOperatorId());
+
 //		Map<String, SendSMSResponse> smsResponses = smssendmulti(context, subsrequest,
 //				jsonBody.getJSONObject("outboundSMSMessageRequest").getJSONArray("address"), API_TYPE,
 //				executor.getValidoperators());
