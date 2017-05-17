@@ -154,8 +154,9 @@ public class SMSInboundNotificationsHandler implements SMSHandler {
 			}
 		}
 		String operator = mncQueryclient.QueryNetwork(mcc, msisdn);
-		context.setProperty(DataPublisherConstants.MSISDN, msisdn);
-		
+//		context.setProperty(DataPublisherConstants.MSISDN, msisdn);
+		context.setProperty("MSISDN", msisdn);
+
 		//context.setProperty(DataPublisherConstants.MSISDN,inboundRequest.getInboundSMSMessageRequest().getInboundSMSMessage().getSenderAddress());
 		context.setProperty(DataPublisherConstants.OPERATOR_ID, operator);
 		context.setProperty(APIMgtGatewayConstants.USER_ID, serviceProvider);
