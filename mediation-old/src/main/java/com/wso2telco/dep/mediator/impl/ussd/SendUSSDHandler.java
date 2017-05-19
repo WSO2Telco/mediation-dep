@@ -101,8 +101,7 @@ public class SendUSSDHandler implements USSDHandler {
 		JSONObject jsonBody = executor.getJsonBody();
 
 		String address = jsonBody.getJSONObject("outboundUSSDMessageRequest").getString("address");
-		String notifyUrl = jsonBody.getJSONObject("outboundUSSDMessageRequest").getJSONObject("responseRequest")
-				.getString("notifyURL");
+		String notifyUrl = jsonBody.getJSONObject("outboundUSSDMessageRequest").getJSONObject("responseRequest").getString("notifyURL");
 		String msisdn = address.substring(5);
 
 		String consumerKey = "";
@@ -121,7 +120,10 @@ public class SendUSSDHandler implements USSDHandler {
 			endpoint = occi.getAPIEndpointsByMSISDN(filteredAddress, API_TYPE,
 					executor.getSubResourcePath(), false, executor.getValidoperators());
 		}
-
+		context.setProperty("operator", endpoint.getOperator());
+		context.setProperty("OPERATOR_NAME", endpoint.getOperator());
+		context.setProperty("OPERATOR_ID", endpoint.getOperatorId());
+		
         Integer subscriptionId = ussdService.ussdRequestEntry(notifyUrl ,consumerKey,endpoint.getOperator(),userId);
         log.info("created subscriptionId  -  " + subscriptionId + " Request ID: " + UID.getRequestID(context));
 		

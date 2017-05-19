@@ -58,37 +58,14 @@ public class USSDExecutor extends RequestExecutor {
      */
     @Override
     public boolean execute(MessageContext context) throws CustomException, AxisFault, Exception {
-        try {    	
-        	//String requestid = UID.getUniqueID(Type.SEND_USSD.getCode(), context, getApplicationid());
-        	JSONObject jsonBody = getJsonBody();
-    		String address = jsonBody.getJSONObject("outboundUSSDMessageRequest").getString("address");
-    		String msisdn = address.substring(5);
-    		
-        	context.setProperty(MSISDNConstants.MSISDN, address);
-        	context.setProperty(MSISDNConstants.USER_MSISDN, msisdn);
-    		
-    		OperatorEndpoint endpoint = null;
-            if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
-                endpoint = occi.getAPIEndpointsByMSISDN(address.replace("tel:", ""), "ussd", getSubResourcePath(), true,getValidoperators());
-            }
-            String sending_add = endpoint.getEndpointref().getAddress();
-    		sending_add += getSubResourcePath();
-            
-    		HandlerUtils.setHandlerProperty(context,this.getClass().getSimpleName());
-    		HandlerUtils.setEndpointProperty(context,sending_add);
-    		HandlerUtils.setAuthorizationHeader(context,this,endpoint);
-    		
-            context.setProperty("operator", endpoint.getOperator());
-            context.setProperty("OPERATOR_NAME", endpoint.getOperator());
-            context.setProperty("OPERATOR_ID", endpoint.getOperatorId());
-    			
-            USSDHandler handler = getUSSDHandler(getSubResourcePath());
-	        return handler.handle(context);
-        } catch (JSONException e) {
-            log.error(e.getMessage());
-            throw new CustomException("SVC0001", "", new String[]{"Request is missing required URI components"});
-        }
-    }
+	    try {
+	    	USSDHandler handler = getUSSDHandler(getSubResourcePath());
+	    	return handler.handle(context);
+	    } catch (JSONException e) {
+	    	log.error(e.getMessage());
+	    	throw new CustomException("SVC0001", "", new String[]{"Request is missing required URI components"});
+	    }
+	}
 
     /* (non-Javadoc)
      * @see com.wso2telco.mediator.RequestExecutor#validateRequest(java.lang.String, java.lang.String, org.json.JSONObject, org.apache.synapse.MessageContext)

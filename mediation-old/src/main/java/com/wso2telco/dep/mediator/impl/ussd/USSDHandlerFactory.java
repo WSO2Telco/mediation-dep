@@ -54,9 +54,9 @@ public class USSDHandlerFactory {
 			} else {
 				try {
                     if(!executor.getJsonBody().getJSONObject("subscription").isNull("shortCodes")){
-                        handler = new NorthBoundUSSDSubscriptionHandler(executor);
+                        handler = new NorthBoundUSSDSubscriptionHandler(executor);//DONE
                     } else {
-                        handler = new SouthBoundMOUSSDSubscribeHandler(executor);
+                        handler = new SouthBoundMOUSSDSubscribeHandler(executor);//NO NEED
                     }
 
                 } catch (Exception e) {
@@ -64,11 +64,11 @@ public class USSDHandlerFactory {
                 }
 			}
 		} else if (ResourceURL.toLowerCase().contains(sendUSSDKeyString.toLowerCase())) {
-            apiType = RequestType.SEND_USSD;
+            apiType = RequestType.SEND_USSD;//DONE
             handler = new SendUSSDHandler(executor);
         } else if (ResourceURL.toLowerCase().contains(retrieveUSSDString.toLowerCase())) {
             apiType = RequestType.RETRIEVE_USSD;
-            handler = new USSDInboundHandler(executor);
+            handler = new USSDInboundHandler(executor);//NO NEED
         } else {
             throw new CustomException("SVC0002", "", new String[]{null});
         }

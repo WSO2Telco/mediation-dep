@@ -20,13 +20,22 @@ public class ShortCodes {
 
 	private String shortCode;
     private String operatorCode;
+    private Integer operatorId;
     private String keyword;
 
 //    private String status;
     private String toAddress;
     private String authorizationHeader;
 
-    public String getShortCode() {
+    public Integer getOperatorId() {
+		return operatorId;
+	}
+
+	public void setOperatorId(Integer operatorId) {
+		this.operatorId = operatorId;
+	}
+
+	public String getShortCode() {
         return shortCode;
     }
 

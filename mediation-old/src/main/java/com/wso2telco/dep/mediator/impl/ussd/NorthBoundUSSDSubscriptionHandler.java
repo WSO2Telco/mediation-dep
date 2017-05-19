@@ -33,6 +33,8 @@ import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.ussd.ValidateUssdSubscription;
 import com.wso2telco.dep.operatorservice.model.OperatorSubscriptionDTO;
+import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -138,12 +140,11 @@ public class NorthBoundUSSDSubscriptionHandler implements USSDHandler {
                 log.info("sending endpoint found: " + endpoint.getEndpointref().getAddress() + " Request ID: " + UID.getRequestID(context));
 
                 shortCodesObj.setAuthorizationHeader("Bearer " + executor.getAccessToken(endpoint.getOperator(), context));
-
-
+                //SET OP_ID & OP_CODE
+                shortCodesObj.setOperatorId(endpoint.getOperatorId());
+                //shortCodesObj.setOperatorCode(endpoint.getOperator());
             } else {
-
                 log.error("OperatorEndpoint not found. Operator Not Provisioned: " + shortCodesObj.getOperatorCode());
-
                 shortCodesObj.setToAddress("Not Provisioned");
             }
 
