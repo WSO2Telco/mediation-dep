@@ -321,7 +321,7 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
 		for (OperatorEndPointDTO oe : validendpoints) {
 
 			extremeEndpoint = oe.getEndpoint() + requestPathURL;
-			endpoints.add(new OperatorEndpoint(new EndpointReference(extremeEndpoint), oe.getOperatorcode()));
+			endpoints.add(new OperatorEndpoint(new EndpointReference(extremeEndpoint), oe.getOperatorcode(), oe.getOperatorid()));
 		}
 
 		return endpoints;

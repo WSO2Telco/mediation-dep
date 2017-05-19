@@ -64,6 +64,27 @@ public class DestinationAddresses {
         this.operatorCode = operatorCode;
     }
 
+    /** The operator Id **/
+    private int operatorId;
+
+    /**
+     * Gets the operator Id
+     *
+     * @return
+     */
+    public int getOperatorId() {
+        return operatorId;
+    }
+
+    /**
+     * Sets the operator Id
+     *
+     * @param operatorId
+     */
+    public void setOperatorId(int operatorId) {
+        this.operatorId = operatorId;
+    }
+
     /** The criteria. */
     private String criteria;
 

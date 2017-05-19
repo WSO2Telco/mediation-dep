@@ -18,6 +18,7 @@ package com.wso2telco.dep.mediator.impl.smsmessaging.southbound;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.wso2telco.core.dbutils.exception.BusinessException;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.entity.ussd.DeleteOperator;
 import com.wso2telco.dep.mediator.entity.ussd.DeleteSubscriptionRequest;
@@ -34,7 +35,9 @@ import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.ValidateDNCancelSubscription;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.ValidateDNCancelSubscriptionPlugin;
+import com.wso2telco.dep.operatorservice.model.OperatorEndPointDTO;
 import com.wso2telco.dep.operatorservice.model.OperatorSubscriptionDTO;
+import com.wso2telco.dep.operatorservice.service.OparatorService;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -68,6 +71,8 @@ public class StopOutboundSMSSubscriptionsSouthBoundHandler implements SMSHandler
 
     private Gson gson = new GsonBuilder().serializeNulls().create();
 
+    private List<OperatorEndPointDTO> operatorEndpoints;
+
     /**
      * Instantiates a new stop outbound sms subscriptions handler.
      *
@@ -79,6 +84,12 @@ public class StopOutboundSMSSubscriptionsSouthBoundHandler implements SMSHandler
         this.executor = executor;
         occi = new OriginatingCountryCalculatorIDD();
         smsMessagingService = new SMSMessagingService();
+
+        try {
+            operatorEndpoints = new OparatorService().getOperatorEndpoints();
+        } catch (BusinessException e) {
+            log.warn("Error while retrieving operator endpoints", e);
+        }
     }
 
     /*
@@ -157,11 +168,20 @@ public class StopOutboundSMSSubscriptionsSouthBoundHandler implements SMSHandler
             // If operator list also added as the payload, to be used in HUB
             List<DeleteOperator> deleteOperators = new ArrayList<DeleteOperator>();
 
+            for (OperatorSubscriptionDTO operatorSubscriptionDTO : domainsubs) {
+                OperatorEndPointDTO endPointDTO = getValidEndpoints(API_TYPE, operatorSubscriptionDTO.getOperator());
+                if (endPointDTO != null)
+                    operatorSubscriptionDTO.setOperatorId(endPointDTO.getOperatorid());
+                else
+                    log.warn("Valid endpoint is empty: " + operatorSubscriptionDTO.getOperator());
+            }
+
             for (OperatorSubscriptionDTO domainSub : domainsubs) {
                 deleteOperators.add(new DeleteOperator(
                         domainSub.getOperator(),
                         domainSub.getDomain(),
-                        "Bearer " + executor.getAccessToken(domainSub.getOperator(), context))
+                        "Bearer " + executor.getAccessToken(domainSub.getOperator(), context),
+                        domainSub.getOperatorId())
                 );
             }
 
@@ -183,5 +203,26 @@ public class StopOutboundSMSSubscriptionsSouthBoundHandler implements SMSHandler
         }
 
         return true;
+    }
+
+    /**
+     * Gets the valid endpoints.
+     *
+     * @param api             the api
+     * @param validoperator   the validoperator
+     * @return the valid endpoints
+     */
+    private OperatorEndPointDTO getValidEndpoints(String api, final String validoperator) {
+
+        OperatorEndPointDTO validoperendpoint = null;
+
+        for (OperatorEndPointDTO d : operatorEndpoints) {
+            if ((d.getApi().equalsIgnoreCase(api)) && (validoperator.equalsIgnoreCase(d.getOperatorcode()) ) ) {
+                validoperendpoint = d;
+                break;
+            }
+        }
+
+        return validoperendpoint;
     }
 }
