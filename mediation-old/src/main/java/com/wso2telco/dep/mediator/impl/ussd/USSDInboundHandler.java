@@ -30,6 +30,8 @@ import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.ussd.ValidateReceiveUssd;
+import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
+
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.logging.Log;
@@ -93,8 +95,7 @@ public class USSDInboundHandler implements USSDHandler {
 		String requestPath = executor.getSubResourcePath();
 		String subscriptionId = requestPath.substring(requestPath.lastIndexOf("/") + 1);
 		FileReader fileReader = new FileReader();
-		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
-				+ FileNames.MEDIATOR_CONF_FILE.getFileName();
+		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
 
 		// remove non numeric chars
 		subscriptionId = subscriptionId.replaceAll("[^\\d.]", "");
@@ -105,8 +106,6 @@ public class USSDInboundHandler implements USSDHandler {
 		//log.info("notifyUrl found -  " + ussdSPDetails.get(0) + " Request ID: " + UID.getRequestID(context));
 		//log.info("consumerKey found - " + ussdSPDetails.get(1) + " Request ID: " + UID.getRequestID(context));
 		
-		
-
 		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
 		context.setProperty("spEndpoint", ussdSPDetails.get(0));
 
@@ -129,7 +128,24 @@ public class USSDInboundHandler implements USSDHandler {
 
         OperatorEndpoint operatorendpoint = new OperatorEndpoint(new EndpointReference(ussdSPDetails.get(0)), null);
         String sending_add = operatorendpoint.getEndpointref().getAddress();
-
+        
+        //==============SET OPERATOR ID & OPERATOR NAME
+        OperatorEndpoint endpoint = null;
+        
+		String filteredAddress = address.replace("etel:", "").replace("tel:", "");
+		if (!filteredAddress.startsWith("+")) {
+			filteredAddress = "+" + filteredAddress;
+		}
+		
+		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
+			endpoint = occi.getAPIEndpointsByMSISDN(filteredAddress, API_TYPE,
+					executor.getSubResourcePath(), false, executor.getValidoperators());
+		}
+		context.setProperty("operator", operatorendpoint.getOperator());
+		context.setProperty("OPERATOR_NAME", operatorendpoint.getOperator());
+		context.setProperty("OPERATOR_ID", operatorendpoint.getOperatorId());        
+		//==============SET OPERATOR ID & OPERATOR NAME
+		
         HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
         HandlerUtils.setEndpointProperty(context, sending_add);
         HandlerUtils.setAuthorizationHeader(context, executor, operatorendpoint);
