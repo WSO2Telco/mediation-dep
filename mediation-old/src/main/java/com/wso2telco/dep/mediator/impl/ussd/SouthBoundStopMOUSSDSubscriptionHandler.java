@@ -26,11 +26,15 @@ import com.wso2telco.dep.mediator.entity.ussd.DeleteSubscriptionRequest;
 import com.wso2telco.dep.mediator.entity.ussd.DeleteSubscriptionRequestDTO;
 import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
+import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.USSDService;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.ussd.ValidateUssdCancelSubscription;
+import com.wso2telco.dep.operatorservice.model.OperatorEndPointDTO;
 import com.wso2telco.dep.operatorservice.model.OperatorSubscriptionDTO;
+import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
+
 import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,13 +50,16 @@ public class SouthBoundStopMOUSSDSubscriptionHandler implements USSDHandler {
 
     private USSDExecutor executor;
     private USSDService dbService;
+	private OriginatingCountryCalculatorIDD occi;
     private Log log = LogFactory.getLog(SouthBoundStopMOUSSDSubscriptionHandler.class);
     private Gson gson = new GsonBuilder().serializeNulls().create();
-
+	private static final String API_TYPE = "ussd";
+    
     public SouthBoundStopMOUSSDSubscriptionHandler(USSDExecutor ussdExecutor) {
 
         this.executor = ussdExecutor;
         dbService = new USSDService();
+        occi = new OriginatingCountryCalculatorIDD();
     }
 
     @Override
@@ -79,23 +86,23 @@ public class SouthBoundStopMOUSSDSubscriptionHandler implements USSDHandler {
         UID.getUniqueID(Type.DELRETSUB.getCode(), context, executor.getApplicationid());
 
         String requestPath = executor.getSubResourcePath();
-        Integer subscriptionId = Integer.parseInt((requestPath.substring(
-                requestPath.lastIndexOf("/") + 1)).replaceFirst("sub", ""));
+        Integer subscriptionId = Integer.parseInt((requestPath.substring(requestPath.lastIndexOf("/") + 1)).replaceFirst("sub", ""));
         List<OperatorSubscriptionDTO> domainsubs = (dbService.moUssdSubscriptionQuery(Integer.valueOf(subscriptionId)));
 
         if (!domainsubs.isEmpty() && domainsubs != null) {
 
             // If operator list also added as the payload, to be used in HUB
             List<DeleteOperator> deleteOperators = new ArrayList<DeleteOperator>();
-
+            
             for (OperatorSubscriptionDTO domainSub : domainsubs) {
-                deleteOperators.add(new DeleteOperator(
-                        domainSub.getOperator(),
-                        domainSub.getDomain(),
-                        "Bearer " + executor.getAccessToken(domainSub.getOperator(), context))
+                deleteOperators.add(	new DeleteOperator(
+				                        domainSub.getOperator(),
+				                        domainSub.getDomain(),
+				                        "Bearer " + executor.getAccessToken(domainSub.getOperator(), context),
+				                        Integer.valueOf(dbService.getOperatorIdByOperator(domainSub.getOperator())))
                 );
             }
-
+            
             DeleteSubscriptionRequest deleteSubscriptionRequest = new DeleteSubscriptionRequest(new DeleteSubscriptionRequestDTO(deleteOperators));
 
             String payload = gson.toJson(deleteSubscriptionRequest);

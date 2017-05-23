@@ -155,9 +155,11 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
 			extremeEndpoint = validOperatorendpoint.getEndpoint() + requestPathURL;
 		}
 
+		int operatorId = validOperatorendpoint.getOperatorid();
+
 		EndpointReference eprMSISDN = new EndpointReference(extremeEndpoint);
 
-		return new OperatorEndpoint(eprMSISDN, operator.toUpperCase());
+		return new OperatorEndpoint(eprMSISDN, operator.toUpperCase(), operatorId);
 	}
 	
 	
@@ -283,9 +285,12 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
 			extremeEndpoint = validOperatorendpoint.getEndpoint()
 					+ searchDTO.getRequestPathURL();
 		}
+
+		int operatorId = validOperatorendpoint.getOperatorid();
+
 		EndpointReference eprMSISDN = new EndpointReference(extremeEndpoint);
 
-		return new OperatorEndpoint(eprMSISDN, operator.toUpperCase());
+		return new OperatorEndpoint(eprMSISDN, operator.toUpperCase(),operatorId);
 
 	}
 	
@@ -316,7 +321,7 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
 		for (OperatorEndPointDTO oe : validendpoints) {
 
 			extremeEndpoint = oe.getEndpoint() + requestPathURL;
-			endpoints.add(new OperatorEndpoint(new EndpointReference(extremeEndpoint), oe.getOperatorcode()));
+			endpoints.add(new OperatorEndpoint(new EndpointReference(extremeEndpoint), oe.getOperatorcode(), oe.getOperatorid()));
 		}
 
 		return endpoints;

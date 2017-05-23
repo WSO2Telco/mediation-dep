@@ -30,6 +30,8 @@ import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.ussd.ValidateUssdSubscription;
 import com.wso2telco.dep.operatorservice.model.OperatorSubscriptionDTO;
+import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -132,6 +134,26 @@ public class SouthBoundMOUSSDSubscribeHandler implements USSDHandler {
         context.setProperty("requestResourceUrl", executor.getResourceUrl());
         context.setProperty("subscriptionID", subscriptionId);
 
+        
+        //==============SET OPERATOR ID & OPERATOR NAME
+        String address ="";//TODO        
+        //OperatorEndpoint endpoint = null;
+        
+		String filteredAddress = address.replace("etel:", "").replace("tel:", "");
+		if (!filteredAddress.startsWith("+")) {
+			filteredAddress = "+" + filteredAddress;
+		}
+		
+		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
+			endpoint = occi.getAPIEndpointsByMSISDN(filteredAddress, API_TYPE,
+					executor.getSubResourcePath(), false, executor.getValidoperators());
+		}
+		context.setProperty("operator", endpoint.getOperator());
+		context.setProperty("OPERATOR_NAME", endpoint.getOperator());
+		context.setProperty("OPERATOR_ID", endpoint.getOperatorId());        
+		//==============SET OPERATOR ID & OPERATOR NAME            
+        
+        
         return true;
     }
 

@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<sequence name="userInfoFaultSeq" trace="disable" xmlns="http://ws.apache.org/ns/synapse">
-  <clone>
-    <target sequence="checkLimitSeq"/>
-    <target sequence="userInfoAsyncSeq"/>
-  </clone>
-</sequence>

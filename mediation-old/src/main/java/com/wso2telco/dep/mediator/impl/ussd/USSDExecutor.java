@@ -17,12 +17,22 @@
  */
 package com.wso2telco.dep.mediator.impl.ussd;
 
+import com.wso2telco.dep.mediator.MSISDNConstants;
+import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.RequestExecutor;
+import com.wso2telco.dep.mediator.internal.ResourceURLUtil;
+import com.wso2telco.dep.mediator.internal.Type;
+import com.wso2telco.dep.mediator.internal.UID;
+import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
+import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
+
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,7 +45,11 @@ public class USSDExecutor extends RequestExecutor {
 
     /** The log. */
     private Log log = LogFactory.getLog(USSDExecutor.class);
-
+    private OriginatingCountryCalculatorIDD occi;
+    
+    public USSDExecutor() {
+        occi = new OriginatingCountryCalculatorIDD();
+    }
     /** The handler. */
     private USSDHandler handler;
 
@@ -44,15 +58,14 @@ public class USSDExecutor extends RequestExecutor {
      */
     @Override
     public boolean execute(MessageContext context) throws CustomException, AxisFault, Exception {
-        try {
-            USSDHandler handler = getUSSDHandler(getSubResourcePath());
-            return handler.handle(context);
-
-        } catch (JSONException e) {
-            log.error(e.getMessage());
-            throw new CustomException("SVC0001", "", new String[]{"Request is missing required URI components"});
-        }
-    }
+	    try {
+	    	USSDHandler handler = getUSSDHandler(getSubResourcePath());
+	    	return handler.handle(context);
+	    } catch (JSONException e) {
+	    	log.error(e.getMessage());
+	    	throw new CustomException("SVC0001", "", new String[]{"Request is missing required URI components"});
+	    }
+	}
 
     /* (non-Javadoc)
      * @see com.wso2telco.mediator.RequestExecutor#validateRequest(java.lang.String, java.lang.String, org.json.JSONObject, org.apache.synapse.MessageContext)

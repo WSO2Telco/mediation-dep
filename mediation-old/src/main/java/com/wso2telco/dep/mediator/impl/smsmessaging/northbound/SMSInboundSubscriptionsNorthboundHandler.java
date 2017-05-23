@@ -178,6 +178,8 @@ public class SMSInboundSubscriptionsNorthboundHandler implements SMSHandler {
 
 				destinationAddressesObj.setAuthorizationHeader("Bearer " + executor.getAccessToken(endpoint.getOperator(), context));
 
+				destinationAddressesObj.setOperatorId(endpoint.getOperatorId());
+
 				log.debug("operator name: " + endpoint.getOperator());
 
 			} else {

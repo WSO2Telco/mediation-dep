@@ -217,6 +217,8 @@ public class OutboundSMSSubscriptionsNorthboundHandler implements SMSHandler {
 
 				senderAddressesObj.setAuthorizationHeader("Bearer " + executor.getAccessToken(endpoint.getOperator(), context));
 
+				senderAddressesObj.setOperatorId(endpoint.getOperatorId());
+
 			} else {
 
 				log.error("OperatorEndpoint not found. Operator Not Provisioned: " + senderAddressesObj.getOperatorCode());

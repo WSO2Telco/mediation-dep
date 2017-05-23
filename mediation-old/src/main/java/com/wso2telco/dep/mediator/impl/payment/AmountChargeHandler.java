@@ -209,6 +209,8 @@ public class AmountChargeHandler implements PaymentHandler {
         context.setProperty("requestResourceUrl", requestResourceURL);
         context.setProperty("requestID", requestid);
         context.setProperty("clientCorrelator", clientCorrelator);
+		context.setProperty("OPERATOR_NAME", endpoint.getOperator());
+		context.setProperty("OPERATOR_ID", endpoint.getOperatorId());
 
         //Set the 'isUserInfoEnabled' property
         GroupEventUnmarshaller unmarshaller = GroupEventUnmarshaller.getInstance();
