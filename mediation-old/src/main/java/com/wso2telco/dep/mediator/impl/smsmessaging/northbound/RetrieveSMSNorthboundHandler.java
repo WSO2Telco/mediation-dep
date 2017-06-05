@@ -78,6 +78,12 @@ private ApiUtils apiUtil;
 /** The executor. */
 private SMSExecutor executor;
 
+/** Configuration file */
+private String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
+
+/** Configuration Map */
+private Map<String, String> mediatorConfMap;
+
 /**
  * Instantiates a new NB retrieve sms handler.
  *
@@ -88,6 +94,7 @@ public RetrieveSMSNorthboundHandler(SMSExecutor executor) {
 	this.executor = executor;
 	occi = new OriginatingCountryCalculatorIDD();
 	apiUtil = new ApiUtils();
+	mediatorConfMap = new FileReader().readPropertyFile(file);
 }
 
 /*
@@ -178,6 +185,9 @@ public boolean handle(MessageContext context) throws CustomException, AxisFault,
     String requestStr = gson.toJson(nbRetrieveRequest);
     HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
     JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), requestStr, true, true);
+
+	String ResourceUrlPrefix = mediatorConfMap.get("hubGateway");
+	context.setProperty("responseResourceURL", ResourceUrlPrefix + "/inbound/registrations/messages");
 
 	return true;
 }
