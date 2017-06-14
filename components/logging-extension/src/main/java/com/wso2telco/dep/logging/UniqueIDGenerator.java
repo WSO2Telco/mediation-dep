@@ -21,10 +21,11 @@ import org.apache.synapse.MessageContext;
 public class UniqueIDGenerator {
     
 	private static long id;
+    private static final String REQUEST_ID = "mife.prop.requestId";
 
     public static synchronized String generateAndSetUniqueID(String axtype, MessageContext context,String appid) {       
         String requestId = System.currentTimeMillis()+axtype+appid+"0"+ id++;
-        context.setProperty(MessageConstants.REQUEST_ID, requestId);
+        context.setProperty(REQUEST_ID, requestId);
         return requestId;
     }
     
@@ -43,7 +44,7 @@ public class UniqueIDGenerator {
     public static String getRequestID(MessageContext messageContext) {
     	String requestId = "";
     	if (messageContext != null) {
-        	requestId = (String) messageContext.getProperty(MessageConstants.REQUEST_ID);
+        	requestId = (String) messageContext.getProperty(REQUEST_ID);
     	}
     	return requestId;
     }

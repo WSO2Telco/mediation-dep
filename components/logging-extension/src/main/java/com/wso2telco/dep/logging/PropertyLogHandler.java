@@ -16,6 +16,12 @@ public class PropertyLogHandler extends AbstractMediator {
 	private DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private static final String REGISTRY_PATH = "gov:/apimgt/";
+	private static final String REQUEST_ID = "mife.prop.requestId";
+	private static final String MESSAGE_TYPE = "message.type";
+	private static final String PAYLOAD_LOGGING_ENABLED = "payload.logging.enabled";
+	private static final String APPLICATION_ID = "api.ut.application.id";
+	private static final String REQUEST = "request";
+	private static final String RESPONSE = "response";
 
 	public boolean mediate(MessageContext messageContext) {
 
@@ -26,11 +32,11 @@ public class PropertyLogHandler extends AbstractMediator {
 
 		isPayloadLoggingEnabled = extractPayloadLoggingStatus(messageContext);
 
-		String direction = (String) axis2MessageContext.getProperty(MessageConstants.MESSAGE_TYPE);
+		String direction = (String) axis2MessageContext.getProperty(MESSAGE_TYPE);
 
-		if (direction != null && direction.equalsIgnoreCase(MessageType.REQUEST.getMessageType())) {
+		if (direction != null && direction.equalsIgnoreCase(REQUEST)) {
 			logRequestProperties(messageContext, axis2MessageContext, isPayloadLoggingEnabled);
-		} else if (direction != null && direction.equalsIgnoreCase(MessageType.RESPONSE.getMessageType())) {
+		} else if (direction != null && direction.equalsIgnoreCase(RESPONSE)) {
 			logResponseProperties(messageContext, axis2MessageContext, isPayloadLoggingEnabled);
 		}
 
@@ -40,18 +46,18 @@ public class PropertyLogHandler extends AbstractMediator {
 	private void logRequestProperties(MessageContext messageContext,
 			org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
 
-		String requestId = (String) messageContext.getProperty(MessageConstants.REQUEST_ID);
+		String requestId = (String) messageContext.getProperty(REQUEST_ID);
 
-		if (CommonUtil.nullOrTrimmed(requestId) == null) {
+		if (nullOrTrimmed(requestId) == null) {
 			UniqueIDGenerator.generateAndSetUniqueID("MI", messageContext,
-					(String) messageContext.getProperty(MessageConstants.APPLICATION_ID));
+					(String) messageContext.getProperty(APPLICATION_ID));
 		}
 
-		String jsonBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
 		log.info("[" + dateFormat.format(new Date()) + "] >>>>> API Request id "
-				+ messageContext.getProperty(MessageConstants.REQUEST_ID));
+				+ messageContext.getProperty(REQUEST_ID));
 		
 		if (isPayloadLoggingEnabled) {
+			String jsonBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
 			log.info("                                       >>>>> reqBody :" + jsonBody);
 		}
 
@@ -60,12 +66,12 @@ public class PropertyLogHandler extends AbstractMediator {
 	private void logResponseProperties(MessageContext messageContext,
 			org.apache.axis2.context.MessageContext axis2MessageContext, boolean isPayloadLoggingEnabled) {
 
-		String jsonBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
 
 		log.info("[" + dateFormat.format(new Date()) + "] <<<<< API Request id "
-				+ messageContext.getProperty(MessageConstants.REQUEST_ID));
+				+ messageContext.getProperty(REQUEST_ID));
 		
 		if (isPayloadLoggingEnabled) {
+			String jsonBody = JsonUtil.jsonPayloadToString(axis2MessageContext);
 			log.info("                                       <<<<< respBody :" + jsonBody);
 		}
 
@@ -74,7 +80,7 @@ public class PropertyLogHandler extends AbstractMediator {
 	private boolean extractPayloadLoggingStatus (MessageContext messageContext) {
 		boolean isPayloadLoggingEnabled = false;
 		
-		Entry payloadEntry = new Entry(REGISTRY_PATH + MessageConstants.PAYLOAD_LOGGING_ENABLED);
+		Entry payloadEntry = new Entry(REGISTRY_PATH + PAYLOAD_LOGGING_ENABLED);
 
 		OMTextImpl payloadEnableRegistryValue = (OMTextImpl) messageContext.getConfiguration().getRegistry()
 				.getResource(payloadEntry, null);
@@ -82,11 +88,19 @@ public class PropertyLogHandler extends AbstractMediator {
 		if (payloadEnableRegistryValue != null) {
 			String payloadLogEnabled = payloadEnableRegistryValue.getText();
 
-			if (CommonUtil.nullOrTrimmed(payloadLogEnabled) != null) {
+			if (nullOrTrimmed(payloadLogEnabled) != null) {
 				isPayloadLoggingEnabled = Boolean.valueOf(payloadLogEnabled);
 			}
 		}
 		
 		return isPayloadLoggingEnabled;
+	}
+
+	private static String nullOrTrimmed(String inputString) {
+		String result = null;
+		if (inputString != null && inputString.trim().length() > 0) {
+			result = inputString.trim();
+		}
+		return result;
 	}
 }
