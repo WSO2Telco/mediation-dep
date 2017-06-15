@@ -40,6 +40,5 @@
 
     <modules>
         <module>com.wso2telco.dep.spend.limit.mediator</module>
-        <module>logging-extension</module>
     </modules>
 </project>
