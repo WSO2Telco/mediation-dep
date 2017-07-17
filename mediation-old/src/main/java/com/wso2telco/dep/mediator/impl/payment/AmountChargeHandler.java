@@ -214,14 +214,16 @@ public class AmountChargeHandler implements PaymentHandler {
 
         //Set the 'isUserInfoEnabled' property
         GroupEventUnmarshaller unmarshaller = GroupEventUnmarshaller.getInstance();
+
+		String isUserInfoEnabled = "false";
         try {
             String consumerKey = (String) context.getProperty("CONSUMER_KEY");
             GroupDTO groupDTO = unmarshaller.getGroupDTO(endpoint.getOperator(), consumerKey);
-            String isUserInfoEnabled = groupDTO.getUserInfoEnabled();
-            context.setProperty("IS_USER_INFO_ENABLED", isUserInfoEnabled);
+            isUserInfoEnabled = groupDTO.getUserInfoEnabled();
         } catch (OparatorNotinListException e) {
-            log.error("Operator not in list", e);
-        }
+			log.debug("Operator not in list of spendlimits", e);
+		}
+		context.setProperty("IS_USER_INFO_ENABLED", isUserInfoEnabled);
 
         return true;
 
