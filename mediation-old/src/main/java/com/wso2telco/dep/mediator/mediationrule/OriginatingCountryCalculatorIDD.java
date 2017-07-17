@@ -186,18 +186,18 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
 
 		/**
 		 * MSISDN provided at JSon body convert into Phone number object.
-		 */
+		 *//*
 		MSISDN numberProto = phoneUtil.parse(searchDTO.getMSISDN());
 
-		/**
+		*//**
 		 * obtain the country code form the phone number object
-		 */
+		 *//*
 		int countryCode = numberProto.getCountryCode();
 
-		/**
+		*//**
 		 * if the country code within the header look up context , the operator
 		 * taken from the header object
-		 */
+		 *//*
 		if (countryLookUpOnHeader.contains(String.valueOf(countryCode))) {
 			
 			log.debug(" The request countryCode in the lookup set ");
@@ -208,14 +208,14 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
 					.getProperty(MessageContext.TRANSPORT_HEADERS);
 			if (headers != null && headers instanceof Map) {
 				Map headersMap = (Map) headers;
-				/*if (headersMap != null) {
+				*//*if (headersMap != null) {
 					log.info("printing header");
 					for (Object iterator : headersMap.entrySet()) {
 						Map.Entry entry = (Map.Entry) iterator;
 						log.info("Key :" + entry.getKey() + " value : "
 								+ entry.getValue());
 					}
-				}*/
+				}*//*
 				operator = (String) headersMap.get("oparator");
 				log.debug(" Operator pick from the Header : " + operator);
 			}else{
@@ -224,13 +224,19 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
 			
 
 		}
-		/**
+		*//**
 		 * build the MSISDN
-		 */
+		 *//*
 		StringBuffer msisdn = new StringBuffer();
 		msisdn.append("+").append(numberProto.getCountryCode())
-				.append(numberProto.getNationalNumber());
+				.append(numberProto.getNationalNumber());*/
 
+		/*
+		Custom Implementation
+		Get the number only and append '+' sign
+		 */
+		String number=searchDTO.getMSISDN();
+		String msisdn= "+"+number.replaceAll("[^0-9]", "");
 		/**
 		 * if the operator still not selected the operator selection logic goes
 		 * as previous .ie select from MCC_NUMBER_RANGE
