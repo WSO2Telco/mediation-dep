@@ -271,10 +271,7 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
 		}
 
 		if (valid == null) {
-			throw new CustomException(
-					ErrorHolder.OPARATOR_NOT_PROVISIONED.getCode(), "",
-					new String[] { ErrorHolder.OPARATOR_NOT_PROVISIONED
-							.getDescription() });
+			throw new CustomException("POL1009", "", new String[]{operator});
 		}
 
 		OperatorEndPointDTO validOperatorendpoint = getValidEndpoints(searchDTO.getApiName()!=null?searchDTO.getApiName(): searchDTO.getApiType().getCode(), operator);
