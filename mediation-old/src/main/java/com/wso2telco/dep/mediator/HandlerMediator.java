@@ -119,6 +119,9 @@ public class HandlerMediator extends AbstractMediator {
             try {
                 Map headersMap = (Map) headers;
                 String jwtparam = (String)headersMap.get("x-jwt-assertion");
+                if (null == jwtparam) {
+                    throw new AxisFault("Can't find 'x-jwt-assertion' header in request");
+                }
                 String[] jwttoken = jwtparam.split("\\.");
                 String jwtbody = Base64Coder.decodeString(jwttoken[1]);
                 JSONObject jwtobj = new JSONObject(jwtbody);
