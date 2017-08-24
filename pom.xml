@@ -14,7 +14,7 @@
 	<properties>
 
 
-		<com.wso2telco.core.version>2.0.24-SANPSHOT</com.wso2telco.core.version>
+		<com.wso2telco.core.version>2.0.24-SNAPSHOT</com.wso2telco.core.version>
 		<com.wso2telco.dep.version>2.2.6-SNAPSHOT</com.wso2telco.dep.version>
 
 		<commons-httpclient.wso2.version>3.1.0.wso2v2</commons-httpclient.wso2.version>
