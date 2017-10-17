@@ -260,8 +260,14 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
 			 * if(countryCode>=0){ mcc = String.valueOf("+"+countryCode); }
 			 */
 			// mcc not known in mediator
-			log.debug(" Unable to obtain Operator   from the Header ,Oprator look for mcc_range_table ,operator:"+operator+ " mcc :"+mcc+ "msisdn: " +msisdn.toString());
-			operator = mncQueryclient.QueryNetwork(mcc, msisdn.toString());
+			log.debug("Unable to obtain Operator from the Header, Oprator look for mcc_range_table - operator : "+operator+ " mcc : "+mcc+ " msisdn : " +msisdn.toString());
+			try{
+				
+				operator = mncQueryclient.QueryNetwork(mcc, msisdn.toString());
+			}catch (Exception e) {
+				
+				throw new CustomException("SVC0001", "", new String[] { "Requested service is not provisioned" });
+			}			
 		}
 
 		if (operator == null) {
