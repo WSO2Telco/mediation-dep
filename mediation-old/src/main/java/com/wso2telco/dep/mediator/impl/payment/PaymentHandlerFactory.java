@@ -158,17 +158,17 @@ public class PaymentHandlerFactory {
 				JSONObject objchargingInformation = (JSONObject) objPaymentAmount.get("chargingInformation");
 
 				if ((!objchargingInformation.has("currency") || objchargingInformation.get("currency").equals(""))
-						&& (objchargingInformation.has("amount") && !objchargingInformation.get("amount").equals("") && !objchargingInformation.isNull("amount") )) {
+						&& (objchargingInformation.has("amount") && !objchargingInformation.get("amount").equals(""))) {
 
 					log.debug("createPaymentHandler -> parameter not found.");
 					throw new CustomException("SVC0002", "", new String[] { "Missing mandatory parameter: currency" });
-				} else if ((!objchargingInformation.has("amount") || objchargingInformation.get("amount").equals("") || objchargingInformation.isNull("amount"))
+				} else if ((!objchargingInformation.has("amount") || objchargingInformation.get("amount").equals(""))
 						&& (objchargingInformation.has("currency")
 								&& !objchargingInformation.get("currency").equals(""))) {
 
 					log.debug("createPaymentHandler -> parameter not found.");
 					throw new CustomException("SVC0002", "", new String[] { "Missing mandatory parameter: amount" });
-				} else if ((!objchargingInformation.has("amount") || objchargingInformation.get("amount").equals("") || objchargingInformation.isNull("amount"))
+				} else if ((!objchargingInformation.has("amount") || objchargingInformation.get("amount").equals(""))
 						&& (!objchargingInformation.has("currency")
 								|| objchargingInformation.get("currency").equals(""))) {
 
