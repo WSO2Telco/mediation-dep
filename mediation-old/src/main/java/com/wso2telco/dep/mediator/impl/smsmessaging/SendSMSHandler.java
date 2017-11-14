@@ -29,7 +29,6 @@ import com.wso2telco.dep.mediator.entity.smsmessaging.SendSMSRequest;
 import com.wso2telco.dep.mediator.entity.smsmessaging.SendSMSResponse;
 import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
-import com.wso2telco.dep.mediator.internal.Util;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.SMSMessagingService;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
@@ -48,7 +47,6 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.wso2.carbon.utils.CarbonUtils;
-
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
@@ -104,7 +102,9 @@ public class SendSMSHandler implements SMSHandler {
 	 */
 	@Override
 	public boolean handle(MessageContext context) throws CustomException, AxisFault, Exception {
+		
 		String requestid = UID.getUniqueID(Type.SMSSEND.getCode(), context, executor.getApplicationid());
+		
 		// append request id to client correlator
 		JSONObject jsonBody = executor.getJsonBody();
 		//JSONObject clientclr = jsonBody.getJSONObject("outboundSMSMessageRequest");
@@ -126,6 +126,49 @@ public class SendSMSHandler implements SMSHandler {
 		}
 		int smsCount = getSMSMessageCount(subsrequest.getOutboundSMSMessageRequest().getOutboundTextMessage().getMessage());
 		context.setProperty(DataPublisherConstants.RESPONSE, String.valueOf(smsCount));
+		
+		if (!jsonBody.getJSONObject("outboundSMSMessageRequest").isNull("address")) {
+
+            JSONArray addressArray = jsonBody.getJSONObject("outboundSMSMessageRequest").getJSONArray("address");
+            
+            String firstAddress = addressArray.getString(0);
+            
+            if(firstAddress.contains("tel:+")){
+        		
+            	firstAddress = firstAddress.replace("tel:+", "");
+        	} else if(firstAddress.contains("tel:")){
+        		
+        		firstAddress = firstAddress.replace("tel:", "");
+        	}else if(firstAddress.contains("+")){
+        		
+        		firstAddress = firstAddress.replace("+", "");
+        	}
+            
+            String firstAddressPrefix = firstAddress.substring(0, 2);          
+            
+    		for (int a = 0; a < addressArray.length(); a++) {
+            	
+            	String address = addressArray.getString(a);
+            	
+            	if(address.contains("tel:+")){
+            		
+            		address = address.replace("tel:+", "");
+            	} else if(address.contains("tel:")){
+            		
+            		address = address.replace("tel:", "");
+            	}else if(address.contains("+")){
+            		
+            		address = address.replace("+", "");
+            	}
+            	
+            	String prefix = address.substring(0,2);
+            	
+            	if(!firstAddressPrefix.equals(prefix)){
+            		
+            		throw new CustomException("SVC0001", "", new String[] { "Cross operator addresses not supported" });
+            	}
+            }
+        }
 
 		// taking the operator endpoint with first address, since this is for same operator
 		OperatorEndpoint operatorEndpoint = getEndpoint(jsonBody.getJSONObject

@@ -19,6 +19,7 @@ package com.wso2telco.dep.mediator.mediationrule;
 
 import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.core.mnc.resolver.MNCQueryClient;
+import com.wso2telco.core.msisdnvalidator.InvalidMSISDNException;
 import com.wso2telco.core.msisdnvalidator.MSISDN;
 import com.wso2telco.core.msisdnvalidator.MSISDNUtil;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
@@ -35,7 +36,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.utils.CarbonUtils;
-
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -184,15 +184,29 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
 		// Initialize End points
 		initialize();
 
-		/**
-		 * MSISDN provided at JSon body convert into Phone number object.
-		 */
-		MSISDN numberProto = phoneUtil.parse(searchDTO.getMSISDN());
+		MSISDN numberProto = null;
+		try {
+			
+			/**
+			 * MSISDN provided at JSon body convert into Phone number object.
+			 */
+			numberProto = phoneUtil.parse(searchDTO.getMSISDN());
+		} catch (InvalidMSISDNException e) {
+			
+			throw new CustomException("SVC0001", "", new String[] { "Requested service is not provisioned" });
+		}
+		
 
-		/**
-		 * obtain the country code form the phone number object
-		 */
-		int countryCode = numberProto.getCountryCode();
+		int countryCode = 0;
+		
+		if(numberProto != null){
+			
+			/**
+			 * obtain the country code form the phone number object
+			 */
+			countryCode = numberProto.getCountryCode();
+		}
+		
 
 		/**
 		 * if the country code within the header look up context , the operator
@@ -228,8 +242,11 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
 		 * build the MSISDN
 		 */
 		StringBuffer msisdn = new StringBuffer();
-		msisdn.append("+").append(numberProto.getCountryCode())
-				.append(numberProto.getNationalNumber());
+		if(numberProto != null){
+			
+			msisdn.append("+").append(numberProto.getCountryCode())
+			.append(numberProto.getNationalNumber());
+		}		
 
 		/**
 		 * if the operator still not selected the operator selection logic goes
@@ -243,8 +260,14 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
 			 * if(countryCode>=0){ mcc = String.valueOf("+"+countryCode); }
 			 */
 			// mcc not known in mediator
-			log.debug(" Unable to obtain Operator   from the Header ,Oprator look for mcc_range_table ,operator:"+operator+ " mcc :"+mcc+ "msisdn: " +msisdn.toString());
-			operator = mncQueryclient.QueryNetwork(mcc, msisdn.toString());
+			log.debug("Unable to obtain Operator from the Header, Oprator look for mcc_range_table - operator : "+operator+ " mcc : "+mcc+ " msisdn : " +msisdn.toString());
+			try{
+				
+				operator = mncQueryclient.QueryNetwork(mcc, msisdn.toString());
+			}catch (Exception e) {
+				
+				throw new CustomException("SVC0001", "", new String[] { "Requested service is not provisioned" });
+			}			
 		}
 
 		if (operator == null) {
