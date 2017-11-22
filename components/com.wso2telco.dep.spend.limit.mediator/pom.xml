@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.wso2telco.dep.mediation</groupId>
         <artifactId>mediation-components</artifactId>
-        <version>2.1.11</version>
+        <version>2.1.12-SNAPSHOT</version>
     </parent>
 
     <artifactId>com.wso2telco.dep.spend.limit.mediator</artifactId>

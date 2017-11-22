@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.wso2telco.dep.mediation</groupId>
 	<artifactId>mediation-dep</artifactId>
-	<version>2.1.11</version>
+	<version>2.1.12-SNAPSHOT</version>
 	<packaging>pom</packaging>
 	<name>mediation-dep</name>
 	<description>mediation-dep</description>
