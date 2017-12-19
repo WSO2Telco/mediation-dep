@@ -199,34 +199,26 @@ public abstract class RequestExecutor {
 	 */
 	public boolean initialize(MessageContext context) throws Exception {
 
-		// Get valid operators
-
 		String applicationid = getApplicationid();
+		String apiName = (String) context.getProperty("API_NAME");
+
 		OparatorService operatorService = new OparatorService();
 		if (applicationid == null) {
 			throw new CustomException("SVC0001", "", new String[] { "Requested service is not provisioned" });
 		}
-		validoperators = operatorService.getApplicationOperators(Integer.valueOf(applicationid));
-		if (validoperators.isEmpty()) {
+
+		if(validoperators==null|validoperators.isEmpty()){
+			validoperators = operatorService.loadActiveApplicationOperators();
+		}
+
+		OperatorApplicationDTO dto=new OperatorApplicationDTO();
+		dto.setApplicationid(Integer.valueOf(applicationid));
+		dto.setApiName(apiName);
+
+		if (validoperators.contains(dto)) {
 			throw new CustomException("SVC0001", "", new String[] { "Requested service is not provisioned" });
 		}
 
-		String apiName = (String) context.getProperty("API_NAME");
-		List<Integer> activeoperators = operatorService.getActiveApplicationOperators(Integer.valueOf(applicationid),
-				apiName);
-		List<OperatorApplicationDTO> validoperatorsDup = new ArrayList<OperatorApplicationDTO>();
-
-		for (OperatorApplicationDTO operator : validoperators) {
-			if (activeoperators.contains(operator.getOperatorid())) {
-				validoperatorsDup.add(operator);
-			}
-		}
-
-		if (validoperatorsDup.isEmpty()) {
-			throw new CustomException("SVC0001", "", new String[] { "Requested service is not provisioned" });
-		}
-
-		validoperators = validoperatorsDup;
 		subResourcePath = (String) context.getProperty("REST_SUB_REQUEST_PATH");
 		resourceUrl = (String) context.getProperty("REST_FULL_REQUEST_PATH");
 		httpMethod = (String) context.getProperty("HTTP_METHOD");
