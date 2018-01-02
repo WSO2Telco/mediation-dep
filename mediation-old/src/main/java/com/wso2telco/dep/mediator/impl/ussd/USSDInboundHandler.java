@@ -107,7 +107,12 @@ public class USSDInboundHandler implements USSDHandler {
 		//log.info("consumerKey found - " + ussdSPDetails.get(1) + " Request ID: " + UID.getRequestID(context));
 		
 		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
-		context.setProperty("spEndpoint", ussdSPDetails.get(0));
+		String notifyUrl = ussdSPDetails.get(0);
+		String requestRouterUrl = mediatorConfMap.get("requestRouterUrl");
+		if (requestRouterUrl != null) {
+			notifyUrl = requestRouterUrl + notifyUrl;
+		}
+		context.setProperty("spEndpoint", notifyUrl);
 
 		JSONObject jsonBody = executor.getJsonBody();
 		//jsonBody.getJSONObject("inboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL", ussdSPDetails.get(0));
