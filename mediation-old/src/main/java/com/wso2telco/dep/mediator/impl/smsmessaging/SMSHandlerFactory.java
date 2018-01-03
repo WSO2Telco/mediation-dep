@@ -17,6 +17,8 @@
  */
 package com.wso2telco.dep.mediator.impl.smsmessaging;
 
+import java.util.Date;
+
 import com.wso2telco.dep.mediator.impl.smsmessaging.northbound.OutboundSMSSubscriptionsNorthboundHandler;
 import com.wso2telco.dep.mediator.impl.smsmessaging.northbound.RetrieveSMSNorthboundHandler;
 import com.wso2telco.dep.mediator.impl.smsmessaging.northbound.SMSInboundSubscriptionsNorthboundHandler;
@@ -25,6 +27,8 @@ import com.wso2telco.dep.mediator.impl.smsmessaging.southbound.RetrieveSMSSouthb
 import com.wso2telco.dep.mediator.impl.smsmessaging.southbound.SMSInboundSubscriptionsSouthboundHandler;
 import com.wso2telco.dep.mediator.impl.smsmessaging.southbound.StopOutboundSMSSubscriptionsSouthBoundHandler;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
+import com.wso2telco.dep.subscriptionvalidator.exceptions.ValidatorException;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.json.JSONObject;
@@ -47,9 +51,12 @@ public class SMSHandlerFactory {
 	 * @param executor
 	 *            the executor
 	 * @return the SMS handler
+	 * @throws ValidatorException
+	 * @throws ClassNotFoundException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
 	 */
-	public static SMSHandler createHandler(String ResourceURL, SMSExecutor executor) {
-
+	public static SMSHandler createHandler(String ResourceURL, SMSExecutor executor) throws InstantiationException, IllegalAccessException, ClassNotFoundException, ValidatorException {
 		String sendSMSKeyString = "outbound";
 		String sendSMSKeyStringRequest = "requests";
 		String retrieveSMSString = "inbound";
@@ -107,13 +114,13 @@ public class SMSHandlerFactory {
 			apiType = RequestType.SMS_INBOUND_NOTIFICATIONS;
 	        log.debug("Invoke SMSInboundNotificationsHandler");
 			handler = new SMSInboundNotificationsHandler(executor);
-			
+
 		} else if (ResourceURL.toLowerCase().contains(deliveryNotifyString.toLowerCase())) {
-			
+
             apiType = RequestType.SMS_OUTBOUND_NOTIFICATIONS;
             log.debug("Invoke SMSOutboundNotificationsHandler");
             handler = new SMSOutboundNotificationsHandler(executor);
-            
+
 		}else if (ResourceURL.toLowerCase().contains(sendSMSKeyString.toLowerCase())
 				&& lastWord.equals(subscriptionKeyString)) {
 
@@ -201,7 +208,7 @@ public class SMSHandlerFactory {
 
 		/** The query sms. */
 		QUERY_SMS,
-		
+
 		SMS_OUTBOUND_NOTIFICATIONS
 	}
 }

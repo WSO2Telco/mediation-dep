@@ -17,8 +17,12 @@
  */
 package com.wso2telco.dep.mediator.impl.smsmessaging;
 
+import java.util.Date;
+
 import com.wso2telco.dep.mediator.RequestExecutor;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
+import com.wso2telco.dep.subscriptionvalidator.exceptions.ValidatorException;
+
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -60,9 +64,9 @@ public class SMSExecutor extends RequestExecutor {
     @Override
     public boolean validateRequest(String httpMethod, String requestPath, JSONObject jsonBody, MessageContext
             context) throws Exception {
-
-        SMSHandler handler = getSMSHandler(requestPath);
+    	SMSHandler handler = getSMSHandler(requestPath);
         return handler.validate(httpMethod, requestPath, jsonBody, context);
+
     }
 
     /**
@@ -70,8 +74,12 @@ public class SMSExecutor extends RequestExecutor {
      *
      * @param requestPath the request path
      * @return the SMS handler
+     * @throws ValidatorException
+     * @throws ClassNotFoundException
+     * @throws IllegalAccessException
+     * @throws InstantiationException
      */
-    private SMSHandler getSMSHandler(String requestPath) {
+    private SMSHandler getSMSHandler(String requestPath) throws InstantiationException, IllegalAccessException, ClassNotFoundException, ValidatorException {
         if (handler == null) {
             handler = SMSHandlerFactory.createHandler(requestPath, this);
         }
