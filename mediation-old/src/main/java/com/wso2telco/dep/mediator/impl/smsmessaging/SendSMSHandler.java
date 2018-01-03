@@ -17,27 +17,43 @@
  */
 package com.wso2telco.dep.mediator.impl.smsmessaging;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.axis2.AxisFault;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.ResponseHandler;
 import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
 import com.wso2telco.dep.mediator.entity.smsmessaging.SendSMSRequest;
 import com.wso2telco.dep.mediator.entity.smsmessaging.SendSMSResponse;
+import com.wso2telco.dep.mediator.impl.AbstractHandler;
 import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.SMSMessagingService;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
-import com.wso2telco.dep.mediator.util.FileNames;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.ValidateSendSms;
 import com.wso2telco.dep.operatorservice.model.OperatorApplicationDTO;
+import com.wso2telco.dep.subscriptionvalidator.exceptions.ValidatorException;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
@@ -55,12 +71,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+
 // TODO: Auto-generated Javadoc
 
 /**
  * The Class SendSMSHandler.
  */
-public class SendSMSHandler implements SMSHandler {
+public class SendSMSHandler extends AbstractHandler{
 
 	/** The log. */
 	private Log log = LogFactory.getLog(SendSMSHandler.class);
@@ -85,8 +102,13 @@ public class SendSMSHandler implements SMSHandler {
 	 *
 	 * @param executor
 	 *            the executor
+	 * @throws ValidatorException
+	 * @throws ClassNotFoundException
+	 * @throws IllegalAccessException
+	 * @throws InstantiationException
 	 */
-	public SendSMSHandler(SMSExecutor executor) {
+	public SendSMSHandler(SMSExecutor executor) throws InstantiationException, IllegalAccessException, ClassNotFoundException, ValidatorException{
+		super();
 		this.executor = executor;
 		occi = new OriginatingCountryCalculatorIDD();
 		responseHandler = new ResponseHandler();
@@ -95,7 +117,7 @@ public class SendSMSHandler implements SMSHandler {
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.wso2telco.mediator.impl.sms.SMSHandler#handle(org.apache.synapse.
 	 * MessageContext)
@@ -119,9 +141,9 @@ public class SendSMSHandler implements SMSHandler {
 		String utf8String = new String(preUtf8, "UTF-8");
 		subsrequest.getOutboundSMSMessageRequest().getOutboundTextMessage().setMessage(utf8String);
 		// ========================UNICODE PATCH
-		        
-		
-		if (!ValidatorUtils.getValidatorForSubscription(context).validate(context)) {
+
+
+		if (!subscriptionValidate(context)) {
 			throw new CustomException("SVC0001", "", new String[] { "Subscription Validation Unsuccessful" });
 		}
 		int smsCount = getSMSMessageCount(subsrequest.getOutboundSMSMessageRequest().getOutboundTextMessage().getMessage());
@@ -189,12 +211,9 @@ public class SendSMSHandler implements SMSHandler {
 		HandlerUtils.setEndpointProperty(context, sending_add);
 		HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
 
-		FileReader fileReader = new FileReader();
-		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
-		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
 
 		// read sendSMSResourceURL from mediatorConfMap and set to message context
-		String sendSmsResourceUrlPrefix = mediatorConfMap.get("sendSMSResourceURL");
+		String sendSmsResourceUrlPrefix = getProperty("sendSMSResourceURL");
 		if (sendSmsResourceUrlPrefix != null && !sendSmsResourceUrlPrefix.isEmpty()) {
 			sendSmsResourceUrlPrefix = sendSmsResourceUrlPrefix.endsWith("/") ?
 					sendSmsResourceUrlPrefix.substring(0, sendSmsResourceUrlPrefix.length() - 1) :  sendSmsResourceUrlPrefix;
@@ -229,7 +248,7 @@ public class SendSMSHandler implements SMSHandler {
 		context.setProperty("ADDRESSES", addresses);
 		context.setProperty("MSISDN_LIST", addressList.substring(0, addressList.length() - 1));
 
-		context.setProperty("RESPONSE_DELIVERY_INFO_RESOURCE_URL", mediatorConfMap.get("hubGateway")+executor.getResourceUrl() + "/" +requestid + "/deliveryInfos");
+		context.setProperty("RESPONSE_DELIVERY_INFO_RESOURCE_URL", getProperty("hubGateway")+executor.getResourceUrl() + "/" +requestid + "/deliveryInfos");
 
 		context.setProperty("OPERATOR_NAME", operatorEndpoint.getOperator());
 		context.setProperty("OPERATOR_ID", operatorEndpoint.getOperatorId());
@@ -246,11 +265,12 @@ public class SendSMSHandler implements SMSHandler {
 //		String resPayload = responseHandler.makeSmsSendResponse(context, jsonBody.toString(), smsResponses, requestid);
 //		storeRequestIDs(requestid, senderAddress, smsResponses);
 //		executor.setResponse(context, resPayload);
+
+
 		return true;
 	}
 
 	private OperatorEndpoint getEndpoint (String address, MessageContext messageContext, String apiType) throws Exception {
-
 		OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
 		searchDTO.setApiName(apiType);
 		searchDTO.setContext(messageContext);
@@ -258,20 +278,18 @@ public class SendSMSHandler implements SMSHandler {
 		searchDTO.setMSISDN(address);
 		searchDTO.setOperators(executor.getValidoperators());
 		searchDTO.setRequestPathURL(executor.getSubResourcePath());
-
 		return occi.getOperatorEndpoint(searchDTO);
 	}
 
 	/*
 	 * (non-Javadoc)
-	 * 
+	 *
 	 * @see
 	 * com.wso2telco.mediator.impl.sms.SMSHandler#validate(java.lang.String,
 	 * java.lang.String, org.json.JSONObject, org.apache.synapse.MessageContext)
 	 */
 	@Override
 	public boolean validate(String httpMethod, String requestPath, JSONObject jsonBody, MessageContext context) throws Exception {
-
 		if (!httpMethod.equalsIgnoreCase("POST")) {
 			((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 405);
 			throw new Exception("Method not allowed");
@@ -308,7 +326,6 @@ public class SendSMSHandler implements SMSHandler {
 				context.setProperty(DataPublisherConstants.SUB_CATEGORY, senderName.substring(6, 9));
 			}
 		}
-
 		return true;
 	}
 
@@ -351,7 +368,7 @@ public class SendSMSHandler implements SMSHandler {
 			searchDTO.setRequestPathURL(executor.getSubResourcePath());
 
 			endpoint = occi.getOperatorEndpoint(searchDTO);
-            
+
 			List<String> sendAdr = new ArrayList<String>();
 			sendAdr.add(address);
 			sendreq.getOutboundSMSMessageRequest().setAddress(sendAdr);
@@ -363,13 +380,14 @@ public class SendSMSHandler implements SMSHandler {
             	sending_add.replace("tel:+", "tel:+");
 			}else{
 				sending_add = java.net.URLDecoder.decode(sending_add, "UTF-8");
-			}                
+			}
             //-----URL DECODE
 			String responseStr = executor.makeRequest(endpoint, sending_add, jsonStr, true, smsmc,false);
 			sendSMSResponse = parseJsonResponse(responseStr);
 
 			smsResponses.put(address, sendSMSResponse);
 		}
+
 		return smsResponses;
 	}
 
@@ -381,7 +399,6 @@ public class SendSMSHandler implements SMSHandler {
 	 * @return the send sms response
 	 */
 	private SendSMSResponse parseJsonResponse(String responseString) {
-
 		Gson gson = new GsonBuilder().create();
 		SendSMSResponse smsResponse;
 		try {
@@ -438,7 +455,6 @@ public class SendSMSHandler implements SMSHandler {
 	 * @return the SMS message count
 	 */
 	private int getSMSMessageCount(String textMessage) {
-
 		int smsCount = 0;
 		try {
 			int count = textMessage.length();

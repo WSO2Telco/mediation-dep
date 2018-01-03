@@ -34,6 +34,7 @@ import com.wso2telco.dep.oneapivalidation.exceptions.RequestError;
 import com.wso2telco.dep.oneapivalidation.exceptions.ResponseError;
 import com.wso2telco.dep.operatorservice.model.OperatorApplicationDTO;
 import com.wso2telco.dep.operatorservice.service.OparatorService;
+
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -198,7 +199,6 @@ public abstract class RequestExecutor {
 	 *             the exception
 	 */
 	public boolean initialize(MessageContext context) throws Exception {
-
 		String applicationid = getApplicationid();
 		String apiName = (String) context.getProperty("API_NAME");
 
@@ -207,7 +207,7 @@ public abstract class RequestExecutor {
 			throw new CustomException("SVC0001", "", new String[] { "Requested service is not provisioned" });
 		}
 
-		if(validoperators==null|validoperators.isEmpty()){
+		if(validoperators==null || validoperators.isEmpty()){
 			validoperators = operatorService.loadActiveApplicationOperators();
 		}
 
@@ -215,7 +215,7 @@ public abstract class RequestExecutor {
 		dto.setApplicationid(Integer.valueOf(applicationid));
 		dto.setApiName(apiName);
 
-		if (validoperators.contains(dto)) {
+		if (!validoperators.contains(dto)) {
 			throw new CustomException("SVC0001", "", new String[] { "Requested service is not provisioned" });
 		}
 
@@ -261,6 +261,7 @@ public abstract class RequestExecutor {
 					"Json Error",
 					new String[] { "Request is missing required URI components" });
 		}
+
 		return true;
 	}
 

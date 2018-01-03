@@ -19,6 +19,7 @@ package com.wso2telco.dep.mediator;
 
 import com.wso2telco.dep.mediator.internal.Base64Coder;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
+
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -28,10 +29,11 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Date;
 import java.util.Map;
 
 
- 
+
 // TODO: Auto-generated Javadoc
 
 /**
@@ -41,22 +43,21 @@ public class HandlerMediator extends AbstractMediator {
 
     /** The log. */
     @SuppressWarnings("unused")
-    
+
     private static Log log = LogFactory.getLog(HandlerMediator.class);
 
     /** The executor class. */
     private String executorClass;
-    
+
     /** The nb publisher. */
     private NorthboundPublisher nbPublisher;
-    
-     
+
+
     /* (non-Javadoc)
      * @see org.apache.synapse.Mediator#mediate(org.apache.synapse.MessageContext)
      */
     public boolean mediate(MessageContext context) {
-
-        String jsonBody = null;
+    	String jsonBody = null;
         try {
             Class clazz = Class.forName(executorClass);
             RequestExecutor reqHandler = (RequestExecutor) clazz.newInstance();
@@ -71,15 +72,14 @@ public class HandlerMediator extends AbstractMediator {
 
         } catch (CustomException ax) {
             handleCustomException(ax.getErrcode(),ax.getErrvar(), ax, context, jsonBody);
-            
-        } catch (Exception axisFault) {            
+
+        } catch (Exception axisFault) {
             handleException("Unexpected error ", axisFault, context);
             return false;
         }
-
         return true;
     }
-    
+
     /**
      * Handle custom exception.
      *
@@ -92,16 +92,16 @@ public class HandlerMediator extends AbstractMediator {
     public void handleCustomException(String errcode, String[] errvar, CustomException ax, MessageContext context, String jsonBody) {
         context.setProperty("ERROR_CODE",errcode);
         context.setProperty("errvar",errvar[0]);
-        
+
         //NB Data Publish
         if(nbPublisher == null){
             nbPublisher = new NorthboundPublisher();
         }
         nbPublisher.publishNBErrorResponseData(ax, jsonBody, context);
-        
+
         handleException(ax.getErrmsg(), ax,context);
     }
-    
+
     /**
      * Store application.
      *
@@ -110,11 +110,11 @@ public class HandlerMediator extends AbstractMediator {
      * @throws AxisFault the axis fault
      */
     private String storeApplication(MessageContext context) throws AxisFault {
-       String applicationid = null;
-        
+    	String applicationid = null;
+
         org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) context).getAxis2MessageContext();
         Object headers = axis2MessageContext.getProperty(
-                org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);        
+                org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
         if (headers != null && headers instanceof Map) {
             try {
                 Map headersMap = (Map) headers;
@@ -126,12 +126,11 @@ public class HandlerMediator extends AbstractMediator {
                 String jwtbody = Base64Coder.decodeString(jwttoken[1]);
                 JSONObject jwtobj = new JSONObject(jwtbody);
                 applicationid = jwtobj.getString("http://wso2.org/claims/applicationid");
-                
+
             } catch (JSONException ex) {
                 throw new AxisFault("Error retriving application id");
             }
         }
-        
         return applicationid;
     }
 
