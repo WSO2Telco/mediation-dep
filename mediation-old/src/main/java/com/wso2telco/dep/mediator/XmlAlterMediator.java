@@ -16,8 +16,6 @@ import javax.xml.transform.stream.StreamResult;
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axiom.soap.SOAPBody;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.w3c.dom.Document;
