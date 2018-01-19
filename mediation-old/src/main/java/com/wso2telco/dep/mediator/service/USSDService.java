@@ -91,7 +91,9 @@ public class USSDService {
 
 			throw new BusinessException(GenaralError.INTERNAL_SERVER_ERROR);
 		}
-
+			if (notifyurls==null){
+				notifyurls = Collections.emptyList();
+			}
 		return notifyurls;
 	}
 

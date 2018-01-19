@@ -103,6 +103,10 @@ public class USSDInboundHandler implements USSDHandler {
 		
 		
 		List<String> ussdSPDetails = ussdService.getUSSDNotify(Integer.valueOf(subscriptionId));
+
+		if (ussdSPDetails.isEmpty()) {
+			throw new CustomException("SVC0002", "", new String[] { "Invalid SubscriptionID" });
+		}
 		//log.info("notifyUrl found -  " + ussdSPDetails.get(0) + " Request ID: " + UID.getRequestID(context));
 		//log.info("consumerKey found - " + ussdSPDetails.get(1) + " Request ID: " + UID.getRequestID(context));
 		
@@ -131,7 +135,7 @@ public class USSDInboundHandler implements USSDHandler {
         log.info("01 SP_OPERATOR_ID found - " + ussdSPDetails.get(2) + " Request ID: " + UID.getRequestID(context));
         log.info("01 SP_USER_ID found - " + ussdSPDetails.get(3) + " Request ID: " + UID.getRequestID(context));
 
-        OperatorEndpoint operatorendpoint = new OperatorEndpoint(new EndpointReference(ussdSPDetails.get(0)), null);
+        OperatorEndpoint operatorendpoint = new OperatorEndpoint(new EndpointReference(notifyUrl), null);
         String sending_add = operatorendpoint.getEndpointref().getAddress();
         
         //==============SET OPERATOR ID & OPERATOR NAME
