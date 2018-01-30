@@ -89,7 +89,7 @@ public class RetrieveSMSHandler implements SMSHandler {
 
 		String requestid = UID.getUniqueID(Type.SMSRETRIVE.getCode(), context, executor.getApplicationid());
 
-		List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp( API_TYPE, executor.getSubResourcePath(), executor.getValidoperators());
+		List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp( API_TYPE, executor.getSubResourcePath(), executor.getValidoperators(context));
 		String endpoint = endpoints.get(0).getEndpointref().getAddress();
 
 		URL retrieveURL = new URL("http://example.com/smsmessaging/v1" + executor.getSubResourcePath());

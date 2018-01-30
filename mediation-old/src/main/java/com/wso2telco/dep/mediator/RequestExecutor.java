@@ -19,6 +19,7 @@ package com.wso2telco.dep.mediator;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.wso2telco.core.dbutils.exception.BusinessException;
 import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.InboundSMSMessage;
 import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.InboundSMSMessageList;
@@ -29,6 +30,7 @@ import com.wso2telco.dep.mediator.unmarshaler.GroupEventUnmarshaller;
 import com.wso2telco.dep.mediator.unmarshaler.OparatorNotinListException;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.MediationHelper;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.exceptions.RequestError;
 import com.wso2telco.dep.oneapivalidation.exceptions.ResponseError;
@@ -75,7 +77,7 @@ public abstract class RequestExecutor {
 	private static Log log = LogFactory.getLog(RequestExecutor.class);
 
 	/** The validoperators. */
-	List<OperatorApplicationDTO> validoperators = null;
+	private static List<OperatorApplicationDTO> validoperators = null;
 
 	/** The http method. */
 	private String httpMethod;
@@ -158,7 +160,32 @@ public abstract class RequestExecutor {
 	 *
 	 * @return the validoperators
 	 */
-	public List<OperatorApplicationDTO> getValidoperators() {
+	public List<OperatorApplicationDTO> getValidoperators(MessageContext context) throws BusinessException {
+		OparatorService operatorService = new OparatorService();
+		if(validoperators==null || validoperators.isEmpty()){
+			validoperators = operatorService.loadActiveApplicationOperators();
+		}
+
+		if(context!=null){
+		OperatorApplicationDTO dto=new OperatorApplicationDTO();
+		dto.setApplicationid(Integer.valueOf(MediationHelper.getInstance().getApplicationId(context)));
+		dto.setApiName(  (String) context.getProperty("API_NAME"));
+		/**
+ 		* check if the given  subscription already loaded
+ 		*/
+		if (!validoperators.contains(dto)) {
+
+         /**
+         * clear the cached operators and load from the db
+         */
+			validoperators.clear();
+			validoperators.addAll(operatorService.loadActiveApplicationOperators());
+
+		}
+		if (!validoperators.contains(dto)) {
+			throw new CustomException("SVC0001", "", new String[] { "Requested service is not provisioned" });
+		}
+		}
 		return validoperators;
 	}
 
@@ -207,18 +234,7 @@ public abstract class RequestExecutor {
 			throw new CustomException("SVC0001", "", new String[] { "Requested service is not provisioned" });
 		}
 
-		if(validoperators==null || validoperators.isEmpty()){
-			validoperators = operatorService.loadActiveApplicationOperators();
-		}
-
-		OperatorApplicationDTO dto=new OperatorApplicationDTO();
-		dto.setApplicationid(Integer.valueOf(applicationid));
-		dto.setApiName(apiName);
-
-		if (!validoperators.contains(dto)) {
-			throw new CustomException("SVC0001", "", new String[] { "Requested service is not provisioned" });
-		}
-
+		getValidoperators(context);
 		subResourcePath = (String) context.getProperty("REST_SUB_REQUEST_PATH");
 		resourceUrl = (String) context.getProperty("REST_FULL_REQUEST_PATH");
 		httpMethod = (String) context.getProperty("HTTP_METHOD");

@@ -35,7 +35,6 @@ import com.wso2telco.dep.mediator.unmarshaler.GroupDTO;
 import com.wso2telco.dep.mediator.unmarshaler.GroupEventUnmarshaller;
 import com.wso2telco.dep.mediator.unmarshaler.OparatorNotinListException;
 import com.wso2telco.dep.mediator.util.APIType;
-import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.FileNames;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.mediator.util.MessagePersistor;
@@ -62,8 +61,6 @@ public class AmountChargeHandler implements PaymentHandler {
 
 	private Log log = LogFactory.getLog(AmountChargeHandler.class);
 
-	private static final String API_TYPE = "payment";
-
 	private OriginatingCountryCalculatorIDD occi;
 
 	private PaymentService paymentService;
@@ -86,13 +83,22 @@ public class AmountChargeHandler implements PaymentHandler {
 	}
 
 	public boolean handle(MessageContext context) throws Exception {
+		long s1 = System.currentTimeMillis();
 
 		String requestid = UID.getUniqueID(Type.PAYMENT.getCode(), context, executor.getApplicationid());
-		
+		long s2 = System.currentTimeMillis();
+		log.error(this.getClass()+"----------------------------------1----------------------------------------"+(s2-s1)+"*************");
+
 		HashMap<String, String> jwtDetails = apiUtils.getJwtTokenDetails(context);
         OperatorEndpoint endpoint = null;
         String clientCorrelator = null;
-        String requestResourceURL = executor.getResourceUrl();
+
+		long s3 = System.currentTimeMillis();
+		log.error(this.getClass()+"----------------------------------2----------------------------------------"+(s3-s2)+"*************");
+
+		String requestResourceURL = executor.getResourceUrl();
+		long s4 = System.currentTimeMillis();
+		log.error(this.getClass()+"----------------------------------3----------------------------------------"+(s4-s3)+"*************");
 
         FileReader fileReader = new FileReader();
         String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
@@ -115,6 +121,8 @@ public class AmountChargeHandler implements PaymentHandler {
 		context.setProperty(MSISDNConstants.USER_MSISDN, msisdn);
 		context.setProperty(MSISDNConstants.MSISDN, endUserId);
 		//OperatorEndpoint endpoint = null;
+		long s5 = System.currentTimeMillis();
+		log.error(this.getClass()+"----------------------------------4----------------------------------------"+(s5-s4)+"*************");
 
 		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
 			OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
@@ -123,10 +131,17 @@ public class AmountChargeHandler implements PaymentHandler {
 			searchDTO.setContext(context);
 			searchDTO.setIsredirect(false);
 			searchDTO.setMSISDN(endUserId);
-			searchDTO.setOperators(executor.getValidoperators());
+			searchDTO.setOperators(executor.getValidoperators(context));
 			searchDTO.setRequestPathURL(executor.getSubResourcePath());
 
-			endpoint = occi.getOperatorEndpoint(searchDTO); /*
+			long startTime = System.currentTimeMillis();
+			endpoint = occi.getOperatorEndpoint(searchDTO);
+
+			long endTime = System.currentTimeMillis();
+			long duration = (endTime - startTime);
+			log.error(this.getClass()+"----------------------------------5----------------------------------------"+duration+"*************");
+
+			/*
 															 * occi.
 															 * getAPIEndpointsByMSISDN
 															 * (
@@ -141,10 +156,14 @@ public class AmountChargeHandler implements PaymentHandler {
 															 * ());
 															 */
 		}
+		long s6 = System.currentTimeMillis();
+		log.error(this.getClass()+"----------------------------------6----------------------------------------"+(s6-s5)+"*************");
 
 		String sending_add = endpoint.getEndpointref().getAddress();
 		log.info("sending endpoint found: " + sending_add + " Request ID: " + UID.getRequestID(context));
+		long s7 = System.currentTimeMillis();
 
+		log.error(this.getClass()+"----------------------------------7----------------------------------------"+(s7-s6)+"*************");
 
 		/*JSONObject clientclr = jsonBody.getJSONObject("amountTransaction");
 		clientclr.put("clientCorrelator", clientclr.getString("clientCorrelator") + ":" + requestid);*/
@@ -170,6 +189,8 @@ public class AmountChargeHandler implements PaymentHandler {
 				"paymentAmount").getJSONObject("chargingMetaData");
 
 		boolean isaggrigator = paymentUtil.isAggregator(context);
+		long s8 = System.currentTimeMillis();
+		log.error(this.getClass()+"----------------------------------8----------------------------------------"+(s8-s7)+"*************");
 
 		if (isaggrigator) {
 			//JSONObject chargingdmeta = objAmountTransaction.getJSONObject("paymentAmount").getJSONObject("chargingMetaData");
@@ -180,6 +201,8 @@ public class AmountChargeHandler implements PaymentHandler {
 						chargingdmeta.getString("onBehalfOf"));
 			}
 		}
+		long s9 = System.currentTimeMillis();
+		log.error(this.getClass()+"----------------------------------9----------------------------------------"+(s9-s8)+"*************");
 
 		if ((!chargingdmeta.isNull("purchaseCategoryCode"))
 				&& (!chargingdmeta.getString("purchaseCategoryCode").isEmpty())) {
@@ -198,7 +221,15 @@ public class AmountChargeHandler implements PaymentHandler {
         messageDTO.setRefval(jsonBody.getJSONObject("amountTransaction").getString("referenceCode"));
         messageDTO.setMessage(jsonBody.toString());
         messageDTO.setReportedTime(System.currentTimeMillis());
+
+		long s10 = System.currentTimeMillis();
+		log.error(this.getClass()+"----------------------------------10----------------------------------------"+(s10-s9)+"*************");
+
         MessagePersistor.getInstance().publishMessage(messageDTO);
+		long s11 = System.currentTimeMillis();
+		log.error(this.getClass()+"----------------------------------11----------------------------------------"+(s11-s10)+"*************");
+
+
 
 		// set information to the message context, to be used in the sequence
         HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
@@ -213,7 +244,15 @@ public class AmountChargeHandler implements PaymentHandler {
 		context.setProperty("OPERATOR_ID", endpoint.getOperatorId());
 
         //Set the 'isUserInfoEnabled' property
-        GroupEventUnmarshaller unmarshaller = GroupEventUnmarshaller.getInstance();
+		long s12 = System.currentTimeMillis();
+		log.error(this.getClass()+"----------------------------------12----------------------------------------"+(s12-s11)+"*************");
+
+		GroupEventUnmarshaller unmarshaller = GroupEventUnmarshaller.getInstance();
+
+		long s13 = System.currentTimeMillis();
+
+		log.error(this.getClass()+"----------------------------------13----------------------------------------"+(s13-s12)+"*************");
+
 
 		String isUserInfoEnabled = "false";
         try {
@@ -224,6 +263,8 @@ public class AmountChargeHandler implements PaymentHandler {
 			log.debug("Operator not in list of spendlimits", e);
 		}
 		context.setProperty("IS_USER_INFO_ENABLED", isUserInfoEnabled);
+		long s14 = System.currentTimeMillis();
+		log.error(this.getClass()+"----------------------------------14----------------------------------------"+(s14-s13)+"*************");
 
         return true;
 

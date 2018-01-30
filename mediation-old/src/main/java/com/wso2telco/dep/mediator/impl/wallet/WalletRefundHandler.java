@@ -93,7 +93,7 @@ public class WalletRefundHandler implements WalletHandler {
         if (ValidatorUtils.getValidatorForSubscription(context).validate(context)) {
 
             endpoint = occi.getAPIEndpointsByMSISDN(endUserId.replace("tel:", ""), API_TYPE, executor.getSubResourcePath(), false,
-                    executor.getValidoperators());
+                    executor.getValidoperators(context));
         }
         
         String sending_add = endpoint.getEndpointref().getAddress();

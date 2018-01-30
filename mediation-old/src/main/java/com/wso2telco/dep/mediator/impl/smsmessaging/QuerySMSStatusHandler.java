@@ -175,7 +175,7 @@ public class QuerySMSStatusHandler implements SMSHandler {
 					searchDTO.setContext(context);
 					searchDTO.setIsredirect(true);
 					searchDTO.setMSISDN(address);
-					searchDTO.setOperators(executor.getValidoperators());
+					searchDTO.setOperators(executor.getValidoperators(context));
 					searchDTO.setRequestPathURL(resourcePath);
 
 					endpoint = occi.getOperatorEndpoint(searchDTO);

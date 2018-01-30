@@ -117,7 +117,7 @@ public class AmountRefundHandler implements PaymentHandler {
 			endpoint = occi.getAPIEndpointsByMSISDN(
 					endUserId.replace("tel:", ""), API_TYPE,
 					executor.getSubResourcePath(), false,
-					executor.getValidoperators());
+					executor.getValidoperators(context));
 		}
 
 		String sending_add = endpoint.getEndpointref().getAddress();

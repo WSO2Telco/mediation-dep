@@ -58,7 +58,7 @@ public class WalletBalanceHandler implements WalletHandler{
 
         if (ValidatorUtils.getValidatorForSubscription(context).validate(context)) {
             endpoint = occi.getAPIEndpointsByMSISDN(params[2].replace("tel:", ""), API_TYPE, executor.getSubResourcePath(), true,
-                    executor.getValidoperators());
+                    executor.getValidoperators(context));
         }
         
         String sending_add = endpoint.getEndpointref().getAddress();

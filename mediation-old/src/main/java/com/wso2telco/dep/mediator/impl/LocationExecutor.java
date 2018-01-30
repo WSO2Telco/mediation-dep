@@ -70,7 +70,7 @@ public class LocationExecutor extends RequestExecutor {
 		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(
 				context)) {
 			
-			endpoint = occi.getAPIEndpointsByMSISDN(params[0].replace("tel:", ""), "location", getSubResourcePath(), true, getValidoperators());
+			endpoint = occi.getAPIEndpointsByMSISDN(params[0].replace("tel:", ""), "location", getSubResourcePath(), true, getValidoperators(context));
 		}
 		
         String sending_add = endpoint.getEndpointref().getAddress();
