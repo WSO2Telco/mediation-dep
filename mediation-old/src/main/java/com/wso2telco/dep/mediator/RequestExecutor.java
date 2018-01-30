@@ -17,6 +17,31 @@
  */
 package com.wso2telco.dep.mediator;
 
+import java.io.BufferedOutputStream;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.axis2.AxisFault;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.json.JsonUtil;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.wso2.carbon.utils.CarbonUtils;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.wso2telco.core.dbutils.exception.BusinessException;
@@ -34,37 +59,9 @@ import com.wso2telco.dep.mediator.util.MediationHelper;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.exceptions.RequestError;
 import com.wso2telco.dep.oneapivalidation.exceptions.ResponseError;
+import com.wso2telco.dep.operatorservice.model.OperatorAppSearchDTO;
 import com.wso2telco.dep.operatorservice.model.OperatorApplicationDTO;
 import com.wso2telco.dep.operatorservice.service.OparatorService;
-
-import org.apache.axis2.AxisFault;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.commons.json.JsonUtil;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.transport.passthru.util.RelayUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
-import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import java.io.BufferedOutputStream;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.File;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 
 // TODO: Auto-generated Javadoc
 
@@ -167,9 +164,12 @@ public abstract class RequestExecutor {
 		}
 
 		if(context!=null){
+			
+			final String ApiName =  (String) context.getProperty("API_NAME");
+			final int appId = Integer.valueOf(MediationHelper.getInstance().getApplicationId(context));
 		OperatorApplicationDTO dto=new OperatorApplicationDTO();
-		dto.setApplicationid(Integer.valueOf(MediationHelper.getInstance().getApplicationId(context)));
-		dto.setApiName(  (String) context.getProperty("API_NAME"));
+		dto.setApplicationid(appId);
+		dto.setApiName(ApiName );
 		/**
  		* check if the given  subscription already loaded
  		*/
@@ -178,8 +178,13 @@ public abstract class RequestExecutor {
          /**
          * clear the cached operators and load from the db
          */
-			validoperators.clear();
-			validoperators.addAll(operatorService.loadActiveApplicationOperators());
+			OperatorAppSearchDTO searchDTO = new OperatorAppSearchDTO();
+			searchDTO.setApiName(ApiName);
+			searchDTO.setApplicationId(appId);
+			final List<OperatorApplicationDTO> latestSubscriptions = operatorService.loadActiveApplicationOperators(searchDTO);
+			if(!latestSubscriptions.isEmpty()) {
+				validoperators.addAll(latestSubscriptions);
+			}
 
 		}
 		if (!validoperators.contains(dto)) {
