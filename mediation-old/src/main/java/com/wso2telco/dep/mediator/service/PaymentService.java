@@ -32,6 +32,7 @@ public class PaymentService {
 	private final Log log = LogFactory.getLog(PaymentService.class);
 
 	PaymentDAO paymentDAO;
+	private static List<String> categories = null;
 
 	{
 		paymentDAO = new PaymentDAO();
@@ -40,11 +41,12 @@ public class PaymentService {
 	@SuppressWarnings("unchecked")
 	public List<String> getValidPayCategories() throws BusinessException {
 
-		List<String> categories = null;
-
 		try {
 
-			categories = paymentDAO.getValidPayCategories();
+			if(categories==null || categories.isEmpty()){
+				categories = paymentDAO.getValidPayCategories();
+			}
+
 		} catch (Exception e) {
 
 			throw new BusinessException(GenaralError.INTERNAL_SERVER_ERROR);

@@ -193,7 +193,17 @@ public abstract class RequestExecutor {
 		}
 		return validoperators;
 	}
+	public OperatorApplicationDTO  checkAndReturnValiOparatorsIfExsista(MessageContext context) throws BusinessException{
+		final String ApiName =  (String) context.getProperty("API_NAME");
+		final int appId = Integer.valueOf(MediationHelper.getInstance().getApplicationId(context));
+		getValidoperators(context);
+		OperatorApplicationDTO dto=new OperatorApplicationDTO();
+		dto.setApplicationid(appId);
+		dto.setApiName(ApiName );
 
+
+		return validoperators.get(validoperators.indexOf(dto));
+	}
 	/**
 	 * Gets the http method.
 	 *
@@ -1460,19 +1470,10 @@ public abstract class RequestExecutor {
         if (applicationid == null) {
             throw new CustomException("SVC0001", "", new String[]{"Requested service is not provisioned"});
         }
-        OparatorService operatorService = new OparatorService();
-        validoperators = operatorService.getApplicationOperators(Integer.valueOf(applicationid));
 
-        if (validoperators.isEmpty()) {
-            throw new CustomException("SVC0001", "", new String[]{"Requested service is not provisioned"});
-        }
+		OparatorService operatorService = new OparatorService();
+		op = checkAndReturnValiOparatorsIfExsista(messageContext);
 
-        for (OperatorApplicationDTO d : validoperators) {
-            if (d.getOperatorname() != null && d.getOperatorname().contains(operator)) {
-                op = d;
-                break;
-            }
-        }
         //
         log.info("Token time : " + op.getTokentime() + " Request ID: " + UID.getRequestID(messageContext));
         log.info("Token validity : " + op.getTokenvalidity() + " Request ID: " + UID.getRequestID(messageContext));
