@@ -236,7 +236,7 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
             }
 
             //Check if regular expression applicable 
-            if ((operatorCode != null)  && (oparatorOnHeaderRegEx != null)) {
+            if ((operatorCode != null) && (oparatorOnHeaderRegEx != null)) {
                 operatorCode = getRegExOperator(operatorCode);
                 if (operatorCode == null) {
                     throw new CustomException("SVC0001", "", new String[]{"Requested service is not provisioned"});
@@ -247,53 +247,44 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
 
         StringBuffer msisdn = new StringBuffer();
         //MSISDN could be in ARC/PCR format
-        if (phoneUtil.resourceInMsisdnFormat(searchDTO.getMSISDN())) {
+        //if (phoneUtil.resourceInMsisdnFormat(searchDTO.getMSISDN())) {
 
         MSISDN numberProto = null;
-        try {
-
-            /**
-             * MSISDN provided at JSon body convert into Phone number object.
-             */
-            numberProto = phoneUtil.parse(searchDTO.getMSISDN());
-        } catch (InvalidMSISDNException e) {
-
-            throw new CustomException("SVC0001", "", new String[]{"Requested service is not provisioned"});
-        }
-
         int countryCode = 0;
-
-        if (numberProto != null) {
+        //Check MSIDN in typical format
+        try {
+            numberProto = phoneUtil.parse(searchDTO.getMSISDN());
+            if (numberProto != null) {
+                /**
+                 * obtain the country code form the phone number object
+                 */
+                countryCode = numberProto.getCountryCode();
+            }
 
             /**
-             * obtain the country code form the phone number object
+             * if the country code within the header look up context , the
+             * operator taken from the header object
              */
-            countryCode = numberProto.getCountryCode();
+            if (countryLookUpOnHeader.contains(String.valueOf(countryCode))) {
+                operator = operatorCode;
+            }
+            /**
+             * build the MSISDN
+             */
+
+            if (numberProto != null) {
+
+                msisdn.append("+").append(numberProto.getCountryCode())
+                        .append(numberProto.getNationalNumber());
+            }
+        } catch (InvalidMSISDNException e) {
+            //number in either ARC/PCR format. number already validated from oneapi validation
+            //operator fetched from header
+            if (operatorCode != null) {
+                operator = operatorCode;
+            }
         }
 
-        /**
-         * if the country code within the header look up context , the operator
-         * taken from the header object
-         */
-        if (countryLookUpOnHeader.contains(String.valueOf(countryCode))) {
-          operator =   operatorCode;
-        }
-        /**
-         * build the MSISDN
-         */
-        
-        if (numberProto != null) {
-
-            msisdn.append("+").append(numberProto.getCountryCode())
-                    .append(numberProto.getNationalNumber());
-        }
-        
-        } else if (operatorCode != null) {
-           operator =   operatorCode; 
-        }
-        
-        
-        
         /**
          * if the operator still not selected the operator selection logic goes
          * as previous .ie select from MCC_NUMBER_RANGE
@@ -323,7 +314,6 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
                                 .getDescription()});
         }
 
-        
         //Check if Operator Brand Exist        
         String brand = McnRangeDbUtil.getMncBrand(operator);
         if (brand != null) {
