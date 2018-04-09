@@ -323,7 +323,8 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
         OperatorApplicationDTO valid = null;
         for (OperatorApplicationDTO d : searchDTO.getOperators()) {
             if (d.getOperatorname() != null
-                    && d.getOperatorname().contains(operator.toUpperCase())) {
+                    && d.getOperatorname().contains(operator.toUpperCase())
+                    && d.getApplicationid() == Integer.parseInt((String)searchDTO.getContext().getProperty("APPLICATION_ID"))) {
                 valid = d;
                 break;
             }
