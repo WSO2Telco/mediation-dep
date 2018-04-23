@@ -25,7 +25,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class XmlAlterMediator extends AbstractMediator {
-    private String removeEl;
+  private String removeEl;
 
 	public String getRemoveEl() {
 		return removeEl;

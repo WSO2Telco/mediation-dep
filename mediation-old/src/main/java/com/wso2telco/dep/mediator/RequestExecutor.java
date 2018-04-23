@@ -250,7 +250,7 @@ public abstract class RequestExecutor {
 		}
 
 		getValidoperators(context);
-		subResourcePath = (String) context.getProperty("REST_SUB_REQUEST_PATH");
+    subResourcePath = (String) context.getProperty("REST_SUB_REQUEST_PATH");
 		resourceUrl = (String) context.getProperty("REST_FULL_REQUEST_PATH");
 		httpMethod = (String) context.getProperty("HTTP_METHOD");
 
