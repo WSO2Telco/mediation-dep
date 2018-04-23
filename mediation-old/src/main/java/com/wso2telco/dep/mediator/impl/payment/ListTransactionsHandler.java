@@ -99,7 +99,7 @@ public class ListTransactionsHandler implements PaymentHandler {
 			endpoint = occi.getAPIEndpointsByMSISDN(
 					params[1].replace("tel:", ""), API_TYPE,
 					executor.getSubResourcePath(), true,
-					executor.getValidoperators());
+					executor.getValidoperators(context));
 		}
 
 		// set information to the message context, to be used in the sequence

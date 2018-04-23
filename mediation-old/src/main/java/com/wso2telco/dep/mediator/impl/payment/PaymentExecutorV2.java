@@ -124,7 +124,7 @@ public class PaymentExecutorV2 extends RequestExecutor {
         if (ValidatorUtils.getValidatorForSubscription(mc).validate(mc)) {
 
             endpoint = occi.getAPIEndpointsByMSISDN(endUserId.replace("tel:", ""), API_TYPE, getSubResourcePath(), false,
-                    getValidoperators());
+                    getValidoperators(mc));
         }
 
         String sending_add = endpoint.getEndpointref().getAddress();

@@ -175,7 +175,7 @@ public class OutboundSMSSubscriptionsSouthboundHandler implements SMSHandler {
 				SouthboundDeliveryReceiptSubscriptionRequest.class);
 
 		List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp(API_TYPE, executor.getSubResourcePath(),
-				executor.getValidoperators());
+				executor.getValidoperators(context));
 
         int dnSubscriptionId = smsMessagingService.outboundSubscriptionEntry(subsrequst.getDeliveryReceiptSubscription()
                 .getCallbackReference().getNotifyURL(), serviceProvider);

@@ -276,7 +276,7 @@ public class SendSMSHandler extends AbstractHandler{
 		searchDTO.setContext(messageContext);
 		searchDTO.setIsredirect(false);
 		searchDTO.setMSISDN(address);
-		searchDTO.setOperators(executor.getValidoperators());
+		searchDTO.setOperators(executor.getValidoperators(messageContext));
 		searchDTO.setRequestPathURL(executor.getSubResourcePath());
 		return occi.getOperatorEndpoint(searchDTO);
 	}
