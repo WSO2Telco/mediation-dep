@@ -103,11 +103,20 @@ public class USSDInboundHandler implements USSDHandler {
 		
 		
 		List<String> ussdSPDetails = ussdService.getUSSDNotify(Integer.valueOf(subscriptionId));
+
+		if (ussdSPDetails.isEmpty()) {
+			throw new CustomException("SVC0002", "", new String[] { "Invalid SubscriptionID" });
+		}
 		//log.info("notifyUrl found -  " + ussdSPDetails.get(0) + " Request ID: " + UID.getRequestID(context));
 		//log.info("consumerKey found - " + ussdSPDetails.get(1) + " Request ID: " + UID.getRequestID(context));
 		
 		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
-		context.setProperty("spEndpoint", ussdSPDetails.get(0));
+		String notifyUrl = ussdSPDetails.get(0);
+		String requestRouterUrl = mediatorConfMap.get("requestRouterUrl");
+		if (requestRouterUrl != null) {
+			notifyUrl = requestRouterUrl + notifyUrl;
+		}
+		context.setProperty("spEndpoint", notifyUrl);
 
 		JSONObject jsonBody = executor.getJsonBody();
 		//jsonBody.getJSONObject("inboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL", ussdSPDetails.get(0));
@@ -126,7 +135,7 @@ public class USSDInboundHandler implements USSDHandler {
         log.info("01 SP_OPERATOR_ID found - " + ussdSPDetails.get(2) + " Request ID: " + UID.getRequestID(context));
         log.info("01 SP_USER_ID found - " + ussdSPDetails.get(3) + " Request ID: " + UID.getRequestID(context));
 
-        OperatorEndpoint operatorendpoint = new OperatorEndpoint(new EndpointReference(ussdSPDetails.get(0)), null);
+        OperatorEndpoint operatorendpoint = new OperatorEndpoint(new EndpointReference(notifyUrl), null);
         String sending_add = operatorendpoint.getEndpointref().getAddress();
         
         //==============SET OPERATOR ID & OPERATOR NAME
@@ -139,7 +148,7 @@ public class USSDInboundHandler implements USSDHandler {
 		
 		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
 			endpoint = occi.getAPIEndpointsByMSISDN(filteredAddress, API_TYPE,
-					executor.getSubResourcePath(), false, executor.getValidoperators());
+					executor.getSubResourcePath(), false, executor.getValidoperators(context));
 		}
 		context.setProperty("operator", operatorendpoint.getOperator());
 		context.setProperty("OPERATOR_NAME", operatorendpoint.getOperator());

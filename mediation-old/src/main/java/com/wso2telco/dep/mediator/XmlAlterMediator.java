@@ -8,17 +8,14 @@ import java.io.Writer;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.transform.*;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
 import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.util.AXIOMUtil;
 import org.apache.axiom.soap.SOAPBody;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.mediators.AbstractMediator;
 import org.w3c.dom.Document;
@@ -28,8 +25,7 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class XmlAlterMediator extends AbstractMediator {
-    private Log log = LogFactory.getLog(this.getClass());
-    private String removeEl;
+  private String removeEl;
 
 	public String getRemoveEl() {
 		return removeEl;
@@ -39,21 +35,21 @@ public class XmlAlterMediator extends AbstractMediator {
 		this.removeEl = removeEl;
 	}
 
-	Document doc ;
+	Document document;
 	public boolean mediate(MessageContext context) {
 		String responsePayload=null;
 		try {
-			doc = getDocumentByXml(context.getEnvelope().toString());
-			String []elements=removeEl.split("_");
-			for (String element : elements) {
-				String []elementTmp=element.split("\\.");
-				String parentElement=elementTmp[0];
-				String childElement=elementTmp[1];
-				deleteElements(parentElement,childElement);
-				log.info(element);
+			document = getDocumentByXml(context.getEnvelope().toString());
+			if(removeEl.contains("_")) {
+				String []elements = removeEl.split("_");
+				for (String element : elements) {
+					removeParentChild(element);
+				}
+			}else {
+				removeParentChild(removeEl);
 			}
 
-			responsePayload=xmlDocPrint(doc);
+			responsePayload=xmlDocPrint(document);
 
 	        SOAPBody body = context.getEnvelope().getBody();
 	        OMElement firstChild = body.getFirstElement();
@@ -64,17 +60,18 @@ public class XmlAlterMediator extends AbstractMediator {
 	            firstChild.insertSiblingAfter(omXML);
 	            firstChild.detach();
 	        }
-
-		} catch (ParserConfigurationException e) {
-			log.error(e.getMessage());
-		} catch (SAXException e) {
-			log.error(e.getMessage());
-		} catch (IOException e) {
-			log.error(e.getMessage());
-		} catch (Exception e) {
+		} catch (ParserConfigurationException|SAXException|IOException|XMLStreamException|TransformerException e) {
 			log.error(e.getMessage());
 		}
 		return true;
+	}
+
+	private void removeParentChild(String removeElement) {
+		String[] elementTmp = removeElement.split("\\.");
+		String parentElement = elementTmp[0];
+		String childElement = elementTmp[1];
+		deleteElements(parentElement, childElement);
+		log.info(removeElement);
 	}
 
 
@@ -89,7 +86,7 @@ public class XmlAlterMediator extends AbstractMediator {
 		return doc;
 	}
 
-	private final String xmlDocPrint(Document xml) throws Exception {
+	private final String xmlDocPrint(Document xml) throws TransformerException {
 		Transformer tf = TransformerFactory.newInstance().newTransformer();
 		tf.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 		tf.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -100,13 +97,13 @@ public class XmlAlterMediator extends AbstractMediator {
 	}
 
 	private Document deleteElements(String parentElement,String childElement) {
-		NodeList nodeList = doc.getElementsByTagName(childElement);
+		NodeList nodeList = document.getElementsByTagName(childElement);
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node node = nodeList.item(i);
 			if ((node.getNodeType() == Node.ELEMENT_NODE)&&(node.getParentNode().getNodeName().equals(parentElement))) {
 				node.getParentNode().removeChild(node);
 			}
 		}
-		return doc;
+		return document;
 	}
 }

@@ -116,7 +116,7 @@ public class SouthBoundMOUSSDSubscribeHandler implements USSDHandler {
         log.info("Subsendpoint - " + subsEndpoint);
 
         List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp(API_TYPE, executor.getSubResourcePath(),
-                                                                     executor.getValidoperators());
+                                                                     executor.getValidoperators(context));
         if (endpoints.size() > 1) {
             log.warn("Multiple operator endpoints found. Picking first endpoint: " + endpoints.get(0).getEndpointref()
                     .getAddress() + " for operator: " + endpoints.get(0).getOperator() + " to send request.");
@@ -146,7 +146,7 @@ public class SouthBoundMOUSSDSubscribeHandler implements USSDHandler {
 		
 		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
 			endpoint = occi.getAPIEndpointsByMSISDN(filteredAddress, API_TYPE,
-					executor.getSubResourcePath(), false, executor.getValidoperators());
+					executor.getSubResourcePath(), false, executor.getValidoperators(context));
 		}
 		context.setProperty("operator", endpoint.getOperator());
 		context.setProperty("OPERATOR_NAME", endpoint.getOperator());

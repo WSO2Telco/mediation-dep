@@ -155,7 +155,7 @@ public class ProvisionServiceHandler implements ProvisionHandler {
 
 			context.setProperty(MSISDNConstants.USER_MSISDN, msisdn.substring(5));
 			endpoint = occi.getAPIEndpointsByMSISDN(msisdn.replace("tel:", ""), API_TYPE, executor.getSubResourcePath(),
-					false, executor.getValidoperators());
+					false, executor.getValidoperators(context));
 
 			String sendingAddress = endpoint.getEndpointref().getAddress();
 

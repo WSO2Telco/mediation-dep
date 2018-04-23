@@ -119,7 +119,7 @@ public class USSDDAO {
 		Connection con = DbUtils.getDbConnection(DataSourceNames.WSO2TELCO_DEP_DB);
 		PreparedStatement ps = null;
 		ResultSet rs = null;
-		List<String> ussdSPDetails = new ArrayList<String>();
+		List<String> ussdSPDetails = null;
 
 
 		try {
@@ -143,6 +143,8 @@ public class USSDDAO {
 			rs = ps.executeQuery();
 
 			if (rs.next()) {
+
+				ussdSPDetails = new ArrayList<String>();
 
 				//notifyurls = rs.getString("notifyurl");
 			    ussdSPDetails.add(rs.getString("notifyurl"));

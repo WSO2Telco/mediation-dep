@@ -180,7 +180,7 @@ public class OutboundSMSSubscriptionsNorthboundHandler implements SMSHandler {
 		String origNotiUrl = nbDeliveryReceiptSubscriptionRequest.getDeliveryReceiptSubscription().getCallbackReference().getNotifyURL();
 		String origCallbackData = nbDeliveryReceiptSubscriptionRequest.getDeliveryReceiptSubscription().getCallbackReference().getCallbackData();
 
-		List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp(API_TYPE, executor.getSubResourcePath(),executor.getValidoperators());
+		List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp(API_TYPE, executor.getSubResourcePath(),executor.getValidoperators(context));
 
 		Map<String, OperatorEndpoint> operatorMap = new HashMap<String, OperatorEndpoint>();
 
