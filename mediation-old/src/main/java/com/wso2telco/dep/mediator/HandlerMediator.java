@@ -29,7 +29,6 @@ import org.apache.synapse.mediators.AbstractMediator;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.util.Date;
 import java.util.Map;
 
 
@@ -49,6 +48,9 @@ public class HandlerMediator extends AbstractMediator {
     /** The executor class. */
     private String executorClass;
 
+    /** The validator class */
+    private String validatorClass;
+
     /** The nb publisher. */
     private NorthboundPublisher nbPublisher;
 
@@ -61,6 +63,8 @@ public class HandlerMediator extends AbstractMediator {
         try {
             Class clazz = Class.forName(executorClass);
             RequestExecutor reqHandler = (RequestExecutor) clazz.newInstance();
+
+            context.setProperty("validatorClass", validatorClass);
 
             reqHandler.setApplicationid(storeApplication(context));
 
@@ -150,5 +154,9 @@ public class HandlerMediator extends AbstractMediator {
      */
     public void setExecutorClass(String executorClass) {
         this.executorClass = executorClass;
+    }
+
+    public void setValidatorClass(String validatorClass){
+        this.validatorClass = validatorClass;
     }
 }
