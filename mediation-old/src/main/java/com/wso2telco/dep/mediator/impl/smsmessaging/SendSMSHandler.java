@@ -33,6 +33,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.google.common.base.CharMatcher;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -269,7 +270,10 @@ public class SendSMSHandler extends AbstractHandler{
 
 		return true;
 	}
-
+	
+/*TODO
+ * Below method should throw a dedicated exception instead of using a generic exception
+*/
 	private OperatorEndpoint getEndpoint (String address, MessageContext messageContext, String apiType) throws Exception {
 		OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
 		searchDTO.setApiName(apiType);
@@ -346,6 +350,10 @@ public class SendSMSHandler extends AbstractHandler{
 	 * @throws Exception
 	 *             the exception
 	 */
+	
+	/*TODO
+	 * Below method should throw a dedicated exception instead of using a generic exception
+	*/
 	private Map<String, SendSMSResponse> smssendmulti(MessageContext smsmc, SendSMSRequest sendreq, JSONArray listaddr, String apitype, List<OperatorApplicationDTO> operators) throws Exception {
 
 		OperatorEndpoint endpoint = null;
@@ -455,27 +463,42 @@ public class SendSMSHandler extends AbstractHandler{
 	 * @return the SMS message count
 	 */
 	private int getSMSMessageCount(String textMessage) {
+		
+		final int asciiMessageLength=160;
+		final int utf8MessageLength=70;
+
 		int smsCount = 0;
 		try {
 			int count = textMessage.length();
 			log.debug("Character count of text message : " + count);
 			if (count > 0) {
-				int tempSMSCount = count / 160;
+				if (CharMatcher.ASCII.matchesAllOf(textMessage)) {
+					log.debug("ASCII MESSAGE");
+					int tempSMSCount = count / asciiMessageLength;
+					int tempRem = count % asciiMessageLength;
 
-				int tempRem = count % 160;
+					if (tempRem > 0) {
+						tempSMSCount++;
+					}
+					smsCount = tempSMSCount;
 
-				if (tempRem > 0) {
-					tempSMSCount++;
+				} else {
+					log.debug("UTF8 MESSAGE");
+					int tempSMSCount = count / utf8MessageLength;
+					int tempRem = count % utf8MessageLength;
+
+					if (tempRem > 0) {
+						tempSMSCount++;
+					}
+					smsCount = tempSMSCount;
 				}
-				smsCount = tempSMSCount;
-
 			}
 		} catch (Exception e) {
 			log.error("error in getSMSMessageCharacterCount : " + e.getMessage());
 			return 0;
 		}
-
 		log.debug("SMS count : " + smsCount);
 		return smsCount;
+
 	}
 }
