@@ -270,7 +270,10 @@ public class SendSMSHandler extends AbstractHandler{
 
 		return true;
 	}
-
+	
+/*TODO
+ * Below method should throw a dedicated exception instead of using a generic exception
+*/
 	private OperatorEndpoint getEndpoint (String address, MessageContext messageContext, String apiType) throws Exception {
 		OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
 		searchDTO.setApiName(apiType);
@@ -347,6 +350,10 @@ public class SendSMSHandler extends AbstractHandler{
 	 * @throws Exception
 	 *             the exception
 	 */
+	
+	/*TODO
+	 * Below method should throw a dedicated exception instead of using a generic exception
+	*/
 	private Map<String, SendSMSResponse> smssendmulti(MessageContext smsmc, SendSMSRequest sendreq, JSONArray listaddr, String apitype, List<OperatorApplicationDTO> operators) throws Exception {
 
 		OperatorEndpoint endpoint = null;
