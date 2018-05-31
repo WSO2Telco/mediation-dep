@@ -148,7 +148,7 @@ public class USSDInboundHandler implements USSDHandler {
 		
 		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
 			endpoint = occi.getAPIEndpointsByMSISDN(filteredAddress, API_TYPE,
-					executor.getSubResourcePath(), false, executor.getValidoperators());
+					executor.getSubResourcePath(), false, executor.getValidoperators(context));
 		}
 		context.setProperty("operator", operatorendpoint.getOperator());
 		context.setProperty("OPERATOR_NAME", operatorendpoint.getOperator());

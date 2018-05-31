@@ -35,7 +35,6 @@ import com.wso2telco.dep.mediator.unmarshaler.GroupDTO;
 import com.wso2telco.dep.mediator.unmarshaler.GroupEventUnmarshaller;
 import com.wso2telco.dep.mediator.unmarshaler.OparatorNotinListException;
 import com.wso2telco.dep.mediator.util.APIType;
-import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.FileNames;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.mediator.util.MessagePersistor;
@@ -62,8 +61,6 @@ public class AmountChargeHandler implements PaymentHandler {
 
 	private Log log = LogFactory.getLog(AmountChargeHandler.class);
 
-	private static final String API_TYPE = "payment";
-
 	private OriginatingCountryCalculatorIDD occi;
 
 	private PaymentService paymentService;
@@ -75,6 +72,8 @@ public class AmountChargeHandler implements PaymentHandler {
 	private ApiUtils apiUtils;
 	
 	private PaymentUtil paymentUtil;
+	
+	private static List<String> validCategoris = null;
 
 	public AmountChargeHandler(PaymentExecutor executor) {
 		this.executor = executor;
@@ -88,11 +87,12 @@ public class AmountChargeHandler implements PaymentHandler {
 	public boolean handle(MessageContext context) throws Exception {
 
 		String requestid = UID.getUniqueID(Type.PAYMENT.getCode(), context, executor.getApplicationid());
-		
+
 		HashMap<String, String> jwtDetails = apiUtils.getJwtTokenDetails(context);
         OperatorEndpoint endpoint = null;
         String clientCorrelator = null;
-        String requestResourceURL = executor.getResourceUrl();
+
+		String requestResourceURL = executor.getResourceUrl();
 
         FileReader fileReader = new FileReader();
         String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
@@ -123,10 +123,11 @@ public class AmountChargeHandler implements PaymentHandler {
 			searchDTO.setContext(context);
 			searchDTO.setIsredirect(false);
 			searchDTO.setMSISDN(endUserId);
-			searchDTO.setOperators(executor.getValidoperators());
+			searchDTO.setOperators(executor.getValidoperators(context));
 			searchDTO.setRequestPathURL(executor.getSubResourcePath());
+			endpoint = occi.getOperatorEndpoint(searchDTO);
 
-			endpoint = occi.getOperatorEndpoint(searchDTO); /*
+			/*
 															 * occi.
 															 * getAPIEndpointsByMSISDN
 															 * (
@@ -140,6 +141,7 @@ public class AmountChargeHandler implements PaymentHandler {
 															 * .getValidoperators
 															 * ());
 															 */
+			
 		}
 
 		String sending_add = endpoint.getEndpointref().getAddress();
@@ -186,7 +188,9 @@ public class AmountChargeHandler implements PaymentHandler {
 
 		}
 		// validate payment categoreis
-		List<String> validCategoris = paymentService.getValidPayCategories();
+		if(validCategoris == null || validCategoris.isEmpty() || (!validCategoris.contains(chargingdmeta.getString("purchaseCategoryCode")))){
+			validCategoris = paymentService.getValidPayCategories();
+		}
 		//validatePaymentCategory(chargingdmeta, validCategoris);
 		paymentUtil.validatePaymentCategory(chargingdmeta, validCategoris);
 
@@ -198,7 +202,11 @@ public class AmountChargeHandler implements PaymentHandler {
         messageDTO.setRefval(jsonBody.getJSONObject("amountTransaction").getString("referenceCode"));
         messageDTO.setMessage(jsonBody.toString());
         messageDTO.setReportedTime(System.currentTimeMillis());
+
+
         MessagePersistor.getInstance().publishMessage(messageDTO);
+
+
 
 		// set information to the message context, to be used in the sequence
         HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
@@ -213,7 +221,10 @@ public class AmountChargeHandler implements PaymentHandler {
 		context.setProperty("OPERATOR_ID", endpoint.getOperatorId());
 
         //Set the 'isUserInfoEnabled' property
-        GroupEventUnmarshaller unmarshaller = GroupEventUnmarshaller.getInstance();
+
+		GroupEventUnmarshaller unmarshaller = GroupEventUnmarshaller.getInstance();
+
+
 
 		String isUserInfoEnabled = "false";
         try {

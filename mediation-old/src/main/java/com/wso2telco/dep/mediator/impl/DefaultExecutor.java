@@ -67,7 +67,7 @@ public class DefaultExecutor extends RequestExecutor {
 		searchDTO.setContext(context);
 		searchDTO.setIsredirect(false);
 		searchDTO.setMSISDN(msisdn);
-		searchDTO.setOperators(getValidoperators());
+		searchDTO.setOperators(getValidoperators(context));
 		searchDTO.setRequestPathURL(getSubResourcePath());
 
 		// MIFE-805

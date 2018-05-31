@@ -69,7 +69,7 @@ public class QueryPaymentStatusHandler implements PaymentHandler {
 			searchDTO.setContext(context);
 			searchDTO.setIsredirect(true);
 			searchDTO.setMSISDN(params[1]);
-			searchDTO.setOperators(executor.getValidoperators());
+			searchDTO.setOperators(executor.getValidoperators(context));
 			searchDTO.setRequestPathURL(executor.getSubResourcePath());
 
 			endpoint = occi.getOperatorEndpoint(searchDTO);

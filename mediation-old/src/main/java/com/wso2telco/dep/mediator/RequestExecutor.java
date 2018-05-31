@@ -17,37 +17,6 @@
  */
 package com.wso2telco.dep.mediator;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.wso2telco.core.dbutils.fileutils.FileReader;
-import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.InboundSMSMessage;
-import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.InboundSMSMessageList;
-import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.SouthboundRetrieveResponse;
-import com.wso2telco.dep.mediator.internal.UID;
-import com.wso2telco.dep.mediator.unmarshaler.GroupDTO;
-import com.wso2telco.dep.mediator.unmarshaler.GroupEventUnmarshaller;
-import com.wso2telco.dep.mediator.unmarshaler.OparatorNotinListException;
-import com.wso2telco.dep.mediator.util.DataPublisherConstants;
-import com.wso2telco.dep.mediator.util.FileNames;
-import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
-import com.wso2telco.dep.oneapivalidation.exceptions.RequestError;
-import com.wso2telco.dep.oneapivalidation.exceptions.ResponseError;
-import com.wso2telco.dep.operatorservice.model.OperatorApplicationDTO;
-import com.wso2telco.dep.operatorservice.service.OparatorService;
-
-import org.apache.axis2.AxisFault;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.commons.json.JsonUtil;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.apache.synapse.transport.passthru.util.RelayUtils;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
-import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
-import org.wso2.carbon.utils.CarbonUtils;
-
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
@@ -58,11 +27,41 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+
+import org.apache.axis2.AxisFault;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.json.JsonUtil;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.json.JSONException;
+import org.json.JSONObject;
+import org.wso2.carbon.utils.CarbonUtils;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.wso2telco.core.dbutils.exception.BusinessException;
+import com.wso2telco.core.dbutils.fileutils.FileReader;
+import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.InboundSMSMessage;
+import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.InboundSMSMessageList;
+import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.SouthboundRetrieveResponse;
+import com.wso2telco.dep.mediator.internal.UID;
+import com.wso2telco.dep.mediator.unmarshaler.GroupDTO;
+import com.wso2telco.dep.mediator.unmarshaler.GroupEventUnmarshaller;
+import com.wso2telco.dep.mediator.unmarshaler.OparatorNotinListException;
+import com.wso2telco.dep.mediator.util.DataPublisherConstants;
+import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.MediationHelper;
+import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
+import com.wso2telco.dep.oneapivalidation.exceptions.RequestError;
+import com.wso2telco.dep.oneapivalidation.exceptions.ResponseError;
+import com.wso2telco.dep.operatorservice.model.OperatorAppSearchDTO;
+import com.wso2telco.dep.operatorservice.model.OperatorApplicationDTO;
+import com.wso2telco.dep.operatorservice.service.OparatorService;
 
 // TODO: Auto-generated Javadoc
 
@@ -75,7 +74,7 @@ public abstract class RequestExecutor {
 	private static Log log = LogFactory.getLog(RequestExecutor.class);
 
 	/** The validoperators. */
-	List<OperatorApplicationDTO> validoperators = null;
+	private static List<OperatorApplicationDTO> validoperators = null;
 
 	/** The http method. */
 	private String httpMethod;
@@ -158,10 +157,53 @@ public abstract class RequestExecutor {
 	 *
 	 * @return the validoperators
 	 */
-	public List<OperatorApplicationDTO> getValidoperators() {
+	public List<OperatorApplicationDTO> getValidoperators(MessageContext context) throws BusinessException {
+		OparatorService operatorService = new OparatorService();
+		if(validoperators==null || validoperators.isEmpty()){
+			validoperators = operatorService.loadActiveApplicationOperators();
+		}
+
+		if(context!=null){
+			
+			final String ApiName =  (String) context.getProperty("API_NAME");
+			final int appId = Integer.valueOf(MediationHelper.getInstance().getApplicationId(context));
+		OperatorApplicationDTO dto=new OperatorApplicationDTO();
+		dto.setApplicationid(appId);
+		dto.setApiName(ApiName );
+		/**
+ 		* check if the given  subscription already loaded
+ 		*/
+		if (!validoperators.contains(dto)) {
+
+         /**
+         * clear the cached operators and load from the db
+         */
+			OperatorAppSearchDTO searchDTO = new OperatorAppSearchDTO();
+			searchDTO.setApiName(ApiName);
+			searchDTO.setApplicationId(appId);
+			final List<OperatorApplicationDTO> latestSubscriptions = operatorService.loadActiveApplicationOperators(searchDTO);
+			if(!latestSubscriptions.isEmpty()) {
+				validoperators.addAll(latestSubscriptions);
+			}
+
+		}
+		if (!validoperators.contains(dto)) {
+			throw new CustomException("SVC0001", "", new String[] { "Requested service is not provisioned" });
+		}
+		}
 		return validoperators;
 	}
+	public OperatorApplicationDTO  checkAndReturnValiOparatorsIfExsista(MessageContext context) throws BusinessException{
+		final String ApiName =  (String) context.getProperty("API_NAME");
+		final int appId = Integer.valueOf(MediationHelper.getInstance().getApplicationId(context));
+		getValidoperators(context);
+		OperatorApplicationDTO dto=new OperatorApplicationDTO();
+		dto.setApplicationid(appId);
+		dto.setApiName(ApiName );
 
+
+		return validoperators.get(validoperators.indexOf(dto));
+	}
 	/**
 	 * Gets the http method.
 	 *
@@ -207,19 +249,8 @@ public abstract class RequestExecutor {
 			throw new CustomException("SVC0001", "", new String[] { "Requested service is not provisioned" });
 		}
 
-		if(validoperators==null || validoperators.isEmpty()){
-			validoperators = operatorService.loadActiveApplicationOperators();
-		}
-
-		OperatorApplicationDTO dto=new OperatorApplicationDTO();
-		dto.setApplicationid(Integer.valueOf(applicationid));
-		dto.setApiName(apiName);
-
-		if (!validoperators.contains(dto)) {
-			throw new CustomException("SVC0001", "", new String[] { "Requested service is not provisioned" });
-		}
-
-		subResourcePath = (String) context.getProperty("REST_SUB_REQUEST_PATH");
+		getValidoperators(context);
+    subResourcePath = (String) context.getProperty("REST_SUB_REQUEST_PATH");
 		resourceUrl = (String) context.getProperty("REST_FULL_REQUEST_PATH");
 		httpMethod = (String) context.getProperty("HTTP_METHOD");
 
@@ -1439,19 +1470,10 @@ public abstract class RequestExecutor {
         if (applicationid == null) {
             throw new CustomException("SVC0001", "", new String[]{"Requested service is not provisioned"});
         }
-        OparatorService operatorService = new OparatorService();
-        validoperators = operatorService.getApplicationOperators(Integer.valueOf(applicationid));
 
-        if (validoperators.isEmpty()) {
-            throw new CustomException("SVC0001", "", new String[]{"Requested service is not provisioned"});
-        }
+		OparatorService operatorService = new OparatorService();
+		op = checkAndReturnValiOparatorsIfExsista(messageContext);
 
-        for (OperatorApplicationDTO d : validoperators) {
-            if (d.getOperatorname() != null && d.getOperatorname().contains(operator)) {
-                op = d;
-                break;
-            }
-        }
         //
         log.info("Token time : " + op.getTokentime() + " Request ID: " + UID.getRequestID(messageContext));
         log.info("Token validity : " + op.getTokenvalidity() + " Request ID: " + UID.getRequestID(messageContext));

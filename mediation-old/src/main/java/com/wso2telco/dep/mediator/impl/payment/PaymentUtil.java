@@ -104,7 +104,7 @@ public class PaymentUtil {
 		return aggregator;
 	}
 
-	public static void validatePaymentCategory(JSONObject chargingdmeta,
+	public void validatePaymentCategory(JSONObject chargingdmeta,
 			List<String> lstCategories) throws JSONException {
 		boolean isvalid = false;
 		String chargeCategory = "";

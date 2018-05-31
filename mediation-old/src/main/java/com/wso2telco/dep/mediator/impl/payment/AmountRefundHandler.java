@@ -117,7 +117,7 @@ public class AmountRefundHandler implements PaymentHandler {
 			endpoint = occi.getAPIEndpointsByMSISDN(
 					endUserId.replace("tel:", ""), API_TYPE,
 					executor.getSubResourcePath(), false,
-					executor.getValidoperators());
+					executor.getValidoperators(context));
 		}
 
 		String sending_add = endpoint.getEndpointref().getAddress();
@@ -160,7 +160,7 @@ public class AmountRefundHandler implements PaymentHandler {
 
 		// validate payment categoreis
 		List<String> validCategoris = dbservice.getValidPayCategories();
-		PaymentUtil.validatePaymentCategory(chargingdmeta, validCategoris);
+		paymentUtil.validatePaymentCategory(chargingdmeta, validCategoris);
 
         // set information to the message context, to be used in the sequence
         HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());

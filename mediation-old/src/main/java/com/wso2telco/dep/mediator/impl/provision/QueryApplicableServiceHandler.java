@@ -84,7 +84,7 @@ public class QueryApplicableServiceHandler implements ProvisionHandler {
 
 		if (ValidatorUtils.getValidatorForSubscription(context).validate(context)) {
 			endpoint = occi.getAPIEndpointsByMSISDN(params[1].replace("tel:", ""), API_TYPE,
-					executor.getSubResourcePath(), true, executor.getValidoperators());
+					executor.getSubResourcePath(), true, executor.getValidoperators(context));
 		}
 
 		String sendingAddress = endpoint.getEndpointref().getAddress();

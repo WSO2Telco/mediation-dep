@@ -17,7 +17,9 @@
  */
 package com.wso2telco.dep.mediator;
 
+import com.wso2telco.core.dbutils.exception.BusinessException;
 import com.wso2telco.dep.mediator.internal.Base64Coder;
+import com.wso2telco.dep.mediator.util.MediationHelper;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 
 import org.apache.axis2.AxisFault;
@@ -109,29 +111,9 @@ public class HandlerMediator extends AbstractMediator {
      * @return the string
      * @throws AxisFault the axis fault
      */
-    private String storeApplication(MessageContext context) throws AxisFault {
-    	String applicationid = null;
+    private String storeApplication(MessageContext context) throws BusinessException {
 
-        org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) context).getAxis2MessageContext();
-        Object headers = axis2MessageContext.getProperty(
-                org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-        if (headers != null && headers instanceof Map) {
-            try {
-                Map headersMap = (Map) headers;
-                String jwtparam = (String)headersMap.get("x-jwt-assertion");
-                if (null == jwtparam) {
-                    throw new AxisFault("Can't find 'x-jwt-assertion' header in request");
-                }
-                String[] jwttoken = jwtparam.split("\\.");
-                String jwtbody = Base64Coder.decodeString(jwttoken[1]);
-                JSONObject jwtobj = new JSONObject(jwtbody);
-                applicationid = jwtobj.getString("http://wso2.org/claims/applicationid");
-
-            } catch (JSONException ex) {
-                throw new AxisFault("Error retriving application id");
-            }
-        }
-        return applicationid;
+       return MediationHelper.getInstance().getApplicationId(context);
     }
 
     /**
