@@ -456,28 +456,7 @@ public class SendSMSHandler extends AbstractHandler{
 	 * @return the SMS message count
 	 */
 	private int getSMSMessageCount(String textMessage) {
-		/*int smsCount = 0;
-		try {
-			int count = textMessage.length();
-			log.debug("Character count of text message : " + count);
-			if (count > 0) {
-				int tempSMSCount = count / 160;
-
-				int tempRem = count % 160;
-
-				if (tempRem > 0) {
-					tempSMSCount++;
-				}
-				smsCount = tempSMSCount;
-
-			}
-		} catch (Exception e) {
-			log.error("error in getSMSMessageCharacterCount : " + e.getMessage());
-			return 0;
-		}
-
-		log.debug("SMS count : " + smsCount);
-		return smsCount;*/
+		
 		final int asciiMessageLength=160;
 		final int utf8MessageLength=70;
 
