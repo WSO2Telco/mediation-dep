@@ -33,6 +33,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.google.common.base.CharMatcher;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -455,7 +456,7 @@ public class SendSMSHandler extends AbstractHandler{
 	 * @return the SMS message count
 	 */
 	private int getSMSMessageCount(String textMessage) {
-		int smsCount = 0;
+		/*int smsCount = 0;
 		try {
 			int count = textMessage.length();
 			log.debug("Character count of text message : " + count);
@@ -476,6 +477,42 @@ public class SendSMSHandler extends AbstractHandler{
 		}
 
 		log.debug("SMS count : " + smsCount);
+		return smsCount;*/
+		final int asciiMessageLength=160;
+		final int utf8MessageLength=70;
+
+		int smsCount = 0;
+		try {
+			int count = textMessage.length();
+			log.debug("Character count of text message : " + count);
+			if (count > 0) {
+				if (CharMatcher.ASCII.matchesAllOf(textMessage)) {
+					log.debug("ASCII MESSAGE");
+					int tempSMSCount = count / asciiMessageLength;
+					int tempRem = count % asciiMessageLength;
+
+					if (tempRem > 0) {
+						tempSMSCount++;
+					}
+					smsCount = tempSMSCount;
+
+				} else {
+					log.debug("UTF8 MESSAGE");
+					int tempSMSCount = count / utf8MessageLength;
+					int tempRem = count % utf8MessageLength;
+
+					if (tempRem > 0) {
+						tempSMSCount++;
+					}
+					smsCount = tempSMSCount;
+				}
+			}
+		} catch (Exception e) {
+			log.error("error in getSMSMessageCharacterCount : " + e.getMessage());
+			return 0;
+		}
+		log.debug("SMS count : " + smsCount);
 		return smsCount;
+
 	}
 }
