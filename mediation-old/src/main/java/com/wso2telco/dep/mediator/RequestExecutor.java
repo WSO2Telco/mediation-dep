@@ -193,6 +193,7 @@ public abstract class RequestExecutor {
 		}
 		return validoperators;
 	}
+
 	public OperatorApplicationDTO  checkAndReturnValiOparatorsIfExsista(MessageContext context) throws BusinessException{
 		final String ApiName =  (String) context.getProperty("API_NAME");
 		final int appId = Integer.valueOf(MediationHelper.getInstance().getApplicationId(context));
@@ -250,7 +251,7 @@ public abstract class RequestExecutor {
 		}
 
 		getValidoperators(context);
-    subResourcePath = (String) context.getProperty("REST_SUB_REQUEST_PATH");
+    	subResourcePath = (String) context.getProperty("REST_SUB_REQUEST_PATH");
 		resourceUrl = (String) context.getProperty("REST_FULL_REQUEST_PATH");
 		httpMethod = (String) context.getProperty("HTTP_METHOD");
 
@@ -1458,65 +1459,86 @@ public abstract class RequestExecutor {
      * @return
      * @throws Exception
      */
-    protected String getDefaultAccessToken(String operator, MessageContext messageContext) throws Exception {
-        OperatorApplicationDTO op = null;
-        String token = null;
+	protected String getDefaultAccessToken(String operator, MessageContext messageContext) throws Exception {
+		OperatorApplicationDTO op = null;
+		String token = null;
 
-        if (operator == null) {
-            return token;
-        }
+		if (operator == null) {
+			return token;
+		}
 
-        String applicationid = getApplicationid();
-        if (applicationid == null) {
-            throw new CustomException("SVC0001", "", new String[]{"Requested service is not provisioned"});
-        }
+		String applicationid = getApplicationid();
+		if (applicationid == null) {
+			throw new CustomException("SVC0001", "", new String[]{"Requested service is not provisioned"});
+		}
 
 		OparatorService operatorService = new OparatorService();
 		op = checkAndReturnValiOparatorsIfExsista(messageContext);
 
-        //
-        log.info("Token time : " + op.getTokentime() + " Request ID: " + UID.getRequestID(messageContext));
-        log.info("Token validity : " + op.getTokenvalidity() + " Request ID: " + UID.getRequestID(messageContext));
+		//
+		log.info("Token time : " + op.getTokentime() + " Request ID: " + UID.getRequestID(messageContext));
+		log.info("Token validity : " + op.getTokenvalidity() + " Request ID: " + UID.getRequestID(messageContext));
 
-        long timeexpires = (long) (op.getTokentime() + (op.getTokenvalidity() * 1000));
+		long timeexpires = (long) (op.getTokentime() + (op.getTokenvalidity() * 1000));
 
-        log.info("Expire time : " + timeexpires + " Request ID: " + UID.getRequestID(messageContext));
+		log.info("Expire time : " + timeexpires + " Request ID: " + UID.getRequestID(messageContext));
 
-        long currtime = new Date().getTime();
+		long currtime = new Date().getTime();
 
-        log.info("Current time : " + currtime + " Request ID: " + UID.getRequestID(messageContext));
+		log.info("Current time : " + currtime + " Request ID: " + UID.getRequestID(messageContext));
 
-        if (timeexpires > currtime) {
-            token = op.getToken();
-            log.info("Token of " + op.getOperatorname() + " operator is active"
-                     + " Request ID: " + UID.getRequestID(messageContext));
-        } else {
+		if (timeexpires > currtime) {
+			token = op.getToken();
+			log.info("Token of " + op.getOperatorname() + " operator is active"
+					+ " Request ID: " + UID.getRequestID(messageContext));
+		} else {
 
-            log.info("Regenerating the token of " + op.getOperatorname() + " operator"
-                     + " Request ID: " + UID.getRequestID(messageContext));
-            String Strtoken = makeTokenrequest(op.getTokenurl(),
-                    "grant_type=refresh_token&refresh_token=" + op.getRefreshtoken(),
-                    ("" + op.getTokenauth()),
-                    messageContext);
-            if (Strtoken != null && Strtoken.length() > 0) {
-                log.info("Token regeneration response of " + op.getOperatorname() + " operator : " + Strtoken
-                         + " Request ID: " + UID.getRequestID(messageContext));
+			log.info("Regenerating the token of " + op.getOperatorname() + " operator"
+					+ " Request ID: " + UID.getRequestID(messageContext));
+			String Strtoken = makeTokenrequest(op.getTokenurl(),
+					"grant_type=refresh_token&refresh_token=" + op.getRefreshtoken(),
+					("" + op.getTokenauth()),
+					messageContext);
+			if (Strtoken != null && Strtoken.length() > 0) {
+				log.info("Token regeneration response of " + op.getOperatorname() + " operator : " + Strtoken
+						+ " Request ID: " + UID.getRequestID(messageContext));
 
-                JSONObject jsontoken = new JSONObject(Strtoken);
-                token = jsontoken.getString("access_token");
-                operatorService.updateOperatorToken(op.getOperatorid(),
-                        jsontoken.getString("refresh_token"),
-                        Long.parseLong(String.valueOf(jsontoken.get("expires_in"))),
-                        new Date().getTime(), token);
+				JSONObject jsontoken = new JSONObject(Strtoken);
+				// Removing operator upon an error, so that refreshed credentials will be
+				// loaded with the next request
+				if (jsontoken.has("error")) {
+					validoperators.remove(op);
+					log.debug("Removing operator detail record with Operator : " + op.getOperatorname() + ", API : " +
+							op.getApiName() + " , Application ID : " + op.getApplicationid());
+					return op.getToken();
+				}
 
-            } else {
-                log.error("Token regeneration response of " + op.getOperatorname() + " operator is invalid.");
-            }
-        }
-        //something here
+				token = jsontoken.getString("access_token");
 
-        return token;
-    }
+				String refresh_token = jsontoken.getString("refresh_token");
+				long expiryTime = Long.parseLong(String.valueOf(jsontoken.get("expires_in")));
+				long current_time = new Date().getTime();
+
+				log.debug("Updating DB with renewed token - refresh_token : " + refresh_token + ", expiryTime : "
+						+ expiryTime + ", token : " + token + ",current_time : " + current_time);
+				operatorService.updateOperatorToken(op.getOperatorid(),
+						refresh_token,
+						expiryTime,
+						current_time, token);
+
+				op.setRefreshtoken(refresh_token);
+				op.setToken(token);
+				op.setTokenvalidity(expiryTime);
+				op.setTokentime(current_time);
+
+
+			} else {
+				log.error("Token regeneration response of " + op.getOperatorname() + " operator is invalid.");
+			}
+		}
+
+		return token;
+	}
 
     private String modifyEndpoint(String sendingAdd, String operator, MessageContext context){
 
