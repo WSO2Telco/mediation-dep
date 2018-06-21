@@ -186,11 +186,13 @@ public class AmountChargeHandler implements PaymentHandler {
 		if ((!chargingdmeta.isNull("purchaseCategoryCode"))
 				&& (!chargingdmeta.getString("purchaseCategoryCode").isEmpty())) {
 
+			if(validCategoris == null || validCategoris.isEmpty() || (!validCategoris.contains(chargingdmeta.getString("purchaseCategoryCode")))){
+				validCategoris = paymentService.getValidPayCategories();
+			}
+
 		}
 		// validate payment categoreis
-		if(validCategoris == null || validCategoris.isEmpty() || (!validCategoris.contains(chargingdmeta.getString("purchaseCategoryCode")))){
-			validCategoris = paymentService.getValidPayCategories();
-		}
+		
 		//validatePaymentCategory(chargingdmeta, validCategoris);
 		paymentUtil.validatePaymentCategory(chargingdmeta, validCategoris);
 
