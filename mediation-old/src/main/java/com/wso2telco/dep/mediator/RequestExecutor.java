@@ -1540,6 +1540,26 @@ public abstract class RequestExecutor {
 		return token;
 	}
 
+	public void clearOperatorDetailsFromCache(MessageContext context) throws BusinessException {
+
+		String ApiName = (String) context.getProperty("API_NAME");
+		int appId = Integer.valueOf(MediationHelper.getInstance().getApplicationId(context));
+
+		OperatorApplicationDTO dto = new OperatorApplicationDTO();
+		dto.setApplicationid(appId);
+		dto.setApiName(ApiName);
+
+		if (log.isDebugEnabled()) {
+			log.debug("Clearing Operator Details for API : " + ApiName + " , Application ID : " + appId);
+		}
+
+		if (validoperators.remove(dto)) {
+			log.debug("Operator Detail removed");
+		} else {
+			log.debug("Operator hasn't been cached.");
+		}
+	}
+
     private String modifyEndpoint(String sendingAdd, String operator, MessageContext context){
 
         FileReader fileReader = new FileReader();

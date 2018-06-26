@@ -39,14 +39,15 @@ public class MediationHelper {
      */
     public String getApplicationId(MessageContext context) throws BusinessException {
 
-        log.debug("Getting Application ID from JWT Token");
+        log.debug("Calling getApplicationId");
         org.apache.axis2.context.MessageContext axis2MessageContext =
                 ((Axis2MessageContext) context).getAxis2MessageContext();
 
         Object appId = context.getProperty(APP_ID);
-        if(appId != null)
-        {
-            log.debug("Getting Application ID from context : "+appId.toString());
+        if (appId != null) {
+            if (log.isDebugEnabled()) {
+                log.debug("Getting Application ID from context : " + appId.toString());
+            }
             return appId.toString();
         }
 
@@ -65,7 +66,10 @@ public class MediationHelper {
                 String jwtbody = Base64Coder.decodeString(jwttoken[1]);
                 JSONObject jwtobj = new JSONObject(jwtbody);
                 applicationid = jwtobj.getString("http://wso2.org/claims/applicationid");
-                context.setProperty(APP_ID,applicationid);
+                if (log.isDebugEnabled()) {
+                    log.debug("Getting Application ID from JWT : " + applicationid);
+                }
+                context.setProperty(APP_ID, applicationid);
 
             } catch (JSONException ex) {
                 throw new BusinessException("Error retriving application id");
