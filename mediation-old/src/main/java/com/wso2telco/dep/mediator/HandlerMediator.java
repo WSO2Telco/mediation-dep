@@ -54,6 +54,8 @@ public class HandlerMediator extends AbstractMediator {
     /** The nb publisher. */
     private NorthboundPublisher nbPublisher;
 
+    public static final String REQUEST_EXECUTOR = "REQUEST_EXECUTOR";
+
 
     /* (non-Javadoc)
      * @see org.apache.synapse.Mediator#mediate(org.apache.synapse.MessageContext)
@@ -70,6 +72,7 @@ public class HandlerMediator extends AbstractMediator {
             reqHandler.validateRequest(reqHandler.getHttpMethod(), reqHandler.getSubResourcePath(),
                     reqHandler.getJsonBody(), context);
             jsonBody = reqHandler.getJsonBody().toString();
+            context.setProperty(REQUEST_EXECUTOR,reqHandler);
             reqHandler.execute(context);
 
         } catch (CustomException ax) {
