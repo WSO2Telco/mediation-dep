@@ -44,7 +44,7 @@ public class XmlAlterMediator extends AbstractMediator {
 	public boolean mediate(MessageContext context) {
 		String responsePayload=null;
 		try {
-			document = getDocumentByXml(context.getEnvelope().toString());
+			document = getDocumentByXml(context.getEnvelope().getBody().getFirstOMChild().toString());
 			if(removeEl.contains("_")) {
 				String []elements = removeEl.split("_");
 				for (String element : elements) {
