@@ -40,18 +40,17 @@ public class XmlAlterMediator extends AbstractMediator {
 		this.removeEl = removeEl;
 	}
 
-	Document document;
 	public boolean mediate(MessageContext context) {
 		String responsePayload=null;
 		try {
-			document = getDocumentByXml(context.getEnvelope().getBody().getFirstOMChild().toString());
+			Document document = getDocumentByXml(context.getEnvelope().getBody().getFirstOMChild().toString());
 			if(removeEl.contains("_")) {
 				String []elements = removeEl.split("_");
 				for (String element : elements) {
-					removeParentChild(element);
+					removeParentChild(element, document);
 				}
 			}else {
-				removeParentChild(removeEl);
+				removeParentChild(removeEl, document);
 			}
 
 			responsePayload=xmlDocPrint(document);
@@ -71,11 +70,11 @@ public class XmlAlterMediator extends AbstractMediator {
 		return true;
 	}
 
-	private void removeParentChild(String removeElement) {
+	private void removeParentChild(String removeElement, Document document) {
 		String[] elementTmp = removeElement.split("\\.");
 		String parentElement = elementTmp[0];
 		String childElement = elementTmp[1];
-		deleteElements(parentElement, childElement);
+		deleteElements(parentElement, childElement, document);
 		log.info(removeElement);
 	}
 
@@ -101,7 +100,7 @@ public class XmlAlterMediator extends AbstractMediator {
 		return out.toString();
 	}
 
-	private Document deleteElements(String parentElement,String childElement) {
+	private Document deleteElements(String parentElement, String childElement, Document document) {
 		NodeList nodeList = document.getElementsByTagName(childElement);
 		for (int i = 0; i < nodeList.getLength(); i++) {
 			Node node = nodeList.item(i);
