@@ -31,7 +31,10 @@ import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+import com.wso2telco.dep.operatorservice.exception.OperatorServiceException;
+import com.wso2telco.dep.operatorservice.model.Operator;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -75,6 +78,9 @@ public abstract class RequestExecutor {
 
 	/** The validoperators. */
 	private static List<OperatorApplicationDTO> validoperators = null;
+
+	// Operator name and Details.
+	private static Map<String,Operator> operatorMap = null;
 
 	/** The http method. */
 	private String httpMethod;
@@ -1385,26 +1391,31 @@ public abstract class RequestExecutor {
      * @return the string representation of the access token
      * @throws Exception
      */
-    public String getAccessToken(String operator, MessageContext messageContext) throws Exception {
-        String response = "";
-        FileReader fileReader = new FileReader();
-        String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
-                      + FileNames.MEDIATOR_CONF_FILE.getFileName();
-        Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
+	public String getAccessToken(String operator, MessageContext messageContext) throws Exception {
+		String response = "";
+		FileReader fileReader = new FileReader();
+		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
+				+ FileNames.MEDIATOR_CONF_FILE.getFileName();
+		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
 
-        String tokenPoolService = mediatorConfMap.get("tokenpoolservice");
-        String resourceURL = mediatorConfMap.get("tokenpoolResourceURL");
-        log.info("tokenPoolService Enabled: " + tokenPoolService + "with tokenPoolService URL: " + resourceURL);
+		String tokenPoolService = mediatorConfMap.get("tokenpoolservice");
+		String resourceURL = mediatorConfMap.get("tokenpoolResourceURL");
+		if (log.isDebugEnabled()) {
+			log.debug("Fetching token for Operator : " + operator);
+			log.debug("tokenPoolService Enabled : " + tokenPoolService + " with tokenPoolService URL : " + resourceURL);
+		}
+		if (tokenPoolService != null && resourceURL != null && tokenPoolService.equals("true")) {
+			if (log.isDebugEnabled()) {
+				log.debug("Token Pool Service getPoolAccessToken() Flow ");
+			}
 
-        if (tokenPoolService != null && resourceURL != null && tokenPoolService.equals("true")) {
-            log.info("Token Pool Service getPoolAccessToken() Flow ");
-            response = getPoolAccessToken(operator, resourceURL);
-        } else {
-            log.info("Hub Mediator getDefaultAccessToken() Flow ");
-            response = getDefaultAccessToken(operator, messageContext);
-        }
-        return response;
-    }
+			response = getPoolAccessToken(operator, resourceURL);
+		} else {
+			log.debug("Hub Mediator getDefaultAccessToken() Flow ");
+			response = getDefaultAccessToken(operator, messageContext);
+		}
+		return response;
+	}
 
     /**
      * Retrieves the token from the token pool service.
@@ -1452,19 +1463,23 @@ public abstract class RequestExecutor {
         return result.toString();
     }
 
-    /**
-     * Retieves the access token using the default flow.
-     *
-     * @param operator the name of the operator
-     * @return
-     * @throws Exception
-     */
+
+	/**
+	 * Retieves the access token using the default flow.
+	 *
+	 * @param operator the name of the operator
+	 * @return
+	 * @throws Exception
+	 */
 	protected String getDefaultAccessToken(String operator, MessageContext messageContext) throws Exception {
-		OperatorApplicationDTO op = null;
+
+		Operator operatorDetail = getOperatorByName(operator);
+		messageContext.setProperty("OPERATOR",operator);
+
 		String token = null;
 
 		if (operator == null) {
-			return token;
+			throw new CustomException("", "", new String[]{"Requested Operator is not provisioned"});
 		}
 
 		String applicationid = getApplicationid();
@@ -1472,45 +1487,55 @@ public abstract class RequestExecutor {
 			throw new CustomException("SVC0001", "", new String[]{"Requested service is not provisioned"});
 		}
 
-		OparatorService operatorService = new OparatorService();
-		op = checkAndReturnValiOparatorsIfExsista(messageContext);
-
 		//
-		log.info("Token time : " + op.getTokentime() + " Request ID: " + UID.getRequestID(messageContext));
-		log.info("Token validity : " + op.getTokenvalidity() + " Request ID: " + UID.getRequestID(messageContext));
+		if (log.isDebugEnabled()) {
+			log.debug("Token time : " + operatorDetail.getTokentime() + " Request ID: " + UID.getRequestID(messageContext));
+			log.debug("Token validity : " + operatorDetail.getTokenvalidity() + " Request ID: " + UID.getRequestID(messageContext));
+		}
 
-		long timeexpires = (long) (op.getTokentime() + (op.getTokenvalidity() * 1000));
+		long timeexpires = (long) (operatorDetail.getTokentime() + (operatorDetail.getTokenvalidity() * 1000));
 
-		log.info("Expire time : " + timeexpires + " Request ID: " + UID.getRequestID(messageContext));
-
+		if (log.isDebugEnabled()) {
+			log.debug("Expire time : " + timeexpires + " Request ID: " + UID.getRequestID(messageContext));
+		}
 		long currtime = new Date().getTime();
 
-		log.info("Current time : " + currtime + " Request ID: " + UID.getRequestID(messageContext));
+		if (log.isDebugEnabled()) {
+			log.debug("Current time : " + currtime + " Request ID: " + UID.getRequestID(messageContext));
+		}
 
 		if (timeexpires > currtime) {
-			token = op.getToken();
-			log.info("Token of " + op.getOperatorname() + " operator is active"
-					+ " Request ID: " + UID.getRequestID(messageContext));
+			token = operatorDetail.getToken();
+			if (log.isDebugEnabled()) {
+				log.debug("Token of " + operatorDetail.getOperatorName() + " operator is active"
+						+ " Request ID: " + UID.getRequestID(messageContext));
+			}
+
 		} else {
 
-			log.info("Regenerating the token of " + op.getOperatorname() + " operator"
-					+ " Request ID: " + UID.getRequestID(messageContext));
-			String Strtoken = makeTokenrequest(op.getTokenurl(),
-					"grant_type=refresh_token&refresh_token=" + op.getRefreshtoken(),
-					("" + op.getTokenauth()),
+			if (log.isDebugEnabled()) {
+				log.debug("Regenerating the token of " + operatorDetail.getOperatorName() + " operator"
+						+ " Request ID: " + UID.getRequestID(messageContext));
+			}
+
+			String Strtoken = makeTokenrequest(operatorDetail.getTokenurl(),
+					"grant_type=refresh_token&refresh_token=" + operatorDetail.getRefreshtoken(),
+					("" + operatorDetail.getTokenauth()),
 					messageContext);
 			if (Strtoken != null && Strtoken.length() > 0) {
-				log.info("Token regeneration response of " + op.getOperatorname() + " operator : " + Strtoken
-						+ " Request ID: " + UID.getRequestID(messageContext));
-
+				if (log.isDebugEnabled()) {
+					log.debug("Token regeneration response of " + operatorDetail.getOperatorName() + " operator : " + Strtoken
+							+ " Request ID: " + UID.getRequestID(messageContext));
+				}
 				JSONObject jsontoken = new JSONObject(Strtoken);
 				// Removing operator upon an error, so that refreshed credentials will be
 				// loaded with the next request
 				if (jsontoken.has("error")) {
-					validoperators.remove(op);
-					log.debug("Removing operator detail record with Operator : " + op.getOperatorname() + ", API : " +
-							op.getApiName() + " , Application ID : " + op.getApplicationid());
-					return op.getToken();
+					operatorMap.remove(operator);
+					if (log.isDebugEnabled()) {
+						log.debug("Removing operator detail record with Operator : " + operatorDetail.getOperatorName());
+					}
+					return operatorDetail.getToken();
 				}
 
 				token = jsontoken.getString("access_token");
@@ -1519,21 +1544,24 @@ public abstract class RequestExecutor {
 				long expiryTime = Long.parseLong(String.valueOf(jsontoken.get("expires_in")));
 				long current_time = new Date().getTime();
 
-				log.debug("Updating DB with renewed token - refresh_token : " + refresh_token + ", expiryTime : "
-						+ expiryTime + ", token : " + token + ",current_time : " + current_time);
-				operatorService.updateOperatorToken(op.getOperatorid(),
+				if (log.isDebugEnabled()) {
+					log.debug("Updating DB with renewed token - refresh_token : " + refresh_token + ", expiryTime : "
+							+ expiryTime + ", token : " + token + ",current_time : " + current_time);
+				}
+				OparatorService operatorService = new OparatorService();
+				operatorService.updateOperatorToken(operatorDetail.getOperatorId(),
 						refresh_token,
 						expiryTime,
 						current_time, token);
 
-				op.setRefreshtoken(refresh_token);
-				op.setToken(token);
-				op.setTokenvalidity(expiryTime);
-				op.setTokentime(current_time);
+				operatorDetail.setRefreshtoken(refresh_token);
+				operatorDetail.setToken(token);
+				operatorDetail.setTokenvalidity(expiryTime);
+				operatorDetail.setTokentime(current_time);
 
 
 			} else {
-				log.error("Token regeneration response of " + op.getOperatorname() + " operator is invalid.");
+				log.error("Token regeneration response of " + operatorDetail.getOperatorName() + " operator is invalid.");
 			}
 		}
 
@@ -1542,22 +1570,49 @@ public abstract class RequestExecutor {
 
 	public void clearOperatorDetailsFromCache(MessageContext context) throws BusinessException {
 
-		String ApiName = (String) context.getProperty("API_NAME");
-		int appId = Integer.valueOf(MediationHelper.getInstance().getApplicationId(context));
+		Object operator = context.getProperty("OPERATOR");
 
-		OperatorApplicationDTO dto = new OperatorApplicationDTO();
-		dto.setApplicationid(appId);
-		dto.setApiName(ApiName);
+		if(operator != null)
+		{
+			log.debug("Clearing Cache for Operator : " + operator.toString());
+			operatorMap.remove(operator.toString());
+		}
+	}
 
-		if (log.isDebugEnabled()) {
-			log.debug("Clearing Operator Details for API : " + ApiName + " , Application ID : " + appId);
+	private Operator getOperatorByName(String operator) throws OperatorServiceException {
+
+		if (operatorMap == null || operatorMap.isEmpty()) {
+			if (log.isDebugEnabled()) {
+				log.debug("Operator Map is null, populating ...");
+			}
+			operatorMap = new ConcurrentHashMap<>();
+			OparatorService operatorService = new OparatorService();
+			List<Operator> operators = operatorService.getOperatorsWithTokenDetails();
+			for (Operator opr : operators) {
+				if (log.isDebugEnabled()) {
+					log.debug("Adding operator to Map : " + opr);
+				}
+				operatorMap.put(opr.getOperatorName(), opr);
+			}
+			return operatorMap.get(operator);
+
 		}
 
-		if (validoperators.remove(dto)) {
-			log.debug("Operator Detail removed");
-		} else {
-			log.debug("Operator hasn't been cached.");
+		if (!operatorMap.containsKey(operator)) {
+			if (log.isDebugEnabled()) {
+				log.debug("Operator " + operator + "is not cached locally. Calling OperatorService.");
+			}
+			OparatorService operatorService = new OparatorService();
+			Operator opr = operatorService.getOperatorWithTokenDetails(operator);
+
+			if (log.isDebugEnabled() && opr != null) {
+				log.debug("Operator details fetched for " + opr);
+			}
+			operatorMap.put(opr.getOperatorName(), opr);
+			return opr;
 		}
+
+		return operatorMap.get(operator);
 	}
 
     private String modifyEndpoint(String sendingAdd, String operator, MessageContext context){
