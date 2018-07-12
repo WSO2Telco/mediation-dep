@@ -1393,6 +1393,12 @@ public abstract class RequestExecutor {
      */
 	public String getAccessToken(String operator, MessageContext messageContext) throws Exception {
 		String response = "";
+		if (log.isDebugEnabled()) {
+			log.debug("Fetching token for Operator : " + operator);
+		}
+		if (operator == null) {
+			return response;
+		}
 		FileReader fileReader = new FileReader();
 		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
 				+ FileNames.MEDIATOR_CONF_FILE.getFileName();
@@ -1401,7 +1407,6 @@ public abstract class RequestExecutor {
 		String tokenPoolService = mediatorConfMap.get("tokenpoolservice");
 		String resourceURL = mediatorConfMap.get("tokenpoolResourceURL");
 		if (log.isDebugEnabled()) {
-			log.debug("Fetching token for Operator : " + operator);
 			log.debug("tokenPoolService Enabled : " + tokenPoolService + " with tokenPoolService URL : " + resourceURL);
 		}
 		if (tokenPoolService != null && resourceURL != null && tokenPoolService.equals("true")) {
@@ -1473,14 +1478,14 @@ public abstract class RequestExecutor {
 	 */
 	protected String getDefaultAccessToken(String operator, MessageContext messageContext) throws Exception {
 
+		if (operator == null) {
+			throw new CustomException("", "", new String[]{"Requested Operator is not provisioned"});
+		}
+
 		Operator operatorDetail = getOperatorByName(operator);
 		messageContext.setProperty("OPERATOR",operator);
 
 		String token = null;
-
-		if (operator == null) {
-			throw new CustomException("", "", new String[]{"Requested Operator is not provisioned"});
-		}
 
 		String applicationid = getApplicationid();
 		if (applicationid == null) {
