@@ -151,7 +151,7 @@ public class SMSInboundSubscriptionsNorthboundHandler implements SMSHandler {
 		Integer moSubscriptionId = smsMessagingService.subscriptionEntry(
 				nbSubsrequst.getSubscription().getCallbackReference().getNotifyURL(), serviceProvider);
 
-		String subsEndpoint = mediatorConfMap.get("hubSubsGatewayEndpoint") + "/" + moSubscriptionId;
+		String subsEndpoint = mediatorConfMap.get("hubMOSubsGatewayEndpoint") + "/" + moSubscriptionId;
 //		jsondstaddr.getJSONObject("callbackReference").put("notifyURL", subsEndpoint);
 //		jsondstaddr.put("clientCorrelator", orgclientcl + ":" + requestid);
 
@@ -199,7 +199,7 @@ public class SMSInboundSubscriptionsNorthboundHandler implements SMSHandler {
 		HandlerUtils.setHandlerProperty(context,this.getClass().getSimpleName());
 
 		String ResourceUrlPrefix = mediatorConfMap.get("hubGateway");
-		context.setProperty("responseResourceURL", ResourceUrlPrefix + executor.getResourceUrl() + "/" + moSubscriptionId);
+		context.setProperty("responseResourceURL", ResourceUrlPrefix + executor.getApiContext()+ "/" + executor.getApiVersion() + executor.getSubResourcePath()+ "/" +  moSubscriptionId);
 
 		context.setProperty("subscriptionID", moSubscriptionId);
 		context.setProperty("original_notifyUrl", origNotiUrl);

@@ -159,6 +159,52 @@ public abstract class RequestExecutor {
 	}
 
 	/**
+	 * The api version
+	 */
+	String apiVersion;
+
+	/**
+	 * Gets the apiversion.
+	 *
+	 * @return apiVersion
+	 */
+	public String getApiVersion() {
+		return apiVersion;
+	}
+
+	/**
+	 * Set the apiVersion
+	 *
+	 * @param apiVersion
+	 */
+	public void setApiVersion(String apiVersion) {
+		this.apiVersion = apiVersion;
+	}
+
+	/**
+	 * The api context
+	 */
+	String apiContext;
+
+	/**
+	 * Gets the apiContext
+	 *
+	 * @return
+	 */
+	public String getApiContext() {
+		return apiContext;
+	}
+
+	/**
+	 * Set the  apiContext
+	 *
+	 * @param apiContext
+	 */
+	public void setApiContext(String apiContext) {
+		this.apiContext = apiContext;
+	}
+
+	/**
 	 * Gets the validoperators.
 	 *
 	 * @return the validoperators
@@ -250,6 +296,8 @@ public abstract class RequestExecutor {
 	public boolean initialize(MessageContext context) throws Exception {
 		String applicationid = getApplicationid();
 		String apiName = (String) context.getProperty("API_NAME");
+		apiVersion = (String) context.getProperty("VERSION");
+		apiContext = (String) context.getProperty("REST_API_CONTEXT");
 
 		OparatorService operatorService = new OparatorService();
 		if (applicationid == null) {
