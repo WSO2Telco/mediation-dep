@@ -245,11 +245,12 @@ public class OutboundSMSSubscriptionsNorthboundHandler implements SMSHandler {
 		HandlerUtils.setHandlerProperty(context,this.getClass().getSimpleName());
 
 		String ResourceUrlPrefix = mediatorConfMap.get("hubGateway");
-		context.setProperty("responseResourceURL", ResourceUrlPrefix + executor.getResourceUrl() + "/" + dnSubscriptionId);
+		context.setProperty("responseResourceURL", ResourceUrlPrefix  + executor.getApiContext()+ "/" + executor.getApiVersion() + executor.getSubResourcePath()+ "/" + dnSubscriptionId);
 
 		context.setProperty("subscriptionID", dnSubscriptionId);
 		context.setProperty("original_notifyUrl", origNotiUrl);
 		context.setProperty("original_callbackData", origCallbackData);
+		context.setProperty("original_clientcorrelator",orgclientcl);
 
 		JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), requestStr, true, true);
 

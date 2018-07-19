@@ -199,7 +199,7 @@ public class SMSInboundSubscriptionsNorthboundHandler implements SMSHandler {
 		HandlerUtils.setHandlerProperty(context,this.getClass().getSimpleName());
 
 		String ResourceUrlPrefix = mediatorConfMap.get("hubGateway");
-		context.setProperty("responseResourceURL", ResourceUrlPrefix + executor.getResourceUrl() + "/" + moSubscriptionId);
+		context.setProperty("responseResourceURL", ResourceUrlPrefix + executor.getApiContext()+ "/" + executor.getApiVersion() + executor.getSubResourcePath()+ "/" +  moSubscriptionId);
 
 		context.setProperty("subscriptionID", moSubscriptionId);
 		context.setProperty("original_notifyUrl", origNotiUrl);
