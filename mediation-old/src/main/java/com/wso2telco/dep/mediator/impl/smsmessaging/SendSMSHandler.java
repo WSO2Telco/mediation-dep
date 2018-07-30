@@ -218,11 +218,13 @@ public class SendSMSHandler extends AbstractHandler{
 		if (sendSmsResourceUrlPrefix != null && !sendSmsResourceUrlPrefix.isEmpty()) {
 			sendSmsResourceUrlPrefix = sendSmsResourceUrlPrefix.endsWith("/") ?
 					sendSmsResourceUrlPrefix.substring(0, sendSmsResourceUrlPrefix.length() - 1) :  sendSmsResourceUrlPrefix;
+			sendSmsResourceUrlPrefix = sendSmsResourceUrlPrefix + "/" + senderAddress;
 
 		} else {
 			// sendSMSResourceURL not found in mediatorConfMap
-			sendSmsResourceUrlPrefix = (String) context.getProperty("REST_URL_PREFIX") + context.getProperty("REST_FULL_REQUEST_PATH");
+			sendSmsResourceUrlPrefix = (String) context.getProperty("REST_URL_PREFIX") + executor.getApiContext()+ "/" + executor.getApiVersion() + executor.getSubResourcePath();
 			sendSmsResourceUrlPrefix = sendSmsResourceUrlPrefix.substring(0, sendSmsResourceUrlPrefix.indexOf("/requests"));
+
 		}
 
 		// encode the sender address
@@ -249,7 +251,7 @@ public class SendSMSHandler extends AbstractHandler{
 		context.setProperty("ADDRESSES", addresses);
 		context.setProperty("MSISDN_LIST", addressList.substring(0, addressList.length() - 1));
 
-		context.setProperty("RESPONSE_DELIVERY_INFO_RESOURCE_URL", getProperty("hubGateway")+executor.getResourceUrl() + "/" +requestid + "/deliveryInfos");
+		context.setProperty("RESPONSE_DELIVERY_INFO_RESOURCE_URL", getProperty("hubGateway")+ executor.getApiContext()+ "/" + executor.getApiVersion() + executor.getSubResourcePath()+ "/" +requestid + "/deliveryInfos");
 
 		context.setProperty("OPERATOR_NAME", operatorEndpoint.getOperator());
 		context.setProperty("OPERATOR_ID", operatorEndpoint.getOperatorId());
