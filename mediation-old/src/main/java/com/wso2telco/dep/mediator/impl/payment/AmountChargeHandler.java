@@ -34,10 +34,8 @@ import com.wso2telco.dep.mediator.service.PaymentService;
 import com.wso2telco.dep.mediator.unmarshaler.GroupDTO;
 import com.wso2telco.dep.mediator.unmarshaler.GroupEventUnmarshaller;
 import com.wso2telco.dep.mediator.unmarshaler.OparatorNotinListException;
-import com.wso2telco.dep.mediator.util.APIType;
-import com.wso2telco.dep.mediator.util.FileNames;
-import com.wso2telco.dep.mediator.util.HandlerUtils;
-import com.wso2telco.dep.mediator.util.MessagePersistor;
+import com.wso2telco.dep.mediator.util.*;
+import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.payment.ValidatePaymentCharge;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
@@ -49,6 +47,8 @@ import org.json.JSONObject;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -243,16 +243,23 @@ public class AmountChargeHandler implements PaymentHandler {
 	}
 
 	@Override
-	public boolean validate(String httpMethod, String requestPath, JSONObject jsonBody, MessageContext context) throws Exception {
+	public boolean validate(String httpMethod, String requestPath, JSONObject jsonBody, MessageContext context) throws CustomException, Exception {
 		if (!httpMethod.equalsIgnoreCase("POST")) {
 			((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 405);
 			throw new Exception("Method not allowed");
 		}
-
 		IServiceValidate validator = new ValidatePaymentCharge();
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
+		compareMsisdn();
 		return true;
+	}
+
+	private void compareMsisdn() throws CustomException{
+		String urlmsisdn = executor.getSubResourcePath().substring(1, executor.getSubResourcePath().indexOf("transactions") - 1);
+		String payloadMsisdn = executor.getJsonBody().getJSONObject("amountTransaction").getString("endUserId").substring(5);
+		ValidationUtils.compareMsisdns(urlmsisdn,payloadMsisdn);
+
 	}
 
 	/**
