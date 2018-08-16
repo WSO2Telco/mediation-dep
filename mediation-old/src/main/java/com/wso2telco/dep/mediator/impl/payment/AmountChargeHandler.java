@@ -243,7 +243,7 @@ public class AmountChargeHandler implements PaymentHandler {
 	}
 
 	@Override
-	public boolean validate(String httpMethod, String requestPath, JSONObject jsonBody, MessageContext context) throws CustomException, Exception {
+	public boolean validate(String httpMethod, String requestPath, JSONObject jsonBody, MessageContext context) throws Exception {
 		if (!httpMethod.equalsIgnoreCase("POST")) {
 			((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 405);
 			throw new Exception("Method not allowed");
@@ -255,8 +255,15 @@ public class AmountChargeHandler implements PaymentHandler {
 		return true;
 	}
 
-	private void compareMsisdn() throws CustomException{
-		String urlmsisdn = executor.getSubResourcePath().substring(1, executor.getSubResourcePath().indexOf("transactions") - 1);
+	private void compareMsisdn(){
+		String urlmsisdn = null;
+		try {
+			urlmsisdn = URLDecoder.decode(executor.getSubResourcePath().substring(1, executor.getSubResourcePath().indexOf("transactions") - 1), "UTF-8");
+			
+		} catch (UnsupportedEncodingException e) {
+			log.debug("Url MSISDN can not be decoded ");
+		}
+
 		String payloadMsisdn = executor.getJsonBody().getJSONObject("amountTransaction").getString("endUserId").substring(5);
 		ValidationUtils.compareMsisdns(urlmsisdn,payloadMsisdn);
 
