@@ -29,4 +29,7 @@ public final class MediatorConstants {
     public static final String MNO_POSITION_PROPERTY = "default.MNO.position";
     
     public static final String TRANSACTION_ID = "transactionId";
+
+    /** The Constant NOTIFY_URL */
+    public static final String NOTIFY_URL = "notifyUrl";
 }

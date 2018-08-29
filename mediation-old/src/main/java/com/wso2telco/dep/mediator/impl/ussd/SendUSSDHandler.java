@@ -19,6 +19,7 @@ package com.wso2telco.dep.mediator.impl.ussd;
 
 import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.MSISDNConstants;
+import com.wso2telco.dep.mediator.MediatorConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
@@ -103,6 +104,7 @@ public class SendUSSDHandler implements USSDHandler {
 		String address = jsonBody.getJSONObject("outboundUSSDMessageRequest").getString("address");
 		String notifyUrl = jsonBody.getJSONObject("outboundUSSDMessageRequest").getJSONObject("responseRequest").getString("notifyURL");
 		String msisdn = address.substring(5);
+		context.setProperty(MediatorConstants.NOTIFY_URL,notifyUrl);
 
 		String consumerKey = "";
 		String userId = "";
