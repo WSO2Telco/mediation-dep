@@ -20,6 +20,9 @@ package com.wso2telco.dep.mediator.impl.ussd;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.wso2telco.dep.mediator.ErrorConstants;
+import com.wso2telco.dep.mediator.MSISDNConstants;
+import com.wso2telco.dep.mediator.MediatorConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.entity.ussd.DeleteOperator;
 import com.wso2telco.dep.mediator.entity.ussd.DeleteSubscriptionRequest;
@@ -29,6 +32,7 @@ import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.USSDService;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
+import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.ussd.ValidateUssdCancelSubscription;
 import com.wso2telco.dep.operatorservice.model.OperatorEndPointDTO;
@@ -116,7 +120,10 @@ public class SouthBoundStopMOUSSDSubscriptionHandler implements USSDHandler {
             HandlerUtils.setAuthorizationHeader(context, executor,
                     new OperatorEndpoint(new EndpointReference(sub.getDomain()), sub.getOperator()));
             context.setProperty("subscriptionId", subscriptionId);
+        } else {
+            throw new CustomException(MSISDNConstants.SVC0002, "", new String[] {ErrorConstants.INVALID_SUBSCRIPTION_ID});
         }
+
         return true;
     }
 }
