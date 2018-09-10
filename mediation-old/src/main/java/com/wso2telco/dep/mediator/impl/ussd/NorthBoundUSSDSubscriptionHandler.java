@@ -161,7 +161,7 @@ public class NorthBoundUSSDSubscriptionHandler implements USSDHandler {
         String requestStr = gson.toJson(subscriptionGatewayRequest);
 
         HandlerUtils.setHandlerProperty(context,this.getClass().getSimpleName());
-        context.setProperty("responseResourceURL", mediatorConfMap.get("hubGateway")+executor.getResourceUrl()+"/"+subscriptionId);
+        context.setProperty("responseResourceURL", mediatorConfMap.get("hubGateway")+executor.getApiContext()+ "/" + executor.getApiVersion() + executor.getSubResourcePath()+"/"+subscriptionId);
         context.setProperty("subscriptionID", subscriptionId);
         context.setProperty("original_clientCorrelator", originalClientCorrelator);
 
