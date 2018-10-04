@@ -32,11 +32,13 @@ public final class ValidationUtils {
 
     public static void compareMsisdns(String urlmsisdn, String payloadMsisdn){
         if(urlmsisdn != null){
-            if ((urlmsisdn.startsWith(MSISDNConstants.TEL_1)) || urlmsisdn.startsWith(MSISDNConstants.ETEL_1)) {
+        	if (urlmsisdn.startsWith(MSISDNConstants.ETEL_1)) {
+        		urlmsisdn = urlmsisdn.substring(6).trim();
+        	} else if ((urlmsisdn.startsWith(MSISDNConstants.TEL_1)) || urlmsisdn.startsWith(MSISDNConstants.ETEL_2)) {
                 urlmsisdn = urlmsisdn.substring(5).trim();
-            } else if (urlmsisdn.startsWith(MSISDNConstants.TEL_2)|| urlmsisdn.startsWith(MSISDNConstants.ETEL_2)) {
+            } else if (urlmsisdn.startsWith(MSISDNConstants.TEL_2)|| urlmsisdn.startsWith(MSISDNConstants.ETEL_3)) {
                 urlmsisdn = urlmsisdn.substring(4);
-            } else if (urlmsisdn.startsWith(MSISDNConstants.TEL_3) || urlmsisdn.startsWith(MSISDNConstants.ETEL_3)) {
+            } else if (urlmsisdn.startsWith(MSISDNConstants.TEL_3)) {
                 urlmsisdn = urlmsisdn.substring(3);
             } else if (urlmsisdn.startsWith(MSISDNConstants.PLUS)) {
                 urlmsisdn = urlmsisdn.substring(1);
