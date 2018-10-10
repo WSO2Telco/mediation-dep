@@ -42,8 +42,6 @@ import org.json.JSONObject;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,7 +82,7 @@ public class AmountRefundHandler implements PaymentHandler {
 		IServiceValidate validator = new ValidateRefund();
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
-		compareMsisdn();
+		ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody());
 		return true;
 	}
 
@@ -213,28 +211,6 @@ public class AmountRefundHandler implements PaymentHandler {
 
 	}
 
-	/**
-	 * This method extracts userId from payload and resource url and passed to
-	 * validate whether they are same
-	 */
-	private void compareMsisdn() {
-		String urlmsisdn = null;
-		try {
-			urlmsisdn = URLDecoder.decode(executor.getSubResourcePath().substring(1,
-					executor.getSubResourcePath().indexOf("transactions") - 1), "UTF-8");
-
-		} catch (UnsupportedEncodingException e) {
-			log.debug("Url MSISDN can not be decoded ");
-		}
-		// This validation assumes that userID should be with the prefix "tel:+" and back end
-		// still does not support with other prefixes for this API.
-		// Therefore below line should be modified in future depending on requirements
-		String payloadMsisdn = executor.getJsonBody().getJSONObject("amountTransaction").getString("endUserId")
-					.substring(5);
-		ValidationUtils.compareMsisdns(urlmsisdn, payloadMsisdn);
-
-	}
-	
 	/**
 	 * + * Ensure the input value is either a null value or a trimmed string +
 	 */

@@ -18,8 +18,13 @@ package com.wso2telco.dep.mediator.util;
 
 import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 
 /**
  *@author WSO2telco
@@ -30,7 +35,29 @@ public final class ValidationUtils {
 
     static Log log = LogFactory.getLog(ValidationUtils.class);
 
-    public static void compareMsisdns(String urlmsisdn, String payloadMsisdn){
+    /**
+	 * This method extracts userId from payload and resource url and passed to
+	 * validate whether they are same
+	 */
+	public static void compareMsisdn(String resourcePath, JSONObject jsonBody) {
+		String urlmsisdn = null;
+		try {
+			urlmsisdn = URLDecoder.decode(resourcePath.substring(1,
+					resourcePath.indexOf("transactions") - 1), "UTF-8");
+
+		} catch (UnsupportedEncodingException e) {
+			log.debug("Url MSISDN can not be decoded ");
+		}
+		// This validation assumes that userID should be with the prefix "tel:+" and back end
+		// still does not support with other prefixes for this API.
+		// Therefore below line should be modified in future depending on requirements
+		String payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId")
+					.substring(5);
+		ValidationUtils.compareMsisdns(urlmsisdn, payloadMsisdn);
+
+	}
+	
+    private static void compareMsisdns(String urlmsisdn, String payloadMsisdn){
         if(urlmsisdn != null){
         	if (urlmsisdn.startsWith(MSISDNConstants.ETEL_1)) {
         		urlmsisdn = urlmsisdn.substring(6).trim();
