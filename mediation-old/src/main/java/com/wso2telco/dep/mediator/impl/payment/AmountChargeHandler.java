@@ -20,7 +20,6 @@ package com.wso2telco.dep.mediator.impl.payment;
 import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
-import com.wso2telco.dep.mediator.ResponseHandler;
 import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
 import com.wso2telco.dep.mediator.internal.AggregatorValidator;
 import com.wso2telco.dep.mediator.internal.ApiUtils;
@@ -35,7 +34,6 @@ import com.wso2telco.dep.mediator.unmarshaler.GroupDTO;
 import com.wso2telco.dep.mediator.unmarshaler.GroupEventUnmarshaller;
 import com.wso2telco.dep.mediator.unmarshaler.OparatorNotinListException;
 import com.wso2telco.dep.mediator.util.*;
-import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.payment.ValidatePaymentCharge;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
@@ -47,8 +45,6 @@ import org.json.JSONObject;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URLDecoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,8 +61,6 @@ public class AmountChargeHandler implements PaymentHandler {
 
 	private PaymentService paymentService;
 
-	private ResponseHandler responseHandler;
-
 	private PaymentExecutor executor;
 	
 	private ApiUtils apiUtils;
@@ -79,7 +73,6 @@ public class AmountChargeHandler implements PaymentHandler {
 		this.executor = executor;
 		occi = new OriginatingCountryCalculatorIDD();
 		paymentService = new PaymentService();
-		responseHandler = new ResponseHandler();
 		apiUtils = new ApiUtils();
 		paymentUtil = new PaymentUtil();
 	}
@@ -251,22 +244,8 @@ public class AmountChargeHandler implements PaymentHandler {
 		IServiceValidate validator = new ValidatePaymentCharge();
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
-		compareMsisdn();
+		ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody());
 		return true;
-	}
-
-	private void compareMsisdn(){
-		String urlmsisdn = null;
-		try {
-			urlmsisdn = URLDecoder.decode(executor.getSubResourcePath().substring(1, executor.getSubResourcePath().indexOf("transactions") - 1), "UTF-8");
-			
-		} catch (UnsupportedEncodingException e) {
-			log.debug("Url MSISDN can not be decoded ");
-		}
-
-		String payloadMsisdn = executor.getJsonBody().getJSONObject("amountTransaction").getString("endUserId").substring(5);
-		ValidationUtils.compareMsisdns(urlmsisdn,payloadMsisdn);
-
 	}
 
 	/**

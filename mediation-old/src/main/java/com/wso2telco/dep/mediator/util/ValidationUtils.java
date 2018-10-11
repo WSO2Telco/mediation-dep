@@ -18,8 +18,13 @@ package com.wso2telco.dep.mediator.util;
 
 import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 
 /**
  *@author WSO2telco
@@ -30,13 +35,33 @@ public final class ValidationUtils {
 
     static Log log = LogFactory.getLog(ValidationUtils.class);
 
-    public static void compareMsisdns(String urlmsisdn, String payloadMsisdn){
-        if(urlmsisdn != null){
-            if ((urlmsisdn.startsWith(MSISDNConstants.TEL_1)) || urlmsisdn.startsWith(MSISDNConstants.ETEL_1)) {
+    /**
+	 * This method extracts userId from payload and resource url and passed to
+	 * validate whether they are same
+	 */
+	public static void compareMsisdn(String resourcePath, JSONObject jsonBody) {
+		String urlmsisdn = null;
+		try {
+			urlmsisdn = URLDecoder.decode(resourcePath.substring(1,
+					resourcePath.indexOf("transactions") - 1), "UTF-8");
+
+		} catch (UnsupportedEncodingException e) {
+			log.debug("Url MSISDN can not be decoded ");
+		}
+		// This validation assumes that userID should be with the prefix "tel:+" and back end
+		// still does not support with other prefixes for this API.
+		// Therefore below line should be modified in future depending on requirements
+		String payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId")
+					.substring(5);
+		
+		if(urlmsisdn != null){
+        	if (urlmsisdn.startsWith(MSISDNConstants.ETEL_1)) {
+        		urlmsisdn = urlmsisdn.substring(6).trim();
+        	} else if ((urlmsisdn.startsWith(MSISDNConstants.TEL_1)) || urlmsisdn.startsWith(MSISDNConstants.ETEL_2)) {
                 urlmsisdn = urlmsisdn.substring(5).trim();
-            } else if (urlmsisdn.startsWith(MSISDNConstants.TEL_2)|| urlmsisdn.startsWith(MSISDNConstants.ETEL_2)) {
+            } else if (urlmsisdn.startsWith(MSISDNConstants.TEL_2)|| urlmsisdn.startsWith(MSISDNConstants.ETEL_3)) {
                 urlmsisdn = urlmsisdn.substring(4);
-            } else if (urlmsisdn.startsWith(MSISDNConstants.TEL_3) || urlmsisdn.startsWith(MSISDNConstants.ETEL_3)) {
+            } else if (urlmsisdn.startsWith(MSISDNConstants.TEL_3)) {
                 urlmsisdn = urlmsisdn.substring(3);
             } else if (urlmsisdn.startsWith(MSISDNConstants.PLUS)) {
                 urlmsisdn = urlmsisdn.substring(1);
@@ -52,5 +77,6 @@ public final class ValidationUtils {
             log.debug("msisdn in resourceURL and payload msisdn are not same");
             throw new CustomException(MSISDNConstants.SVC0002, "", new String[] { "Two different endUserId provided" });
         }
-    }
+
+	}
 }
