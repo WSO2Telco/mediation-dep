@@ -53,12 +53,8 @@ public final class ValidationUtils {
 		// Therefore below line should be modified in future depending on requirements
 		String payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId")
 					.substring(5);
-		ValidationUtils.compareMsisdns(urlmsisdn, payloadMsisdn);
-
-	}
-	
-    private static void compareMsisdns(String urlmsisdn, String payloadMsisdn){
-        if(urlmsisdn != null){
+		
+		if(urlmsisdn != null){
         	if (urlmsisdn.startsWith(MSISDNConstants.ETEL_1)) {
         		urlmsisdn = urlmsisdn.substring(6).trim();
         	} else if ((urlmsisdn.startsWith(MSISDNConstants.TEL_1)) || urlmsisdn.startsWith(MSISDNConstants.ETEL_2)) {
@@ -81,5 +77,6 @@ public final class ValidationUtils {
             log.debug("msisdn in resourceURL and payload msisdn are not same");
             throw new CustomException(MSISDNConstants.SVC0002, "", new String[] { "Two different endUserId provided" });
         }
-    }
+
+	}
 }
