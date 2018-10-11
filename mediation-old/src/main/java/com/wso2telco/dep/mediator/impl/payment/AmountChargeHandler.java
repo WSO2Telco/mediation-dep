@@ -20,7 +20,6 @@ package com.wso2telco.dep.mediator.impl.payment;
 import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
-import com.wso2telco.dep.mediator.ResponseHandler;
 import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
 import com.wso2telco.dep.mediator.internal.AggregatorValidator;
 import com.wso2telco.dep.mediator.internal.ApiUtils;
@@ -35,7 +34,6 @@ import com.wso2telco.dep.mediator.unmarshaler.GroupDTO;
 import com.wso2telco.dep.mediator.unmarshaler.GroupEventUnmarshaller;
 import com.wso2telco.dep.mediator.unmarshaler.OparatorNotinListException;
 import com.wso2telco.dep.mediator.util.*;
-import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.payment.ValidatePaymentCharge;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
@@ -63,8 +61,6 @@ public class AmountChargeHandler implements PaymentHandler {
 
 	private PaymentService paymentService;
 
-	private ResponseHandler responseHandler;
-
 	private PaymentExecutor executor;
 	
 	private ApiUtils apiUtils;
@@ -77,7 +73,6 @@ public class AmountChargeHandler implements PaymentHandler {
 		this.executor = executor;
 		occi = new OriginatingCountryCalculatorIDD();
 		paymentService = new PaymentService();
-		responseHandler = new ResponseHandler();
 		apiUtils = new ApiUtils();
 		paymentUtil = new PaymentUtil();
 	}

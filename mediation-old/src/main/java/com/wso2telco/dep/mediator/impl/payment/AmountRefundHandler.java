@@ -20,7 +20,6 @@ package com.wso2telco.dep.mediator.impl.payment;
 import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
-import com.wso2telco.dep.mediator.ResponseHandler;
 import com.wso2telco.dep.mediator.internal.AggregatorValidator;
 import com.wso2telco.dep.mediator.internal.ApiUtils;
 import com.wso2telco.dep.mediator.internal.Type;
@@ -55,7 +54,6 @@ public class AmountRefundHandler implements PaymentHandler {
 	private static Log log = LogFactory.getLog(AmountRefundHandler.class);
 	private static final String API_TYPE = "payment";
 	private OriginatingCountryCalculatorIDD occi;
-	private ResponseHandler responseHandler;
 	private PaymentExecutor executor;
 	private PaymentService dbservice;
 	private ApiUtils apiUtils;
@@ -64,7 +62,6 @@ public class AmountRefundHandler implements PaymentHandler {
 	public AmountRefundHandler(PaymentExecutor executor) {
 		this.executor = executor;
 		occi = new OriginatingCountryCalculatorIDD();
-		responseHandler = new ResponseHandler();
 		dbservice = new PaymentService();
 		apiUtils = new ApiUtils();
 		paymentUtil = new PaymentUtil();
