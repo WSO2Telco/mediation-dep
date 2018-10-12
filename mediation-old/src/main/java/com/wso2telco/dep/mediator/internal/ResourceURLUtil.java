@@ -177,7 +177,7 @@ public class ResourceURLUtil {
      */
     public String[] getParamValues(String url) throws UnsupportedEncodingException {
         
-       List<String> paramlist  = new ArrayList();
+       List<String> paramlist  = new ArrayList<String>();
         
         String[] urlParts = url.split("\\?");
         if (urlParts.length < 2) {
@@ -186,7 +186,6 @@ public class ResourceURLUtil {
             String query = urlParts[1];
             for (String param : query.split("&")) {
                 String[] pair = param.split("=");
-                String value = "";
                 if (pair.length > 1) {
                     paramlist.add(URLDecoder.decode(pair[1],"UTF-8"));
                 }
@@ -195,5 +194,30 @@ public class ResourceURLUtil {
         
         return paramlist.toArray(new String[paramlist.size()]);
     }
-   
+
+	/**
+	 * Returns array of path parameters by splitting '&' notation.
+	 *
+	 * <b>Note:</b> This does not check whether parameter has "=" notation.
+	 *
+	 * <p><strong>Example:</strong> [ParamName1=ParamValue1, ParamName1=ParamValue2, someParam]<p>.
+	 *
+	 * @param url the url
+	 * @return the params list
+	 * @throws UnsupportedEncodingException the unsupported encoding exception
+	 */
+	public String[] getParamPairs(String url) throws UnsupportedEncodingException {
+
+		List<String> paramPairs = new ArrayList<String>();
+		String[] urlParts = url.split("\\?");
+		if (urlParts.length >= 2) {
+			String query = urlParts[1];
+			for (String param : query.split("&")) {
+				if(!param.isEmpty()) {
+					paramPairs.add(URLDecoder.decode(param, "UTF-8"));
+				}
+			}
+		}
+		return paramPairs.toArray(new String[paramPairs.size()]);
+	}
 }
