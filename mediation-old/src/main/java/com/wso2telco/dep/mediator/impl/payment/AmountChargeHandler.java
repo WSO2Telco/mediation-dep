@@ -237,11 +237,21 @@ public class AmountChargeHandler implements PaymentHandler {
 
 	@Override
 	public boolean validate(String httpMethod, String requestPath, JSONObject jsonBody, MessageContext context) throws Exception {
+		IServiceValidate validator;
+		String validatorClass = (String) context.getProperty("validatorClass");
+
 		if (!httpMethod.equalsIgnoreCase("POST")) {
 			((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 405);
 			throw new Exception("Method not allowed");
 		}
-		IServiceValidate validator = new ValidatePaymentCharge();
+
+		if(validatorClass != null){
+			Class clazz = Class.forName(validatorClass);
+			validator = (IServiceValidate) clazz.newInstance();
+		}else{
+			validator = new ValidatePaymentCharge();
+		}
+
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
 		ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody());

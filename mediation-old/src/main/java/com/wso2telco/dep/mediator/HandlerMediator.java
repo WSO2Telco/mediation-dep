@@ -51,10 +51,15 @@ public class HandlerMediator extends AbstractMediator {
     /** The executor class. */
     private String executorClass;
 
+    /** The validator class */
+    private String validatorClass;
+
     /** The nb publisher. */
     private NorthboundPublisher nbPublisher;
 
     public static final String REQUEST_EXECUTOR = "REQUEST_EXECUTOR";
+
+    public static final String VALIDATOR_CLASS = "validatorClass";
 
 
     /* (non-Javadoc)
@@ -65,6 +70,8 @@ public class HandlerMediator extends AbstractMediator {
         try {
             Class clazz = Class.forName(executorClass);
             RequestExecutor reqHandler = (RequestExecutor) clazz.newInstance();
+
+            context.setProperty(VALIDATOR_CLASS, validatorClass);
 
             reqHandler.setApplicationid(storeApplication(context));
 
@@ -135,5 +142,14 @@ public class HandlerMediator extends AbstractMediator {
      */
     public void setExecutorClass(String executorClass) {
         this.executorClass = executorClass;
+    }
+
+    /**
+     * Sets the executor class.
+     *
+     * @param validatorClass the new executor class
+     */
+    public void setValidatorClass(String validatorClass){
+        this.validatorClass = validatorClass;
     }
 }
