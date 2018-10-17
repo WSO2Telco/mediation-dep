@@ -21,12 +21,14 @@ import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.ResponseHandler;
+import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
 import com.wso2telco.dep.mediator.internal.AggregatorValidator;
 import com.wso2telco.dep.mediator.internal.ApiUtils;
 import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.PaymentService;
+import com.wso2telco.dep.mediator.util.APIType;
 import com.wso2telco.dep.mediator.util.FileNames;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
@@ -114,10 +116,15 @@ public class AmountRefundHandler implements PaymentHandler {
 		// OperatorEndpoint endpoint = null;
 		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(
 				context)) {
-			endpoint = occi.getAPIEndpointsByMSISDN(
-					endUserId.replace("tel:", ""), API_TYPE,
-					executor.getSubResourcePath(), false,
-					executor.getValidoperators(context));
+			OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
+			searchDTO.setApi(APIType.PAYMENT);
+			searchDTO.setApiName((String) context.getProperty("API_NAME"));
+			searchDTO.setContext(context);
+			searchDTO.setIsredirect(false);
+			searchDTO.setMSISDN(endUserId.replace("tel:", ""));
+			searchDTO.setOperators(executor.getValidoperators(context));
+			searchDTO.setRequestPathURL(executor.getSubResourcePath());
+			endpoint = occi.getOperatorEndpoint(searchDTO);
 		}
 
 		String sending_add = endpoint.getEndpointref().getAddress();

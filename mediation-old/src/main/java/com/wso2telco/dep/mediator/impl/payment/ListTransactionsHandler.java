@@ -22,8 +22,10 @@ import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.ResponseHandler;
+import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.PaymentService;
+import com.wso2telco.dep.mediator.util.APIType;
 import com.wso2telco.dep.mediator.util.FileNames;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
@@ -96,10 +98,21 @@ public class ListTransactionsHandler implements PaymentHandler {
 		context.setProperty(MSISDNConstants.MSISDN, params[1]);
 		OperatorEndpoint endpoint = null;
 		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
-			endpoint = occi.getAPIEndpointsByMSISDN(
+
+			OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
+			searchDTO.setApi(APIType.PAYMENT);
+			searchDTO.setApiName((String) context.getProperty("API_NAME"));
+			searchDTO.setContext(context);
+			searchDTO.setIsredirect(true);
+			searchDTO.setMSISDN(params[1].replace("tel:", ""));
+			searchDTO.setOperators(executor.getValidoperators(context));
+			searchDTO.setRequestPathURL(executor.getSubResourcePath());
+
+			endpoint = occi.getOperatorEndpoint(searchDTO);
+			/*endpoint = occi.getAPIEndpointsByMSISDN(
 					params[1].replace("tel:", ""), API_TYPE,
 					executor.getSubResourcePath(), true,
-					executor.getValidoperators(context));
+					executor.getValidoperators(context));*/
 		}
 
 		// set information to the message context, to be used in the sequence

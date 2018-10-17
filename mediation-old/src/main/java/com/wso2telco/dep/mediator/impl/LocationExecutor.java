@@ -69,8 +69,16 @@ public class LocationExecutor extends RequestExecutor {
         OperatorEndpoint endpoint = null;
 		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(
 				context)) {
-			
-			endpoint = occi.getAPIEndpointsByMSISDN(params[0].replace("tel:", ""), "location", getSubResourcePath(), true, getValidoperators(context));
+            OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
+            searchDTO.setApi(APIType.PAYMENT);
+            searchDTO.setApiName((String) context.getProperty("API_NAME"));
+            searchDTO.setContext(context);
+            searchDTO.setIsredirect(true);
+            searchDTO.setMSISDN(params[0].replace("tel:", ""));
+            searchDTO.setOperators(getValidoperators(context));
+            searchDTO.setRequestPathURL(getSubResourcePath());
+
+            endpoint = occi.getOperatorEndpoint(searchDTO);
 		}
 		
         String sending_add = endpoint.getEndpointref().getAddress();
