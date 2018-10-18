@@ -38,7 +38,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.wso2.carbon.utils.CarbonUtils;
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -167,13 +166,11 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
         }
 
         if (valid == null) {
-
             throw new CustomException("SVC0001", "", new String[]{"Requested service is not provisioned"});
         }
 
         OperatorEndPointDTO validOperatorendpoint = getValidEndpoints(apikey, operator);
         if (validOperatorendpoint == null) {
-
             throw new CustomException("SVC0001", "", new String[]{"Requested service is not provisioned"});
         }
 
@@ -299,7 +296,6 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
             // mcc not known in mediator
             log.debug("Unable to obtain Operator from the Header, Oprator look for mcc_range_table - operator : " + operator + " mcc : " + mcc + " msisdn : " + msisdn.toString());
             try {
-
                 operator = mncQueryclient.QueryNetwork(mcc, msisdn.toString());
             } catch (Exception e) {
 
@@ -367,17 +363,16 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
      * @throws Exception the exception
      */
     public List<OperatorEndpoint> getAPIEndpointsByApp(String apiKey, String requestPathURL,
-            List<OperatorApplicationDTO> validoperator) throws Exception {
+                                                       List<OperatorApplicationDTO> validoperator, org.apache.synapse.MessageContext messageContextcontext) throws Exception {
 
         List<OperatorEndpoint> endpoints = new ArrayList<OperatorEndpoint>();
 
         initialize();
 
-        List<OperatorEndPointDTO> validendpoints = getValidEndpoints(apiKey, validoperator);
+        List<OperatorEndPointDTO> validendpoints = getValidEndpoints(apiKey, validoperator, messageContextcontext);
         String extremeEndpoint;
 
         for (OperatorEndPointDTO oe : validendpoints) {
-
             extremeEndpoint = oe.getEndpoint() + requestPathURL;
             endpoints.add(new OperatorEndpoint(new EndpointReference(extremeEndpoint), oe.getOperatorcode(), oe.getOperatorid()));
         }
@@ -448,15 +443,17 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
      * @param validoperator the validoperator
      * @return the valid endpoints
      */
-    private List<OperatorEndPointDTO> getValidEndpoints(String api, List<OperatorApplicationDTO> validoperator) {
+    private List<OperatorEndPointDTO> getValidEndpoints(String api, List<OperatorApplicationDTO> validoperator, org.apache.synapse.MessageContext context) {
 
         String endpoint = null;
         List<String> validlist = new ArrayList();
         List<OperatorEndPointDTO> validoperendpoints = new ArrayList();
 
         for (OperatorApplicationDTO op : validoperator) {
+           if(op.getApplicationid() == Integer.parseInt((String)context.getProperty("APPLICATION_ID"))) {
+               validlist.add(op.getOperatorname());
+           }
 
-            validlist.add(op.getOperatorname());
         }
 
         for (OperatorEndPointDTO d : operatorEndpoints) {

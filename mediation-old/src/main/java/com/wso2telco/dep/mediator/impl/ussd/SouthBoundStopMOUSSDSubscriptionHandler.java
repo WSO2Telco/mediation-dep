@@ -90,7 +90,12 @@ public class SouthBoundStopMOUSSDSubscriptionHandler implements USSDHandler {
         UID.getUniqueID(Type.DELRETSUB.getCode(), context, executor.getApplicationid());
 
         String requestPath = executor.getSubResourcePath();
-        Integer subscriptionId = Integer.parseInt((requestPath.substring(requestPath.lastIndexOf("/") + 1)).replaceFirst("sub", ""));
+        Integer subscriptionId;
+        try {
+            subscriptionId = Integer.parseInt((requestPath.substring(requestPath.lastIndexOf("/") + 1)).replaceFirst("sub", ""));
+        }catch (NumberFormatException ex){
+            throw new CustomException(MSISDNConstants.SVC0002, "", new String[] {ErrorConstants.INVALID_SUBSCRIPTION_ID});
+        }
         List<OperatorSubscriptionDTO> domainsubs = (dbService.moUssdSubscriptionQuery(Integer.valueOf(subscriptionId)));
 
         if (!domainsubs.isEmpty() && domainsubs != null) {

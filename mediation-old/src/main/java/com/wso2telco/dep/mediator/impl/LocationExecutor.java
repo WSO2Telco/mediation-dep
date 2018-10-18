@@ -20,19 +20,17 @@ package com.wso2telco.dep.mediator.impl;
 import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.RequestExecutor;
-import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
 import com.wso2telco.dep.mediator.internal.ResourceURLUtil;
 import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
-import com.wso2telco.dep.mediator.util.APIType;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.impl.location.ValidateLocation;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
-
-import java.util.Map;
+import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
+import com.wso2telco.dep.mediator.util.APIType;
 
 import org.apache.axis2.AxisFault;
 import org.apache.synapse.MessageContext;
@@ -110,7 +108,7 @@ public class LocationExecutor extends RequestExecutor {
             ((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 405);
             throw new Exception("Method not allowed");
         }
-        String[] params = new ResourceURLUtil().getParamValues(requestPath);
+        String[] params = new ResourceURLUtil().getParamPairs(requestPath);
         ValidateLocation validator = new ValidateLocation();
         validator.validateUrl(requestPath);
         validator.validate(params);
