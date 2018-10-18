@@ -126,7 +126,7 @@ public boolean handle(MessageContext context) throws CustomException, AxisFault,
 
 
 	List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp(API_TYPE,
-			executor.getSubResourcePath(), executor.getValidoperators(context));
+			executor.getSubResourcePath(), executor.getValidoperators(context),context);
 
 	List<OperatorEndpoint> validEndpoints = new ArrayList<OperatorEndpoint>();
 	Registrations[] registrations = nbRetrieveRequest

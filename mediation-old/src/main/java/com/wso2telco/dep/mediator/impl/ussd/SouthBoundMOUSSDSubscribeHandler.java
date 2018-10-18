@@ -17,11 +17,8 @@
  */
 package com.wso2telco.dep.mediator.impl.ussd;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
-import com.wso2telco.dep.mediator.entity.SubscriptionRequest;
 import com.wso2telco.dep.mediator.internal.ApiUtils;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.USSDService;
@@ -29,20 +26,15 @@ import com.wso2telco.dep.mediator.util.FileNames;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.ussd.ValidateUssdSubscription;
-import com.wso2telco.dep.operatorservice.model.OperatorSubscriptionDTO;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
-import org.wso2.carbon.apimgt.gateway.handlers.security.APISecurityUtils;
-import org.wso2.carbon.apimgt.gateway.handlers.security.AuthenticationContext;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -116,7 +108,7 @@ public class SouthBoundMOUSSDSubscribeHandler implements USSDHandler {
         log.info("Subsendpoint - " + subsEndpoint);
 
         List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp(API_TYPE, executor.getSubResourcePath(),
-                                                                     executor.getValidoperators(context));
+                                                                     executor.getValidoperators(context),context);
         if (endpoints.size() > 1) {
             log.warn("Multiple operator endpoints found. Picking first endpoint: " + endpoints.get(0).getEndpointref()
                     .getAddress() + " for operator: " + endpoints.get(0).getOperator() + " to send request.");

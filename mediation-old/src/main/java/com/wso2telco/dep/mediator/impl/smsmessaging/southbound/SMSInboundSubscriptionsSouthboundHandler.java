@@ -119,7 +119,7 @@ public class SMSInboundSubscriptionsSouthboundHandler implements SMSHandler {
         String subsEndpoint = mediatorConfMap.get("hubMOSubsGatewayEndpoint") + "/" + moSubscriptionId;
 
         List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp(API_TYPE, executor.getSubResourcePath(),
-                executor.getValidoperators(context));
+                executor.getValidoperators(context),context);
 
         if (!endpoints.isEmpty()) {
             if (endpoints.size() > 1) {

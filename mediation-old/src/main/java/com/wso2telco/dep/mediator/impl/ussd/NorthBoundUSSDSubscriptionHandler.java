@@ -103,7 +103,7 @@ public class NorthBoundUSSDSubscriptionHandler implements USSDHandler {
         jsonBody.getJSONObject("subscription").getJSONObject("callbackReference").put("notifyURL", subsEndpoint);
 
         List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp(API_TYPE, executor.getSubResourcePath(),
-                executor.getValidoperators(context));
+                executor.getValidoperators(context),context);
 
         SubscriptionHubRequest subscriptionHubRequest = gson.fromJson(jsonBody.toString(),SubscriptionHubRequest.class);
         ShortCodes[] shortCodes = subscriptionHubRequest.getSubscription().getShortCodes();

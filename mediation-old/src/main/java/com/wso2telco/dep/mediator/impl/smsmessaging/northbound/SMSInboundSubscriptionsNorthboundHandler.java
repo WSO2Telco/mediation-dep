@@ -138,7 +138,7 @@ public class SMSInboundSubscriptionsNorthboundHandler implements SMSHandler {
 		String notificationFormat = nbSubsrequst.getSubscription().getNotificationFormat();
 
 		List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp(API_TYPE, executor.getSubResourcePath(),
-				executor.getValidoperators(context));
+				executor.getValidoperators(context),context);
 
 		Map<String, OperatorEndpoint> operatorMap = new HashMap<String, OperatorEndpoint>();
 
