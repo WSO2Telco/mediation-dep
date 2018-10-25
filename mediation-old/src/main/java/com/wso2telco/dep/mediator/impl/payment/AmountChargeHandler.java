@@ -62,11 +62,11 @@ public class AmountChargeHandler implements PaymentHandler {
 	private PaymentService paymentService;
 
 	private PaymentExecutor executor;
-	
+
 	private ApiUtils apiUtils;
-	
+
 	private PaymentUtil paymentUtil;
-	
+
 	private static List<String> validCategoris = null;
 
 	public AmountChargeHandler(PaymentExecutor executor) {
@@ -90,7 +90,7 @@ public class AmountChargeHandler implements PaymentHandler {
         FileReader fileReader = new FileReader();
         String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
  		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
-        		
+
         String hub_gateway_id = mediatorConfMap.get("hub_gateway_id");
         log.debug("Hub / Gateway Id : " + hub_gateway_id);
 
@@ -99,8 +99,8 @@ public class AmountChargeHandler implements PaymentHandler {
         String subscriber = jwtDetails.get("subscriber");
         log.debug("Subscriber Name : " + subscriber);
 		JSONObject jsonBody = executor.getJsonBody();
-		
-				
+
+
 		String endUserId = jsonBody.getJSONObject("amountTransaction").getString("endUserId");
 		String msisdn = endUserId.substring(5);
         //Double chargeamount = Double.parseDouble(jsonBody.getJSONObject("amountTransaction").getJSONObject("paymentAmount").getJSONObject("chargingInformation").getString("amount"));
@@ -134,7 +134,7 @@ public class AmountChargeHandler implements PaymentHandler {
 															 * .getValidoperators
 															 * ());
 															 */
-			
+
 		}
 
 		String sending_add = endpoint.getEndpointref().getAddress();
@@ -161,33 +161,36 @@ public class AmountChargeHandler implements PaymentHandler {
             clientCorrelator = clientCorrelator + ":" + hub_gateway_id + ":" + appId;
         }
 
-		JSONObject chargingdmeta = objAmountTransaction.getJSONObject(
-				"paymentAmount").getJSONObject("chargingMetaData");
+        if (objAmountTransaction.has("chargingMetaData")) {
 
-		boolean isaggrigator = paymentUtil.isAggregator(context);
+            JSONObject chargingdmeta = objAmountTransaction.getJSONObject(
+                    "paymentAmount").getJSONObject("chargingMetaData");
 
-		if (isaggrigator) {
-			//JSONObject chargingdmeta = objAmountTransaction.getJSONObject("paymentAmount").getJSONObject("chargingMetaData");
-			if (!chargingdmeta.isNull("onBehalfOf")) {
-				new AggregatorValidator().validateMerchant(
-						Integer.valueOf(executor.getApplicationid()),
-						endpoint.getOperator(), subscriber,
-						chargingdmeta.getString("onBehalfOf"));
-			}
-		}
+            boolean isaggrigator = paymentUtil.isAggregator(context);
 
-		if ((!chargingdmeta.isNull("purchaseCategoryCode"))
-				&& (!chargingdmeta.getString("purchaseCategoryCode").isEmpty())) {
+            if (isaggrigator) {
+                //JSONObject chargingdmeta = objAmountTransaction.getJSONObject("paymentAmount").getJSONObject("chargingMetaData");
+                if (!chargingdmeta.isNull("onBehalfOf")) {
+                    new AggregatorValidator().validateMerchant(
+                            Integer.valueOf(executor.getApplicationid()),
+                            endpoint.getOperator(), subscriber,
+                            chargingdmeta.getString("onBehalfOf"));
+                }
+            }
 
-			if(validCategoris == null || validCategoris.isEmpty() || (!validCategoris.contains(chargingdmeta.getString("purchaseCategoryCode")))){
-				validCategoris = paymentService.getValidPayCategories();
-			}
+            if ((!chargingdmeta.isNull("purchaseCategoryCode"))
+                    && (!chargingdmeta.getString("purchaseCategoryCode").isEmpty())) {
 
-		}
-		// validate payment categoreis
-		
-		//validatePaymentCategory(chargingdmeta, validCategoris);
-		paymentUtil.validatePaymentCategory(chargingdmeta, validCategoris);
+                if (validCategoris == null || validCategoris.isEmpty() || (!validCategoris.contains(chargingdmeta.getString("purchaseCategoryCode")))) {
+                    validCategoris = paymentService.getValidPayCategories();
+                }
+
+            }
+            // validate payment categoreis
+
+            //validatePaymentCategory(chargingdmeta, validCategoris);
+            paymentUtil.validatePaymentCategory(chargingdmeta, validCategoris);
+        }
 
 		//This persiste messages into Axiatadb database table
         MessageDTO messageDTO = new MessageDTO();
@@ -418,7 +421,7 @@ public class AmountChargeHandler implements PaymentHandler {
 		}
 		return str_result;
 	}
-	
+
 	public static String nullOrTrimmed(String s) {
 		String rv = null;
 		if (s != null && s.trim().length() > 0) {
@@ -426,6 +429,6 @@ public class AmountChargeHandler implements PaymentHandler {
 		}
 		return rv;
 	}
-	 
+
 
 }
