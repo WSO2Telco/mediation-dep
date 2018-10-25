@@ -119,6 +119,12 @@ public class PaymentHandlerFactory {
 
 				JSONObject objJSONObject = executor.getJsonBody();
 
+				if (!objJSONObject.has("amountTransaction")) {
+                    log.error("createPaymentHandler -> API Type Not found");
+                    throw new CustomException("SVC0002", "",
+                            new String[] { "Missing mandatory parameter: amountTransaction" });
+                }
+
 				JSONObject objAmountTransaction = (JSONObject) objJSONObject.get("amountTransaction");
 
 				if (!objAmountTransaction.has("transactionOperationStatus")) {
