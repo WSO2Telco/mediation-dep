@@ -67,7 +67,7 @@ public class AmountChargeHandler implements PaymentHandler {
 
 	private PaymentUtil paymentUtil;
 
-	private static List<String> validCategoris = null;
+	private static List<String> validCategories = null;
 
 	public AmountChargeHandler(PaymentExecutor executor) {
 		this.executor = executor;
@@ -92,12 +92,12 @@ public class AmountChargeHandler implements PaymentHandler {
  		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
 
         String hub_gateway_id = mediatorConfMap.get("hub_gateway_id");
-        log.debug("Hub / Gateway Id : " + hub_gateway_id);
+        if (log.isDebugEnabled()) log.debug("Hub / Gateway Id : " + hub_gateway_id);
 
         String appId = jwtDetails.get("applicationid");
-        log.debug("Application Id : " + appId);
+		if (log.isDebugEnabled()) log.debug("Application Id : " + appId);
         String subscriber = jwtDetails.get("subscriber");
-        log.debug("Subscriber Name : " + subscriber);
+		if (log.isDebugEnabled()) log.debug("Subscriber Name : " + subscriber);
 		JSONObject jsonBody = executor.getJsonBody();
 
 
@@ -151,45 +151,45 @@ public class AmountChargeHandler implements PaymentHandler {
 
 		if (clientCorrelator == null || clientCorrelator.equals("")) {
 
-			log.debug("clientCorrelator not provided by application and hub/plugin generating clientCorrelator on behalf of application");
+			if (log.isDebugEnabled()) log.debug("clientCorrelator not provided by application and hub/plugin generating clientCorrelator on behalf of application");
 			String hashString = apiUtils.getHashString(jsonBody.toString());
-			log.debug("hashString : " + hashString);
+			if (log.isDebugEnabled()) log.debug("hashString : " + hashString);
             clientCorrelator = hashString + "-" + requestid + ":" + hub_gateway_id + ":" + appId;
         } else {
 
-			log.debug("clientCorrelator provided by application");
+			if (log.isDebugEnabled()) log.debug("clientCorrelator provided by application");
             clientCorrelator = clientCorrelator + ":" + hub_gateway_id + ":" + appId;
         }
 
         if (objAmountTransaction.has("chargingMetaData")) {
 
-            JSONObject chargingdmeta = objAmountTransaction.getJSONObject(
+            JSONObject chargingMeta = objAmountTransaction.getJSONObject(
                     "paymentAmount").getJSONObject("chargingMetaData");
 
-            boolean isaggrigator = paymentUtil.isAggregator(context);
+            boolean isAggregator = paymentUtil.isAggregator(context);
 
-            if (isaggrigator) {
-                //JSONObject chargingdmeta = objAmountTransaction.getJSONObject("paymentAmount").getJSONObject("chargingMetaData");
-                if (!chargingdmeta.isNull("onBehalfOf")) {
+            if (isAggregator) {
+                //JSONObject chargingMeta = objAmountTransaction.getJSONObject("paymentAmount").getJSONObject("chargingMetaData");
+                if (!chargingMeta.isNull("onBehalfOf")) {
                     new AggregatorValidator().validateMerchant(
                             Integer.valueOf(executor.getApplicationid()),
                             endpoint.getOperator(), subscriber,
-                            chargingdmeta.getString("onBehalfOf"));
+                            chargingMeta.getString("onBehalfOf"));
                 }
             }
 
-            if ((!chargingdmeta.isNull("purchaseCategoryCode"))
-                    && (!chargingdmeta.getString("purchaseCategoryCode").isEmpty())) {
+            if ((!chargingMeta.isNull("purchaseCategoryCode"))
+                    && (!chargingMeta.getString("purchaseCategoryCode").isEmpty())) {
 
-                if (validCategoris == null || validCategoris.isEmpty() || (!validCategoris.contains(chargingdmeta.getString("purchaseCategoryCode")))) {
-                    validCategoris = paymentService.getValidPayCategories();
+                if (validCategories == null || validCategories.isEmpty() || (!validCategories.contains(chargingMeta.getString("purchaseCategoryCode")))) {
+                    validCategories = paymentService.getValidPayCategories();
                 }
 
             }
             // validate payment categoreis
 
-            //validatePaymentCategory(chargingdmeta, validCategoris);
-            paymentUtil.validatePaymentCategory(chargingdmeta, validCategoris);
+            //validatePaymentCategory(chargingMeta, validCategories);
+            paymentUtil.validatePaymentCategory(chargingMeta, validCategories);
         }
 
 		//This persiste messages into Axiatadb database table
@@ -230,7 +230,7 @@ public class AmountChargeHandler implements PaymentHandler {
             GroupDTO groupDTO = unmarshaller.getGroupDTO(endpoint.getOperator(), consumerKey);
             isUserInfoEnabled = groupDTO.getUserInfoEnabled();
         } catch (OparatorNotinListException e) {
-			log.debug("Operator not in list of spendlimits", e);
+			log.error("Operator not in list of spendlimits", e);
 		}
 		context.setProperty("IS_USER_INFO_ENABLED", isUserInfoEnabled);
 
@@ -245,6 +245,7 @@ public class AmountChargeHandler implements PaymentHandler {
 
 		if (!httpMethod.equalsIgnoreCase("POST")) {
 			((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 405);
+			log.error("Method not allowed");
 			throw new Exception("Method not allowed");
 		}
 
@@ -365,19 +366,19 @@ public class AmountChargeHandler implements PaymentHandler {
 	/**
 	 * Validate payment category.
 	 *
-	 * @param chargingdmeta
-	 *            the chargingdmeta
+	 * @param chargingMeta
+	 *            the chargingMeta
 	 * @param lstCategories
 	 *            the lst categories
 	 * @throws JSONException
 	 *             the JSON exception
 	 */
-	/*private void validatePaymentCategory(JSONObject chargingdmeta, List<String> lstCategories) throws JSONException {
+	/*private void validatePaymentCategory(JSONObject chargingMeta, List<String> lstCategories) throws JSONException {
 		boolean isvalid = false;
 		String chargeCategory = "";
-		if ((!chargingdmeta.isNull("purchaseCategoryCode"))	&& (!chargingdmeta.getString("purchaseCategoryCode").isEmpty())) {
+		if ((!chargingMeta.isNull("purchaseCategoryCode"))	&& (!chargingMeta.getString("purchaseCategoryCode").isEmpty())) {
 
-			chargeCategory = chargingdmeta.getString("purchaseCategoryCode");
+			chargeCategory = chargingMeta.getString("purchaseCategoryCode");
 			for (String d : lstCategories) {
 				if (d.equalsIgnoreCase(chargeCategory)) {
 					isvalid = true;
