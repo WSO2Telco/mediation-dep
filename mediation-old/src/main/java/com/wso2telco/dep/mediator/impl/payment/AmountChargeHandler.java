@@ -34,6 +34,7 @@ import com.wso2telco.dep.mediator.unmarshaler.GroupDTO;
 import com.wso2telco.dep.mediator.unmarshaler.GroupEventUnmarshaller;
 import com.wso2telco.dep.mediator.unmarshaler.OparatorNotinListException;
 import com.wso2telco.dep.mediator.util.*;
+import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.payment.ValidatePaymentCharge;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
@@ -79,7 +80,7 @@ public class AmountChargeHandler implements PaymentHandler {
 
 	public boolean handle(MessageContext context) throws Exception {
 
-		String requestid = UID.getUniqueID(Type.PAYMENT.getCode(), context, executor.getApplicationid());
+		String requestId = UID.getUniqueID(Type.PAYMENT.getCode(), context, executor.getApplicationid());
 
 		HashMap<String, String> jwtDetails = apiUtils.getJwtTokenDetails(context);
         OperatorEndpoint endpoint = null;
@@ -92,12 +93,18 @@ public class AmountChargeHandler implements PaymentHandler {
  		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
 
         String hub_gateway_id = mediatorConfMap.get("hub_gateway_id");
-        if (log.isDebugEnabled()) log.debug("Hub / Gateway Id : " + hub_gateway_id);
+        if (log.isDebugEnabled()) {
+            log.debug("Hub / Gateway Id : " + hub_gateway_id);
+        }
 
         String appId = jwtDetails.get("applicationid");
-		if (log.isDebugEnabled()) log.debug("Application Id : " + appId);
+		if (log.isDebugEnabled()) {
+            log.debug("Application Id : " + appId);
+        }
         String subscriber = jwtDetails.get("subscriber");
-		if (log.isDebugEnabled()) log.debug("Subscriber Name : " + subscriber);
+		if (log.isDebugEnabled()) {
+            log.debug("Subscriber Name : " + subscriber);
+        }
 		JSONObject jsonBody = executor.getJsonBody();
 
 
@@ -138,12 +145,18 @@ public class AmountChargeHandler implements PaymentHandler {
 		}
 
 		String sending_add = endpoint.getEndpointref().getAddress();
-		log.info("sending endpoint found: " + sending_add + " Request ID: " + UID.getRequestID(context));
-
+		if(log.isDebugEnabled()) {
+            log.info("sending endpoint found: " + sending_add + " Request ID: " + UID.getRequestID(context));
+        }
 
 		/*JSONObject clientclr = jsonBody.getJSONObject("amountTransaction");
-		clientclr.put("clientCorrelator", clientclr.getString("clientCorrelator") + ":" + requestid);*/
-		 JSONObject objAmountTransaction = jsonBody.getJSONObject("amountTransaction");
+		clientclr.put("clientCorrelator", clientclr.getString("clientCorrelator") + ":" + requestId);*/
+
+		if (!jsonBody.has("amountTransaction")) {
+            throw new CustomException("SVC0002", "", new String[]{"Missing mandatory parameter: amountTransaction"});
+        }
+		JSONObject objAmountTransaction = jsonBody.getJSONObject("amountTransaction");
+
 		if (!objAmountTransaction.isNull("clientCorrelator")) {
 			clientCorrelator = nullOrTrimmed(objAmountTransaction.get(
 					"clientCorrelator").toString());
@@ -151,13 +164,19 @@ public class AmountChargeHandler implements PaymentHandler {
 
 		if (clientCorrelator == null || clientCorrelator.equals("")) {
 
-			if (log.isDebugEnabled()) log.debug("clientCorrelator not provided by application and hub/plugin generating clientCorrelator on behalf of application");
+			if (log.isDebugEnabled()) {
+                log.debug("clientCorrelator not provided by application and hub/plugin generating clientCorrelator on behalf of application");
+            }
 			String hashString = apiUtils.getHashString(jsonBody.toString());
-			if (log.isDebugEnabled()) log.debug("hashString : " + hashString);
-            clientCorrelator = hashString + "-" + requestid + ":" + hub_gateway_id + ":" + appId;
+			if (log.isDebugEnabled()) {
+                log.debug("hashString : " + hashString);
+                clientCorrelator = hashString + "-" + requestId + ":" + hub_gateway_id + ":" + appId;
+            }
         } else {
 
-			if (log.isDebugEnabled()) log.debug("clientCorrelator provided by application");
+			if (log.isDebugEnabled()) {
+                log.debug("clientCorrelator provided by application");
+            }
             clientCorrelator = clientCorrelator + ":" + hub_gateway_id + ":" + appId;
         }
 
@@ -195,7 +214,7 @@ public class AmountChargeHandler implements PaymentHandler {
 		//This persiste messages into Axiatadb database table
         MessageDTO messageDTO = new MessageDTO();
         messageDTO.setMsgId(MessageType.PAYMENT_REQUEST.getMessageDid());
-        messageDTO.setMdtrequestId(requestid);
+        messageDTO.setMdtrequestId(requestId);
         messageDTO.setRefcode(ClientReference.PAYMENT_REQUEST_REFCODE);
         messageDTO.setRefval(jsonBody.getJSONObject("amountTransaction").getString("referenceCode"));
         messageDTO.setMessage(jsonBody.toString());
@@ -213,7 +232,7 @@ public class AmountChargeHandler implements PaymentHandler {
         HandlerUtils.setAuthorizationHeader(context, executor, endpoint);
         context.setProperty("operator", endpoint.getOperator());
         context.setProperty("requestResourceUrl", requestResourceURL);
-        context.setProperty("requestID", requestid);
+        context.setProperty("requestID", requestId);
         context.setProperty("clientCorrelator", clientCorrelator);
 		context.setProperty("OPERATOR_NAME", endpoint.getOperator());
 		context.setProperty("OPERATOR_ID", endpoint.getOperatorId());
@@ -405,8 +424,8 @@ public class AmountChargeHandler implements PaymentHandler {
 	 *            the index
 	 * @return the string
 	 */
-	private String str_piece(String str, char separator, int index) {
-		String str_result = "";
+	private String strPiece(String str, char separator, int index) {
+		String strResult = "";
 		int count = 0;
 		for (int i = 0; i < str.length(); i++) {
 			if (str.charAt(i) == separator) {
@@ -416,11 +435,11 @@ public class AmountChargeHandler implements PaymentHandler {
 				}
 			} else {
 				if (count == index - 1) {
-					str_result += str.charAt(i);
+					strResult += str.charAt(i);
 				}
 			}
 		}
-		return str_result;
+		return strResult;
 	}
 
 	public static String nullOrTrimmed(String s) {
