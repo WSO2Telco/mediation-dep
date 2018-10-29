@@ -42,6 +42,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -85,6 +86,7 @@ public class AmountChargeHandler implements PaymentHandler {
 		HashMap<String, String> jwtDetails = apiUtils.getJwtTokenDetails(context);
         OperatorEndpoint endpoint = null;
         String clientCorrelator = null;
+        String sending_add = null;
 
 		String requestResourceURL = executor.getResourceUrl();
 
@@ -105,110 +107,111 @@ public class AmountChargeHandler implements PaymentHandler {
 		if (log.isDebugEnabled()) {
             log.debug("Subscriber Name : " + subscriber);
         }
-		JSONObject jsonBody = executor.getJsonBody();
 
+        JSONObject jsonBody = executor.getJsonBody();
+        try {
 
-		String endUserId = jsonBody.getJSONObject("amountTransaction").getString("endUserId");
-		String msisdn = endUserId.substring(5);
-        //Double chargeamount = Double.parseDouble(jsonBody.getJSONObject("amountTransaction").getJSONObject("paymentAmount").getJSONObject("chargingInformation").getString("amount"));
+            String endUserId = jsonBody.getJSONObject("amountTransaction").getString("endUserId");
+            String msisdn = endUserId.substring(5);
+            //Double chargeamount = Double.parseDouble(jsonBody.getJSONObject("amountTransaction").getJSONObject("paymentAmount").getJSONObject("chargingInformation").getString("amount"));
 
-		context.setProperty(MSISDNConstants.USER_MSISDN, msisdn);
-		context.setProperty(MSISDNConstants.MSISDN, endUserId);
-		//OperatorEndpoint endpoint = null;
+            context.setProperty(MSISDNConstants.USER_MSISDN, msisdn);
+            context.setProperty(MSISDNConstants.MSISDN, endUserId);
+            //OperatorEndpoint endpoint = null;
 
-		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
-			OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
-			searchDTO.setApi(APIType.PAYMENT);
-			searchDTO.setApiName((String) context.getProperty("API_NAME"));
-			searchDTO.setContext(context);
-			searchDTO.setIsredirect(false);
-			searchDTO.setMSISDN(endUserId);
-			searchDTO.setOperators(executor.getValidoperators(context));
-			searchDTO.setRequestPathURL(executor.getSubResourcePath());
-			endpoint = occi.getOperatorEndpoint(searchDTO);
+            if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
+                OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
+                searchDTO.setApi(APIType.PAYMENT);
+                searchDTO.setApiName((String) context.getProperty("API_NAME"));
+                searchDTO.setContext(context);
+                searchDTO.setIsredirect(false);
+                searchDTO.setMSISDN(endUserId);
+                searchDTO.setOperators(executor.getValidoperators(context));
+                searchDTO.setRequestPathURL(executor.getSubResourcePath());
+                endpoint = occi.getOperatorEndpoint(searchDTO);
 
-			/*
-															 * occi.
-															 * getAPIEndpointsByMSISDN
-															 * (
-															 * endUserId.replace
-															 * ("tel:", ""),
-															 * API_TYPE,
-															 * executor
-															 * .getSubResourcePath
-															 * (), false,
-															 * executor
-															 * .getValidoperators
-															 * ());
-															 */
+                /*
+                 * occi.
+                 * getAPIEndpointsByMSISDN
+                 * (
+                 * endUserId.replace
+                 * ("tel:", ""),
+                 * API_TYPE,
+                 * executor
+                 * .getSubResourcePath
+                 * (), false,
+                 * executor
+                 * .getValidoperators
+                 * ());
+                 */
 
-		}
+            }
 
-		String sending_add = endpoint.getEndpointref().getAddress();
-		if(log.isDebugEnabled()) {
-            log.info("sending endpoint found: " + sending_add + " Request ID: " + UID.getRequestID(context));
-        }
+            sending_add = endpoint.getEndpointref().getAddress();
+            if (log.isDebugEnabled()) {
+                log.info("sending endpoint found: " + sending_add + " Request ID: " + UID.getRequestID(context));
+            }
 
 		/*JSONObject clientclr = jsonBody.getJSONObject("amountTransaction");
 		clientclr.put("clientCorrelator", clientclr.getString("clientCorrelator") + ":" + requestId);*/
 
-		if (!jsonBody.has("amountTransaction")) {
-            throw new CustomException("SVC0002", "", new String[]{"Missing mandatory parameter: amountTransaction"});
-        }
-		JSONObject objAmountTransaction = jsonBody.getJSONObject("amountTransaction");
+            JSONObject objAmountTransaction = jsonBody.getJSONObject("amountTransaction");
 
-		if (!objAmountTransaction.isNull("clientCorrelator")) {
-			clientCorrelator = nullOrTrimmed(objAmountTransaction.get("clientCorrelator").toString());
-		}
-
-		if (clientCorrelator == null || clientCorrelator.equals("")) {
-
-			if (log.isDebugEnabled()) {
-                log.debug("clientCorrelator not provided by application and hub/plugin generating clientCorrelator on behalf of application");
+            if (!objAmountTransaction.isNull("clientCorrelator")) {
+                clientCorrelator = nullOrTrimmed(objAmountTransaction.get("clientCorrelator").toString());
             }
-			String hashString = apiUtils.getHashString(jsonBody.toString());
-			if (log.isDebugEnabled()) {
-				log.debug("hashString : " + hashString);
-			}
-			clientCorrelator = hashString + "-" + requestId + ":" + hub_gateway_id + ":" + appId;
 
-        } else {
+            if (clientCorrelator == null || clientCorrelator.equals("")) {
 
-			if (log.isDebugEnabled()) {
-                log.debug("clientCorrelator provided by application");
-            }
-            clientCorrelator = clientCorrelator + ":" + hub_gateway_id + ":" + appId;
-        }
-
-        if (objAmountTransaction.has("chargingMetaData")) {
-
-            JSONObject chargingMeta = objAmountTransaction.getJSONObject(
-                    "paymentAmount").getJSONObject("chargingMetaData");
-
-            boolean isAggregator = paymentUtil.isAggregator(context);
-
-            if (isAggregator) {
-                //JSONObject chargingMeta = objAmountTransaction.getJSONObject("paymentAmount").getJSONObject("chargingMetaData");
-                if (!chargingMeta.isNull("onBehalfOf")) {
-                    new AggregatorValidator().validateMerchant(
-                            Integer.valueOf(executor.getApplicationid()),
-                            endpoint.getOperator(), subscriber,
-                            chargingMeta.getString("onBehalfOf"));
+                if (log.isDebugEnabled()) {
+                    log.debug("clientCorrelator not provided by application and hub/plugin generating clientCorrelator on behalf of application");
                 }
+                String hashString = apiUtils.getHashString(jsonBody.toString());
+                if (log.isDebugEnabled()) {
+                    log.debug("hashString : " + hashString);
+                }
+                clientCorrelator = hashString + "-" + requestId + ":" + hub_gateway_id + ":" + appId;
+
+            } else {
+
+                if (log.isDebugEnabled()) {
+                    log.debug("clientCorrelator provided by application");
+                }
+                clientCorrelator = clientCorrelator + ":" + hub_gateway_id + ":" + appId;
             }
 
-            if ((!chargingMeta.isNull("purchaseCategoryCode"))
-                    && (!chargingMeta.getString("purchaseCategoryCode").isEmpty())) {
+            if (objAmountTransaction.has("chargingMetaData")) {
 
-                if (validCategories == null || validCategories.isEmpty() || (!validCategories.contains(chargingMeta.getString("purchaseCategoryCode")))) {
-                    validCategories = paymentService.getValidPayCategories();
+                JSONObject chargingMeta = objAmountTransaction.getJSONObject("paymentAmount").getJSONObject("chargingMetaData");
+
+                boolean isAggregator = paymentUtil.isAggregator(context);
+
+                if (isAggregator) {
+                    //JSONObject chargingMeta = objAmountTransaction.getJSONObject("paymentAmount").getJSONObject("chargingMetaData");
+                    if (!chargingMeta.isNull("onBehalfOf")) {
+                        new AggregatorValidator().validateMerchant(
+                                Integer.valueOf(executor.getApplicationid()),
+                                endpoint.getOperator(), subscriber,
+                                chargingMeta.getString("onBehalfOf"));
+                    }
                 }
 
-            }
-            // validate payment categoreis
+                if ((!chargingMeta.isNull("purchaseCategoryCode"))
+                        && (!chargingMeta.getString("purchaseCategoryCode").isEmpty())) {
 
-            //validatePaymentCategory(chargingMeta, validCategories);
-            paymentUtil.validatePaymentCategory(chargingMeta, validCategories);
+                    if (validCategories == null || validCategories.isEmpty() || (!validCategories.contains(chargingMeta.getString("purchaseCategoryCode")))) {
+                        validCategories = paymentService.getValidPayCategories();
+                    }
+
+                }
+                // validate payment categoreis
+
+                //validatePaymentCategory(chargingMeta, validCategories);
+                paymentUtil.validatePaymentCategory(chargingMeta, validCategories);
+            }
+        }catch (JSONException e){
+            log.error("Manipulating received JSON Object: " + e);
+            throw new CustomException("SVC0001", "", new String[]{"Incorrect JSON Object received"});
         }
 
 		//This persiste messages into Axiatadb database table
