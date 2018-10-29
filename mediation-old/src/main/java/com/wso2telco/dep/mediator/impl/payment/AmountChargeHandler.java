@@ -158,8 +158,7 @@ public class AmountChargeHandler implements PaymentHandler {
 		JSONObject objAmountTransaction = jsonBody.getJSONObject("amountTransaction");
 
 		if (!objAmountTransaction.isNull("clientCorrelator")) {
-			clientCorrelator = nullOrTrimmed(objAmountTransaction.get(
-					"clientCorrelator").toString());
+			clientCorrelator = nullOrTrimmed(objAmountTransaction.get("clientCorrelator").toString());
 		}
 
 		if (clientCorrelator == null || clientCorrelator.equals("")) {
@@ -169,9 +168,10 @@ public class AmountChargeHandler implements PaymentHandler {
             }
 			String hashString = apiUtils.getHashString(jsonBody.toString());
 			if (log.isDebugEnabled()) {
-                log.debug("hashString : " + hashString);
-                clientCorrelator = hashString + "-" + requestId + ":" + hub_gateway_id + ":" + appId;
-            }
+				log.debug("hashString : " + hashString);
+			}
+			clientCorrelator = hashString + "-" + requestId + ":" + hub_gateway_id + ":" + appId;
+
         } else {
 
 			if (log.isDebugEnabled()) {
