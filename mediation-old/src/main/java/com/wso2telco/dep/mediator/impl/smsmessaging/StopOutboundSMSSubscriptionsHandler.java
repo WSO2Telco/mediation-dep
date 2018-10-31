@@ -17,6 +17,8 @@
  */
 package com.wso2telco.dep.mediator.impl.smsmessaging;
 
+import com.wso2telco.dep.mediator.ErrorConstants;
+import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
@@ -134,19 +136,24 @@ public class StopOutboundSMSSubscriptionsHandler implements SMSHandler {
 	 */
 	private boolean deleteSubscriptions(MessageContext context) throws Exception {
 		String requestPath = executor.getSubResourcePath();
-		String subid = requestPath.substring(requestPath.lastIndexOf("/") + 1);
+		String subId = requestPath.substring(requestPath.lastIndexOf("/") + 1);
 
 		String requestid = UID.getUniqueID(Type.DELRETSUB.getCode(), context, executor.getApplicationid());
-		Integer dnSubscriptionId = Integer.parseInt(subid.replaceFirst("sub", ""));
-		List<OperatorSubscriptionDTO> domainsubs = (smsMessagingService
-				.outboudSubscriptionQuery(Integer.valueOf(dnSubscriptionId)));
-		if (domainsubs.isEmpty()) {
+		Integer dnSubscriptionId;
+		try{
+			dnSubscriptionId = Integer.parseInt(subId.replaceFirst("sub", ""));
+		}
+		catch (NumberFormatException ex){
+			throw new CustomException(MSISDNConstants.SVC0002, "", new String[] {ErrorConstants.INVALID_SUBSCRIPTION_ID});
+		}
+		List<OperatorSubscriptionDTO> domainSubs = (smsMessagingService.outboudSubscriptionQuery(Integer.valueOf(dnSubscriptionId)));
+		if (domainSubs.isEmpty()) {
 
 			throw new CustomException("POL0001", "",new String[] { "SMS Receipt Subscription Not Found: " + dnSubscriptionId });
 		}
 
 		String resStr = "";
-		for (OperatorSubscriptionDTO subs : domainsubs) {
+		for (OperatorSubscriptionDTO subs : domainSubs) {
 			resStr = executor.makeDeleteRequest(new OperatorEndpoint(new EndpointReference(subs.getDomain()), subs.getOperator()), subs.getDomain(),
 			                                    null, true, context, false);
 		}
