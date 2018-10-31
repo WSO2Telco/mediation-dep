@@ -47,11 +47,13 @@ public class LocationExecutor extends RequestExecutor {
     /** The occi. */
     private OriginatingCountryCalculatorIDD occi;
 
+    ValidateLocation validator;
     /**
      * Instantiates a new location executor.
      */
     public LocationExecutor() {
         occi = new OriginatingCountryCalculatorIDD();
+        validator = new ValidateLocation();
     }
 
     /* (non-Javadoc)
@@ -60,10 +62,8 @@ public class LocationExecutor extends RequestExecutor {
     @Override
     public boolean execute(MessageContext context) throws CustomException, AxisFault, Exception {
 
-    	String requestid = UID.getUniqueID(Type.LOCREQ.getCode(), context, getApplicationid());
-        String[] params = new ResourceURLUtil().getParamValues(getSubResourcePath());
-        context.setProperty(MSISDNConstants.MSISDN, params[0]);
-        context.setProperty(MSISDNConstants.USER_MSISDN, params[0].substring(5));
+    	context.setProperty(MSISDNConstants.MSISDN, validator.getMsisdns()[0]);
+    	context.setProperty(MSISDNConstants.USER_MSISDN, validator.getUserMsisdns()[0]);
         OperatorEndpoint endpoint = null;
 		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(
 				context)) {
@@ -72,7 +72,7 @@ public class LocationExecutor extends RequestExecutor {
             searchDTO.setApiName((String) context.getProperty("API_NAME"));
             searchDTO.setContext(context);
             searchDTO.setIsredirect(true);
-            searchDTO.setMSISDN(params[0].replace("tel:", ""));
+            searchDTO.setMSISDN(validator.getQueryMsisdns()[0]);
             searchDTO.setOperators(getValidoperators(context));
             searchDTO.setRequestPathURL(getSubResourcePath());
 
@@ -109,7 +109,6 @@ public class LocationExecutor extends RequestExecutor {
             throw new Exception("Method not allowed");
         }
         String[] params = new ResourceURLUtil().getParamPairs(requestPath);
-        ValidateLocation validator = new ValidateLocation();
         validator.validateUrl(requestPath);
         validator.validate(params);
 
