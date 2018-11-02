@@ -26,6 +26,7 @@ import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
+import com.wso2telco.dep.mediator.util.ValidationUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.impl.location.ValidateLocation;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
@@ -62,8 +63,9 @@ public class LocationExecutor extends RequestExecutor {
     @Override
     public boolean execute(MessageContext context) throws CustomException, AxisFault, Exception {
 
-    	context.setProperty(MSISDNConstants.MSISDN, validator.getMsisdns()[0]);
-    	context.setProperty(MSISDNConstants.USER_MSISDN, validator.getUserMsisdns()[0]);
+    	String[] addresses = validator.getMsisdns();
+    	context.setProperty(MSISDNConstants.MSISDN, addresses[0]);
+    	context.setProperty(MSISDNConstants.USER_MSISDN, ValidationUtils.getUserMsisdns(addresses)[0]);
         OperatorEndpoint endpoint = null;
 		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(
 				context)) {
@@ -72,7 +74,7 @@ public class LocationExecutor extends RequestExecutor {
             searchDTO.setApiName((String) context.getProperty("API_NAME"));
             searchDTO.setContext(context);
             searchDTO.setIsredirect(true);
-            searchDTO.setMSISDN(validator.getQueryMsisdns()[0]);
+            searchDTO.setMSISDN(ValidationUtils.getQueryMsisdns(addresses)[0]);
             searchDTO.setOperators(getValidoperators(context));
             searchDTO.setRequestPathURL(getSubResourcePath());
 
