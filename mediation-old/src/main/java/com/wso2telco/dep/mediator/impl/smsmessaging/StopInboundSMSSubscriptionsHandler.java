@@ -123,7 +123,7 @@ public class StopInboundSMSSubscriptionsHandler implements SMSHandler {
 		String requestPath = executor.getSubResourcePath();
 		String subId = requestPath.substring(requestPath.lastIndexOf("/") + 1);
 
-		Integer moSubscriptionId;
+		int moSubscriptionId;
 		try{
 			moSubscriptionId = Integer.parseInt(subId.replaceFirst("sub", ""));
 		}

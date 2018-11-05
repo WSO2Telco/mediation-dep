@@ -161,7 +161,7 @@ public class StopOutboundSMSSubscriptionsSouthBoundHandler implements SMSHandler
         String requestPath = executor.getSubResourcePath();
         String subId = requestPath.substring(requestPath.lastIndexOf("/") + 1);
 
-        Integer dnSubscriptionId;
+        int dnSubscriptionId;
         try{
             dnSubscriptionId = Integer.parseInt(subId.replaceFirst("sub", ""));
         }

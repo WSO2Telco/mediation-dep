@@ -139,7 +139,7 @@ public class StopOutboundSMSSubscriptionsHandler implements SMSHandler {
 		String subId = requestPath.substring(requestPath.lastIndexOf("/") + 1);
 
 		String requestid = UID.getUniqueID(Type.DELRETSUB.getCode(), context, executor.getApplicationid());
-		Integer dnSubscriptionId;
+		int dnSubscriptionId;
 		try{
 			dnSubscriptionId = Integer.parseInt(subId.replaceFirst("sub", ""));
 		}
