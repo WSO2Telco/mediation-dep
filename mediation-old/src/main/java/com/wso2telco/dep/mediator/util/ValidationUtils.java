@@ -21,6 +21,8 @@ import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -55,17 +57,7 @@ public final class ValidationUtils {
 					.substring(5);
 		
 		if(urlmsisdn != null){
-        	if (urlmsisdn.startsWith(MSISDNConstants.ETEL_1)) {
-        		urlmsisdn = urlmsisdn.substring(6).trim();
-        	} else if ((urlmsisdn.startsWith(MSISDNConstants.TEL_1)) || urlmsisdn.startsWith(MSISDNConstants.ETEL_2)) {
-                urlmsisdn = urlmsisdn.substring(5).trim();
-            } else if (urlmsisdn.startsWith(MSISDNConstants.TEL_2)|| urlmsisdn.startsWith(MSISDNConstants.ETEL_3)) {
-                urlmsisdn = urlmsisdn.substring(4);
-            } else if (urlmsisdn.startsWith(MSISDNConstants.TEL_3)) {
-                urlmsisdn = urlmsisdn.substring(3);
-            } else if (urlmsisdn.startsWith(MSISDNConstants.PLUS)) {
-                urlmsisdn = urlmsisdn.substring(1);
-            }
+			urlmsisdn = getMsisdnNumber(urlmsisdn);
         } else {
            log.debug("Not valid msisdn in resourceURL");
             throw new CustomException(MSISDNConstants.SVC0002, "", new String[] {"Not valid msisdn in URL"});
@@ -78,5 +70,56 @@ public final class ValidationUtils {
             throw new CustomException(MSISDNConstants.SVC0002, "", new String[] { "Two different endUserId provided" });
         }
 
+	}
+	
+
+    /**
+     * Returns array of MSISDNs without "tel:+" prefix
+     */
+	public static String[] getUserMsisdns(String[] msisdns) {
+		List<String> userMsisdn = new ArrayList<String>();
+		for(String msisdn  : msisdns) {
+			userMsisdn.add(getMsisdnNumber(msisdn));
+		}
+		return userMsisdn.toArray(new String[userMsisdn.size()]);
+	}
+	
+	/**
+     * Returns array of MSISDNs without "tel:" prefix
+     */
+	public static String[] getQueryMsisdns(String[] msisdns) {
+		List<String> qurMsisdn = new ArrayList<String>();
+		for(String msisdn  : msisdns) {
+			qurMsisdn.add(getMsisdnNumberWithPlus(msisdn));
+		}
+		return qurMsisdn.toArray(new String[qurMsisdn.size()]);
+	}
+	
+	/**
+	 * Returns MSISDN number without prefix
+	 */
+	public static String getMsisdnNumber(String msisdn) {
+		if (msisdn.startsWith(MSISDNConstants.ETEL_1)) {
+			msisdn = msisdn.substring(6).trim();
+    	} else if ((msisdn.startsWith(MSISDNConstants.TEL_1)) || msisdn.startsWith(MSISDNConstants.ETEL_2)) {
+    		msisdn = msisdn.substring(5).trim();
+        } else if (msisdn.startsWith(MSISDNConstants.TEL_2)|| msisdn.startsWith(MSISDNConstants.ETEL_3)) {
+        	msisdn = msisdn.substring(4);
+        } else if (msisdn.startsWith(MSISDNConstants.TEL_3)) {
+        	msisdn = msisdn.substring(3);
+        } else if (msisdn.startsWith(MSISDNConstants.PLUS)) {
+        	msisdn = msisdn.substring(1);
+        }
+		return msisdn;
+	}
+	
+	/**
+	 * Returns MSISDN number only with "+" prefix
+	 */
+	public static String getMsisdnNumberWithPlus(String msisdn) {
+		if (msisdn.contains(MSISDNConstants.PLUS)) {
+			msisdn = msisdn.substring(msisdn.lastIndexOf(MSISDNConstants.PLUS));
+    	}
+		return msisdn;
 	}
 }
