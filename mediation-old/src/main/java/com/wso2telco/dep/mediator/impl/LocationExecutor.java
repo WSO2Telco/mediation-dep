@@ -48,7 +48,7 @@ public class LocationExecutor extends RequestExecutor {
     /** The occi. */
     private OriginatingCountryCalculatorIDD occi;
 
-    ValidateLocation validator;
+    private ValidateLocation validator;
     /**
      * Instantiates a new location executor.
      */
