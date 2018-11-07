@@ -19,6 +19,7 @@ package com.wso2telco.dep.mediator.impl.smsmessaging.southbound;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.wso2telco.core.dbutils.exception.BusinessException;
+import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.entity.ussd.DeleteOperator;
 import com.wso2telco.dep.mediator.entity.ussd.DeleteSubscriptionRequest;
@@ -28,8 +29,8 @@ import com.wso2telco.dep.mediator.impl.smsmessaging.SMSHandler;
 import com.wso2telco.dep.mediator.impl.smsmessaging.StopOutboundSMSSubscriptionsHandler;
 import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
-import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.SMSMessagingService;
+import com.wso2telco.dep.mediator.util.FileNames;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
@@ -45,9 +46,12 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
+import org.wso2.carbon.utils.CarbonUtils;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * This handler stop subscriptions for delivery notifications on southbound scenario (gateway)
@@ -60,14 +64,17 @@ public class StopOutboundSMSSubscriptionsSouthBoundHandler implements SMSHandler
     /** The Constant API_TYPE. */
     private static final String API_TYPE = "smsmessaging";
 
-    /** The occi. */
-    private OriginatingCountryCalculatorIDD occi;
-
     /** The smsMessagingDAO. */
     private SMSMessagingService smsMessagingService;
 
     /** The executor. */
     private SMSExecutor executor;
+    
+    /** The configuration file */
+	private String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
+
+	/** The configurations */
+	private Map<String, String> mediatorConfMap;
 
     private Gson gson = new GsonBuilder().serializeNulls().create();
 
@@ -82,8 +89,8 @@ public class StopOutboundSMSSubscriptionsSouthBoundHandler implements SMSHandler
     public StopOutboundSMSSubscriptionsSouthBoundHandler(SMSExecutor executor) {
 
         this.executor = executor;
-        occi = new OriginatingCountryCalculatorIDD();
         smsMessagingService = new SMSMessagingService();
+        mediatorConfMap = new FileReader().readPropertyFile(file);
 
         try {
             operatorEndpoints = new OparatorService().getOperatorEndpoints();
@@ -198,6 +205,7 @@ public class StopOutboundSMSSubscriptionsSouthBoundHandler implements SMSHandler
             HandlerUtils.setAuthorizationHeader(context, executor,
                     new OperatorEndpoint(new EndpointReference(sub.getDomain()), sub.getOperator()));
             context.setProperty("subscriptionId", dnSubscriptionId);
+    		context.setProperty("responseResourceURL", mediatorConfMap.get("hubGateway")  + executor.getApiContext()+ "/" + executor.getApiVersion() + executor.getSubResourcePath());
         } else {
             throw new CustomException("POL0001", "",new String[] { "SMS Receipt Subscription Not Found: " + dnSubscriptionId });
         }
