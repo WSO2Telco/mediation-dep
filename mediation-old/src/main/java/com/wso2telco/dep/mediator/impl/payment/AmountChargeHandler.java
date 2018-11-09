@@ -189,7 +189,7 @@ public class AmountChargeHandler implements PaymentHandler {
 		//validatePaymentCategory(chargingdmeta, validCategoris);
 		paymentUtil.validatePaymentCategory(chargingdmeta, validCategoris);
 
-		//This persiste messages into Axiatadb database table
+		/*//This persiste messages into Axiatadb database table
         MessageDTO messageDTO = new MessageDTO();
         messageDTO.setMsgId(MessageType.PAYMENT_REQUEST.getMessageDid());
         messageDTO.setMdtrequestId(requestid);
@@ -199,7 +199,7 @@ public class AmountChargeHandler implements PaymentHandler {
         messageDTO.setReportedTime(System.currentTimeMillis());
 
 
-        MessagePersistor.getInstance().publishMessage(messageDTO);
+        MessagePersistor.getInstance().publishMessage(messageDTO);*/
 
 
 
@@ -217,7 +217,7 @@ public class AmountChargeHandler implements PaymentHandler {
 
         //Set the 'isUserInfoEnabled' property
 
-		GroupEventUnmarshaller unmarshaller = GroupEventUnmarshaller.getInstance();
+		/*GroupEventUnmarshaller unmarshaller = GroupEventUnmarshaller.getInstance();
 
 
 
@@ -229,7 +229,7 @@ public class AmountChargeHandler implements PaymentHandler {
         } catch (OparatorNotinListException e) {
 			log.debug("Operator not in list of spendlimits", e);
 		}
-		context.setProperty("IS_USER_INFO_ENABLED", isUserInfoEnabled);
+		context.setProperty("IS_USER_INFO_ENABLED", isUserInfoEnabled);*/
 
         return true;
 
