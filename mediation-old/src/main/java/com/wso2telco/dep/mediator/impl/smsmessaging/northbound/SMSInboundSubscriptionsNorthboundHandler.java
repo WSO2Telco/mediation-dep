@@ -169,9 +169,9 @@ public class SMSInboundSubscriptionsNorthboundHandler implements SMSHandler {
 
 		for (DestinationAddresses destinationAddressesObj : destinationAddresses) {
 
-			if (operatorMap.containsKey(destinationAddressesObj.getOperatorCode())) {
+			if (operatorMap.containsKey(destinationAddressesObj.getOperatorCode().trim())) {
 
-				OperatorEndpoint endpoint = operatorMap.get(destinationAddressesObj.getOperatorCode());
+				OperatorEndpoint endpoint = operatorMap.get(destinationAddressesObj.getOperatorCode().trim());
 				String url = endpoint.getEndpointref().getAddress();
 
 				destinationAddressesObj.setToAddress(url);

@@ -117,7 +117,6 @@ public class AmountChargeHandler implements PaymentHandler {
 
             context.setProperty(MSISDNConstants.USER_MSISDN, msisdn);
             context.setProperty(MSISDNConstants.MSISDN, endUserId);
-            //OperatorEndpoint endpoint = null;
 
             if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
                 OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
@@ -130,30 +129,12 @@ public class AmountChargeHandler implements PaymentHandler {
                 searchDTO.setRequestPathURL(executor.getSubResourcePath());
                 endpoint = occi.getOperatorEndpoint(searchDTO);
 
-                /*
-                 * occi.
-                 * getAPIEndpointsByMSISDN
-                 * (
-                 * endUserId.replace
-                 * ("tel:", ""),
-                 * API_TYPE,
-                 * executor
-                 * .getSubResourcePath
-                 * (), false,
-                 * executor
-                 * .getValidoperators
-                 * ());
-                 */
-
             }
 
             sending_add = endpoint.getEndpointref().getAddress();
             if (log.isDebugEnabled()) {
                 log.info("sending endpoint found: " + sending_add + " Request ID: " + UID.getRequestID(context));
             }
-
-		/*JSONObject clientclr = jsonBody.getJSONObject("amountTransaction");
-		clientclr.put("clientCorrelator", clientclr.getString("clientCorrelator") + ":" + requestId);*/
 
             JSONObject objAmountTransaction = jsonBody.getJSONObject("amountTransaction");
 
@@ -204,7 +185,6 @@ public class AmountChargeHandler implements PaymentHandler {
                     }
 
                 }
-                // validate payment categoreis
 
                 //validatePaymentCategory(chargingMeta, validCategories);
                 paymentUtil.validatePaymentCategory(chargingMeta, validCategories);
@@ -213,19 +193,6 @@ public class AmountChargeHandler implements PaymentHandler {
             log.error("Manipulating received JSON Object: " + e);
             throw new CustomException("SVC0001", "", new String[]{"Incorrect JSON Object received"});
         }
-
-		//This persiste messages into Axiatadb database table
-        MessageDTO messageDTO = new MessageDTO();
-        messageDTO.setMsgId(MessageType.PAYMENT_REQUEST.getMessageDid());
-        messageDTO.setMdtrequestId(requestId);
-        messageDTO.setRefcode(ClientReference.PAYMENT_REQUEST_REFCODE);
-        messageDTO.setRefval(jsonBody.getJSONObject("amountTransaction").getString("referenceCode"));
-        messageDTO.setMessage(jsonBody.toString());
-        messageDTO.setReportedTime(System.currentTimeMillis());
-
-
-        MessagePersistor.getInstance().publishMessage(messageDTO);
-
 
 
 		// set information to the message context, to be used in the sequence
@@ -239,22 +206,6 @@ public class AmountChargeHandler implements PaymentHandler {
         context.setProperty("clientCorrelator", clientCorrelator);
 		context.setProperty("OPERATOR_NAME", endpoint.getOperator());
 		context.setProperty("OPERATOR_ID", endpoint.getOperatorId());
-
-        //Set the 'isUserInfoEnabled' property
-
-		GroupEventUnmarshaller unmarshaller = GroupEventUnmarshaller.getInstance();
-
-
-
-		String isUserInfoEnabled = "false";
-        try {
-            String consumerKey = (String) context.getProperty("CONSUMER_KEY");
-            GroupDTO groupDTO = unmarshaller.getGroupDTO(endpoint.getOperator(), consumerKey);
-            isUserInfoEnabled = groupDTO.getUserInfoEnabled();
-        } catch (OparatorNotinListException e) {
-			log.error("Operator not in list of spendlimits", e);
-		}
-		context.setProperty("IS_USER_INFO_ENABLED", isUserInfoEnabled);
 
         return true;
 
