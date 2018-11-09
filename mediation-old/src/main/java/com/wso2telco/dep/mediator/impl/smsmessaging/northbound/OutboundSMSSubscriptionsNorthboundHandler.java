@@ -206,9 +206,9 @@ public class OutboundSMSSubscriptionsNorthboundHandler implements SMSHandler {
 
 		for (SenderAddresses senderAddressesObj : senderAddresses) {
 
-			if (operatorMap.containsKey(senderAddressesObj.getOperatorCode())) {
+			if (operatorMap.containsKey(senderAddressesObj.getOperatorCode().trim())) {
 
-				OperatorEndpoint endpoint = operatorMap.get(senderAddressesObj.getOperatorCode());
+				OperatorEndpoint endpoint = operatorMap.get(senderAddressesObj.getOperatorCode().trim());
 				String url = endpoint.getEndpointref().getAddress();
 				String southboundURLPart = "/" + senderAddressesObj.getSenderAddress() + "/subscriptions";
 				url = url.replace("/subscriptions", southboundURLPart);
