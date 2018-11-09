@@ -21,6 +21,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.wso2telco.core.dbutils.exception.BusinessException;
 import com.wso2telco.core.dbutils.fileutils.FileReader;
+import com.wso2telco.dep.mediator.ErrorConstants;
+import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.entity.ussd.DeleteOperator;
 import com.wso2telco.dep.mediator.entity.ussd.DeleteSubscriptionRequest;
@@ -120,11 +122,19 @@ public class StopInboundSMSSubscriptionsHandler implements SMSHandler {
 		UID.getUniqueID(Type.DELRETSUB.getCode(), context, executor.getApplicationid());
 
 		String requestPath = executor.getSubResourcePath();
-		String moSubscriptionId = requestPath.substring(requestPath.lastIndexOf("/") + 1);
+		String subId = requestPath.substring(requestPath.lastIndexOf("/") + 1);
 
-		List<OperatorSubscriptionDTO> domainsubs = (smsMessagingService.subscriptionQuery(Integer.valueOf(moSubscriptionId)));
+		int moSubscriptionId;
+		try{
+			moSubscriptionId = Integer.parseInt(subId.replaceFirst("sub", ""));
+		}
+		catch (NumberFormatException ex){
+			throw new CustomException(MSISDNConstants.SVC0002, "", new String[] {ErrorConstants.INVALID_SUBSCRIPTION_ID});
+		}
 
-		for (OperatorSubscriptionDTO operatorSubscriptionDTO : domainsubs) {
+		List<OperatorSubscriptionDTO> domainSubs = (smsMessagingService.subscriptionQuery(Integer.valueOf(moSubscriptionId)));
+
+		for (OperatorSubscriptionDTO operatorSubscriptionDTO : domainSubs) {
 			OperatorEndPointDTO endPointDTO = getValidEndpoints(API_TYPE, operatorSubscriptionDTO.getOperator());
 			if (endPointDTO != null)
 				operatorSubscriptionDTO.setOperatorId(endPointDTO.getOperatorid());
@@ -132,11 +142,11 @@ public class StopInboundSMSSubscriptionsHandler implements SMSHandler {
 				log.warn("Valid endpoint is empty: " + operatorSubscriptionDTO.getOperator());
 		}
 
-		if (domainsubs != null && !domainsubs.isEmpty()) {
+		if (domainSubs != null && !domainSubs.isEmpty()) {
 
 			List<DeleteOperator> deleteOperators = new ArrayList<DeleteOperator>();
 
-			for (OperatorSubscriptionDTO domainSub : domainsubs) {
+			for (OperatorSubscriptionDTO domainSub : domainSubs) {
 				deleteOperators.add(new DeleteOperator(
 						domainSub.getOperator(),
 						domainSub.getDomain(),
@@ -152,7 +162,7 @@ public class StopInboundSMSSubscriptionsHandler implements SMSHandler {
 			JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), payload, true, true);
 
 			//pick the first record since this is gateway
-			OperatorSubscriptionDTO sub = domainsubs.get(0);
+			OperatorSubscriptionDTO sub = domainSubs.get(0);
 
 			HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
 			HandlerUtils.setEndpointProperty(context, sub.getDomain());

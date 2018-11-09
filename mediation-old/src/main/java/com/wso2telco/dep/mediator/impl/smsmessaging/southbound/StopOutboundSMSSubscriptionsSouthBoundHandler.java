@@ -20,6 +20,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.wso2telco.core.dbutils.exception.BusinessException;
 import com.wso2telco.core.dbutils.fileutils.FileReader;
+import com.wso2telco.dep.mediator.ErrorConstants;
+import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.entity.ussd.DeleteOperator;
 import com.wso2telco.dep.mediator.entity.ussd.DeleteSubscriptionRequest;
@@ -164,18 +166,24 @@ public class StopOutboundSMSSubscriptionsSouthBoundHandler implements SMSHandler
         UID.getUniqueID(Type.DELRETSUB.getCode(), context, executor.getApplicationid());
 
         String requestPath = executor.getSubResourcePath();
-        String subid = requestPath.substring(requestPath.lastIndexOf("/") + 1);
+        String subId = requestPath.substring(requestPath.lastIndexOf("/") + 1);
 
-        Integer dnSubscriptionId = Integer.parseInt(subid.replaceFirst("sub", ""));
-        List<OperatorSubscriptionDTO> domainsubs = (smsMessagingService
-                .outboudSubscriptionQuery(Integer.valueOf(dnSubscriptionId)));
+        int dnSubscriptionId;
+        try{
+            dnSubscriptionId = Integer.parseInt(subId.replaceFirst("sub", ""));
+        }
+        catch (NumberFormatException ex){
+            throw new CustomException(MSISDNConstants.SVC0002, "", new String[] {ErrorConstants.INVALID_SUBSCRIPTION_ID});
+        }
 
-        if (domainsubs != null && !domainsubs.isEmpty()) {
+        List<OperatorSubscriptionDTO> domainSubs = (smsMessagingService.outboudSubscriptionQuery(Integer.valueOf(dnSubscriptionId)));
+
+        if (domainSubs != null && !domainSubs.isEmpty()) {
 
             // If operator list also added as the payload, to be used in HUB
             List<DeleteOperator> deleteOperators = new ArrayList<DeleteOperator>();
 
-            for (OperatorSubscriptionDTO operatorSubscriptionDTO : domainsubs) {
+            for (OperatorSubscriptionDTO operatorSubscriptionDTO : domainSubs) {
                 OperatorEndPointDTO endPointDTO = getValidEndpoints(API_TYPE, operatorSubscriptionDTO.getOperator());
                 if (endPointDTO != null)
                     operatorSubscriptionDTO.setOperatorId(endPointDTO.getOperatorid());
@@ -183,7 +191,7 @@ public class StopOutboundSMSSubscriptionsSouthBoundHandler implements SMSHandler
                     log.warn("Valid endpoint is empty: " + operatorSubscriptionDTO.getOperator());
             }
 
-            for (OperatorSubscriptionDTO domainSub : domainsubs) {
+            for (OperatorSubscriptionDTO domainSub : domainSubs) {
                 deleteOperators.add(new DeleteOperator(
                         domainSub.getOperator(),
                         domainSub.getDomain(),
@@ -199,7 +207,7 @@ public class StopOutboundSMSSubscriptionsSouthBoundHandler implements SMSHandler
             JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), payload, true, true);
 
             // First operator is taken into variables to be used in GW
-            OperatorSubscriptionDTO sub = domainsubs.get(0);
+            OperatorSubscriptionDTO sub = domainSubs.get(0);
             HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
             HandlerUtils.setEndpointProperty(context, sub.getDomain());
             HandlerUtils.setAuthorizationHeader(context, executor,
