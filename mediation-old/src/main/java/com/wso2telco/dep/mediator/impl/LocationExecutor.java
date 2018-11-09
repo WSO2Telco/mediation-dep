@@ -26,6 +26,7 @@ import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
+import com.wso2telco.dep.mediator.util.ValidationUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.impl.location.ValidateLocation;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
@@ -47,11 +48,13 @@ public class LocationExecutor extends RequestExecutor {
     /** The occi. */
     private OriginatingCountryCalculatorIDD occi;
 
+    private ValidateLocation validator;
     /**
      * Instantiates a new location executor.
      */
     public LocationExecutor() {
         occi = new OriginatingCountryCalculatorIDD();
+        validator = new ValidateLocation();
     }
 
     /* (non-Javadoc)
@@ -60,10 +63,9 @@ public class LocationExecutor extends RequestExecutor {
     @Override
     public boolean execute(MessageContext context) throws CustomException, AxisFault, Exception {
 
-    	String requestid = UID.getUniqueID(Type.LOCREQ.getCode(), context, getApplicationid());
-        String[] params = new ResourceURLUtil().getParamValues(getSubResourcePath());
-        context.setProperty(MSISDNConstants.MSISDN, params[0]);
-        context.setProperty(MSISDNConstants.USER_MSISDN, params[0].substring(5));
+    	String[] addresses = validator.getMsisdns();
+    	context.setProperty(MSISDNConstants.MSISDN, addresses[0]);
+    	context.setProperty(MSISDNConstants.USER_MSISDN, ValidationUtils.getUserMsisdns(addresses)[0]);
         OperatorEndpoint endpoint = null;
 		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(
 				context)) {
@@ -72,7 +74,7 @@ public class LocationExecutor extends RequestExecutor {
             searchDTO.setApiName((String) context.getProperty("API_NAME"));
             searchDTO.setContext(context);
             searchDTO.setIsredirect(true);
-            searchDTO.setMSISDN(params[0].replace("tel:", ""));
+            searchDTO.setMSISDN(ValidationUtils.getQueryMsisdns(addresses)[0]);
             searchDTO.setOperators(getValidoperators(context));
             searchDTO.setRequestPathURL(getSubResourcePath());
 
@@ -109,7 +111,6 @@ public class LocationExecutor extends RequestExecutor {
             throw new Exception("Method not allowed");
         }
         String[] params = new ResourceURLUtil().getParamPairs(requestPath);
-        ValidateLocation validator = new ValidateLocation();
         validator.validateUrl(requestPath);
         validator.validate(params);
 
