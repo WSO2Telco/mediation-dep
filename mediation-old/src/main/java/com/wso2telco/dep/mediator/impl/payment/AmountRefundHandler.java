@@ -39,6 +39,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.json.JSONException;
 import org.json.JSONObject;
 import org.wso2.carbon.utils.CarbonUtils;
 
@@ -85,87 +86,115 @@ public class AmountRefundHandler implements PaymentHandler {
 	}
 
 	@Override
-	public boolean handle(MessageContext context) throws Exception {
-		String requestid = UID.getUniqueID(Type.PAYMENT.getCode(), context,
-				executor.getApplicationid());
+    public boolean handle(MessageContext context) throws Exception {
 
-		HashMap<String, String> jwtDetails = apiUtils
-				.getJwtTokenDetails(context);
-		OperatorEndpoint endpoint = null;
-		String clientCorrelator = null;
+        String requestId = UID.getUniqueID(Type.PAYMENT.getCode(), context,
+                executor.getApplicationid());
 
-		FileReader fileReader = new FileReader();
-		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
-		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
-		String hub_gateway_id = mediatorConfMap.get("hub_gateway_id");
-		log.debug("Hub / Gateway Id : " + hub_gateway_id);
+        HashMap<String, String> jwtDetails = apiUtils
+                .getJwtTokenDetails(context);
+        OperatorEndpoint endpoint = null;
+        String clientCorrelator = null;
+        String sending_add = null;
 
-		String appId = jwtDetails.get("applicationid");
-		log.debug("Application Id : " + appId);
-		String subscriber = jwtDetails.get("subscriber");
-		log.debug("Subscriber Name : " + subscriber);
-
-		JSONObject jsonBody = executor.getJsonBody();
-		String endUserId = jsonBody.getJSONObject("amountTransaction")
-				.getString("endUserId");
-		String msisdn = endUserId.substring(5);
-		context.setProperty(MSISDNConstants.USER_MSISDN, msisdn);
-		context.setProperty(MSISDNConstants.MSISDN, endUserId);
-		// OperatorEndpoint endpoint = null;
-		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(
-				context)) {
-			OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
-			searchDTO.setApi(APIType.PAYMENT);
-			searchDTO.setApiName((String) context.getProperty("API_NAME"));
-			searchDTO.setContext(context);
-			searchDTO.setIsredirect(false);
-			searchDTO.setMSISDN(endUserId.replace("tel:", ""));
-			searchDTO.setOperators(executor.getValidoperators(context));
-			searchDTO.setRequestPathURL(executor.getSubResourcePath());
-			endpoint = occi.getOperatorEndpoint(searchDTO);
-		}
-
-		String sending_add = endpoint.getEndpointref().getAddress();
-		log.debug("sending endpoint found: " + sending_add);
-
-
-		JSONObject objAmountTransaction = jsonBody
-				.getJSONObject("amountTransaction");
-		if (!objAmountTransaction.isNull("clientCorrelator")) {
-
-			clientCorrelator = nullOrTrimmed(objAmountTransaction.get(
-					"clientCorrelator").toString());
-		}
-		if (clientCorrelator == null || clientCorrelator.equals("")) {
-			log.debug("clientCorrelator not provided by application and hub/plugin generating clientCorrelator on behalf of application");
-			String hashString = apiUtils.getHashString(jsonBody.toString());
-			log.debug("hashString : " + hashString);
-            clientCorrelator = hashString + "-" + requestid + ":" + hub_gateway_id + ":" + appId;
-        } else {
-
-			log.debug("clientCorrelator provided by application");
-            clientCorrelator = clientCorrelator + ":" + hub_gateway_id + ":" + appId;
+        FileReader fileReader = new FileReader();
+        String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
+        Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
+        String hub_gateway_id = mediatorConfMap.get("hub_gateway_id");
+        if (log.isDebugEnabled()) {
+            log.debug("Hub / Gateway Id : " + hub_gateway_id);
         }
 
-		JSONObject chargingdmeta = objAmountTransaction.getJSONObject(
-				"paymentAmount").getJSONObject("chargingMetaData");
-		/* String subscriber = paymentUtil.storeSubscription(context); */
-		boolean isaggrigator = PaymentUtil.isAggregator(context);
+        String appId = jwtDetails.get("applicationid");
+        if (log.isDebugEnabled()) {
+            log.debug("Application Id : " + appId);
+        }
+        String subscriber = jwtDetails.get("subscriber");
+        if (log.isDebugEnabled()) {
+            log.debug("Subscriber Name : " + subscriber);
+        }
 
-		if (isaggrigator) {
-			// JSONObject chargingdmeta =
-			// clientclr.getJSONObject("paymentAmount").getJSONObject("chargingMetaData");
-			if (!chargingdmeta.isNull("onBehalfOf")) {
-				new AggregatorValidator().validateMerchant(
-						Integer.valueOf(executor.getApplicationid()),
-						endpoint.getOperator(), subscriber,
-						chargingdmeta.getString("onBehalfOf"));
-			}
-		}
+        try {
+            JSONObject jsonBody = executor.getJsonBody();
 
-		// validate payment categoreis
-		List<String> validCategoris = dbservice.getValidPayCategories();
-		paymentUtil.validatePaymentCategory(chargingdmeta, validCategoris);
+            String endUserId = jsonBody.getJSONObject("amountTransaction").getString("endUserId");
+            String msisdn = endUserId.substring(5);
+            context.setProperty(MSISDNConstants.USER_MSISDN, msisdn);
+            context.setProperty(MSISDNConstants.MSISDN, endUserId);
+            // OperatorEndpoint endpoint = null;
+            if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
+                OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
+                searchDTO.setApi(APIType.PAYMENT);
+                searchDTO.setApiName((String) context.getProperty("API_NAME"));
+                searchDTO.setContext(context);
+                searchDTO.setIsredirect(false);
+                searchDTO.setMSISDN(endUserId.replace("tel:", ""));
+                searchDTO.setOperators(executor.getValidoperators(context));
+                searchDTO.setRequestPathURL(executor.getSubResourcePath());
+                endpoint = occi.getOperatorEndpoint(searchDTO);
+            }
+
+            sending_add = endpoint.getEndpointref().getAddress();
+            if (log.isDebugEnabled()) {
+                log.debug("sending endpoint found: " + sending_add);
+            }
+
+
+            if (!jsonBody.has("amountTransaction")) {
+                throw new CustomException("SVC0001", "", new String[]{"Incorrect JSON Object received"});
+            }
+            JSONObject objAmountTransaction = jsonBody.getJSONObject("amountTransaction");
+
+            if (!objAmountTransaction.isNull("clientCorrelator")) {
+
+                clientCorrelator = nullOrTrimmed(objAmountTransaction.get("clientCorrelator").toString());
+            }
+            if (clientCorrelator == null || clientCorrelator.equals("")) {
+                if (log.isDebugEnabled()) {
+                    log.debug("clientCorrelator not provided by application and hub/plugin generating clientCorrelator on behalf of application");
+                }
+                String hashString = apiUtils.getHashString(jsonBody.toString());
+                if (log.isDebugEnabled()) {
+                    log.debug("hashString : " + hashString);
+                }
+                clientCorrelator = hashString + "-" + requestId + ":" + hub_gateway_id + ":" + appId;
+
+            } else {
+
+                if (log.isDebugEnabled()) {
+                    log.debug("clientCorrelator provided by application");
+                }
+                clientCorrelator = clientCorrelator + ":" + hub_gateway_id + ":" + appId;
+            }
+
+            JSONObject paymentAmount = objAmountTransaction.getJSONObject("paymentAmount");
+
+            if (paymentAmount.has("chargingMetaData")) {
+
+                JSONObject chargingMetaData = paymentAmount.getJSONObject("chargingMetaData");
+                /* String subscriber = paymentUtil.storeSubscription(context); */
+                boolean isAggregator = PaymentUtil.isAggregator(context);
+
+                if (isAggregator) {
+                    // JSONObject chargingdmeta =
+                    // clientclr.getJSONObject("paymentAmount").getJSONObject("chargingMetaData");
+                    if (!chargingMetaData.isNull("onBehalfOf")) {
+                        new AggregatorValidator().validateMerchant(
+                                Integer.valueOf(executor.getApplicationid()),
+                                endpoint.getOperator(), subscriber,
+                                chargingMetaData.getString("onBehalfOf"));
+                    }
+                }
+
+
+                // validate payment categoreis
+                List<String> validPayCategories = dbservice.getValidPayCategories();
+                paymentUtil.validatePaymentCategory(chargingMetaData, validPayCategories);
+            }
+        } catch (JSONException e) {
+            log.error("Manipulating received JSON Object: " + e);
+            throw new CustomException("SVC0001", "", new String[]{"Incorrect JSON Object received"});
+        }
 
         // set information to the message context, to be used in the sequence
         HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
@@ -173,14 +202,14 @@ public class AmountRefundHandler implements PaymentHandler {
         HandlerUtils.setGatewayHost(context);
         HandlerUtils.setAuthorizationHeader(context, executor, endpoint);
         context.setProperty("requestResourceUrl", executor.getResourceUrl());
-        context.setProperty("requestID", requestid);
+        context.setProperty("requestID", requestId);
         context.setProperty("clientCorrelator", clientCorrelator);
         context.setProperty("operator", endpoint.getOperator());
-		context.setProperty("OPERATOR_NAME", endpoint.getOperator());
-		context.setProperty("OPERATOR_ID", endpoint.getOperatorId());
+        context.setProperty("OPERATOR_NAME", endpoint.getOperator());
+        context.setProperty("OPERATOR_ID", endpoint.getOperatorId());
 
-		return true;
-	}
+        return true;
+    }
 
 	private String makeRefundResponse(String responseStr, String requestid,
 			String clientCorrelator) {
@@ -195,8 +224,7 @@ public class AmountRefundHandler implements PaymentHandler {
 			String ResourceUrlPrefix = mediatorConfMap.get("hubGateway");
 
 			JSONObject jsonObj = new JSONObject(responseStr);
-			JSONObject objAmountTransaction = jsonObj
-					.getJSONObject("amountTransaction");
+			JSONObject objAmountTransaction = jsonObj.getJSONObject("amountTransaction");
 
 			objAmountTransaction.put("clientCorrelator", clientCorrelator);
 			objAmountTransaction.put("resourceURL", ResourceUrlPrefix
@@ -204,12 +232,12 @@ public class AmountRefundHandler implements PaymentHandler {
 			jsonResponse = jsonObj.toString();
 		} catch (Exception e) {
 
-			log.error("Error in formatting amount refund response : "
-					+ e.getMessage());
+			log.error("Error in formatting amount refund response : "+ e.getMessage());
 			throw new CustomException("SVC1000", "", new String[] { null });
 		}
 
-		log.debug("Formatted amount refund response : " + jsonResponse);
+		if (log.isDebugEnabled())
+			log.debug("Formatted amount refund response : " + jsonResponse);
 		return jsonResponse;
 
 	}
