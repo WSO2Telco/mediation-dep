@@ -28,9 +28,9 @@
 	</properties>
 
 	<modules>
-		<module>components</module>
+		<!--module>components</module-->
 		<module>mediation-old</module>
-		<module>distribution</module>
+		<!--module>distribution</module-->
 	</modules>
 	<distributionManagement>
 		<snapshotRepository>
