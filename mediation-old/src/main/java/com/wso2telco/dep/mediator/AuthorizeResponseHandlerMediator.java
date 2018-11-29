@@ -18,7 +18,7 @@
 
 package com.wso2telco.dep.mediator;
 
-import com.wso2telco.dep.mediator.publisher.PublishFactory;
+//import com.wso2telco.dep.mediator.publisher.PublishFactory;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import org.apache.commons.httpclient.HttpStatus;
 import org.apache.synapse.MessageContext;
@@ -27,6 +27,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
+
 
 public class AuthorizeResponseHandlerMediator extends AbstractMediator {
 
@@ -107,7 +108,7 @@ public class AuthorizeResponseHandlerMediator extends AbstractMediator {
 
         if ( isPaymentReq ) {
             try {
-                PublishFactory.getPublishable(paymentRes).publish(messageContext, paymentRes);
+               // PublishFactory.getPublishable(paymentRes).publish(messageContext, paymentRes);
             } catch (Exception e) {
                 log.error("ERROR occurred while data publishing data. ", e);
             }
