@@ -17,6 +17,7 @@
 package com.wso2telco.dep.mediator.impl.smsmessaging;
 
 import com.wso2telco.core.dbutils.exception.BusinessException;
+import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.service.SMSMessagingService;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,7 +39,15 @@ public class SendSMSRequestIdPersistMediator extends AbstractMediator {
         // create JSON object out of 'ADDRESSES' property
         JSONArray addressArray;
         try {
-            addressArray = new JSONArray(messageContext.getProperty("ADDRESSES"));
+            if(Boolean.valueOf((String)messageContext.getProperty("USER_ANONYMIZATION")).booleanValue()) {
+                String[] addresses = ((String)messageContext.getProperty(MSISDNConstants.MASKED_MSISDN_LIST)).split(",");
+                addressArray = new JSONArray();
+                for(String address : addresses) {
+                    addressArray.put(address);
+                }
+            } else {
+                addressArray = new JSONArray(messageContext.getProperty("ADDRESSES"));
+            }
         } catch (JSONException e) {
             log.error("Error in creating json array out of: " + messageContext.getProperty("ADDRESSES"), e);
             return false;

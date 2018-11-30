@@ -160,7 +160,8 @@ public class PaymentHandlerFactory {
 							new String[] { "Missing mandatory parameter: transactionOperationStatus" });
 				}
 
-				if (!objAmountTransaction.get("transactionOperationStatus").equals("")) {
+				if (!objAmountTransaction.isNull("transactionOperationStatus") 
+						&& !objAmountTransaction.get("transactionOperationStatus").equals("")) {
 
 					transactionOperationStatus = nullOrTrimmed(
 							objAmountTransaction.get("transactionOperationStatus").toString());

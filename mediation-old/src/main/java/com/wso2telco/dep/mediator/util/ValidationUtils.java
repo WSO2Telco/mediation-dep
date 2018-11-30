@@ -24,8 +24,10 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.wso2telco.dep.user.masking.UserMaskHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.MessageContext;
 import org.json.JSONObject;
 
 /**
@@ -41,7 +43,7 @@ public final class ValidationUtils {
 	 * This method extracts userId from payload and resource url and passed to
 	 * validate whether they are same
 	 */
-	public static void compareMsisdn(String resourcePath, JSONObject jsonBody) {
+	public static void compareMsisdn(String resourcePath, JSONObject jsonBody, boolean userAnonymization, MessageContext context) {
 		String urlmsisdn = null;
 		try {
 			urlmsisdn = URLDecoder.decode(resourcePath.substring(1,
@@ -53,7 +55,15 @@ public final class ValidationUtils {
 		// This validation assumes that userID should be with the prefix "tel:+" and back end
 		// still does not support with other prefixes for this API.
 		// Therefore below line should be modified in future depending on requirements
-		String payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId")
+		String payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId");
+		if (userAnonymization) {
+			try {
+				payloadMsisdn = UserMaskHandler.maskUserId(payloadMsisdn, false, (String)context.getProperty("USER_MASKING_SECRET_KEY"));
+			} catch (Exception e) {
+				log.debug("Error while decoeing user ID");
+			}
+		}
+		payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId")
 					.substring(5);
 		
 		if(urlmsisdn != null){
