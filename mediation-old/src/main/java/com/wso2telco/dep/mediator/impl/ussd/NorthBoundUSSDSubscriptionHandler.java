@@ -124,7 +124,8 @@ public class NorthBoundUSSDSubscriptionHandler implements USSDHandler {
         // request creation
         subscriptionGatewayRequestDTO.setClientCorrelator(jsonBody.getJSONObject("subscription").getString("clientCorrelator"));
 
-        if (jsonBody.getJSONObject("subscription").getJSONObject("callbackReference").has("callbackData")) {
+        if (jsonBody.getJSONObject("subscription").getJSONObject("callbackReference").has("callbackData") 
+        		&& !jsonBody.getJSONObject("subscription").getJSONObject("callbackReference").isNull("callbackData")) {
             callbackReference.setCallbackData(jsonBody.getJSONObject("subscription").getJSONObject("callbackReference").getString("callbackData"));
         }
 
