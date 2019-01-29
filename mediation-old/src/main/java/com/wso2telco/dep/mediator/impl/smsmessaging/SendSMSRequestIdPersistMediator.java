@@ -76,6 +76,7 @@ public class SendSMSRequestIdPersistMediator extends AbstractMediator {
 
         try {
             new SMSMessagingService().insertSMSRequestIds(requestId, senderAddress, addressToOperatorRequestIdMap);
+            addressToOperatorRequestIdMap.clear();
         } catch (BusinessException e) {
             log.error("Error inserting request ids for send SMS operation", e);
             return false;
