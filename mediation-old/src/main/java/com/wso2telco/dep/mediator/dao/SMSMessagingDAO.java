@@ -652,6 +652,9 @@ public class SMSMessagingDAO {
 				ps.addBatch();
 			}
 			
+			gatewayRequestIds.clear();
+			queryString.setLength(0);
+			
 			log.debug("sql query in insertSMSRequestIds : " + ps);
 
 			ps.executeBatch();
@@ -679,7 +682,7 @@ public class SMSMessagingDAO {
 			log.error("error in insertSMSRequestIds : ", e);
 			throw e;
 		} finally {
-
+		
 			DbUtils.closeAllConnections(ps, con, null);
 		}
 	}
