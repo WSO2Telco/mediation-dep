@@ -16,6 +16,7 @@
 package com.wso2telco.dep.mediator.util;
 
 import com.wso2telco.core.dbutils.fileutils.FileReader;
+import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.RequestExecutor;
 import org.apache.synapse.MessageContext;
@@ -82,5 +83,21 @@ public class HandlerUtils {
         String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
         Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
         messageContext.setProperty("hubGateway", mediatorConfMap.get("hubGateway"));
+    }
+
+
+    public static String getMSISDNSuffix(String msisdn) {
+        if (msisdn != null && !msisdn.isEmpty()) {
+            if (msisdn.contains(MSISDNConstants.TEL_1)) {
+                return msisdn.replace(MSISDNConstants.TEL_1, "");
+            } else if (msisdn.contains(MSISDNConstants.TEL_2)) {
+                return msisdn.replace(MSISDNConstants.TEL_2, "");
+            } else if (msisdn.contains(MSISDNConstants.TEL_3)) {
+                return msisdn.replace(MSISDNConstants.TEL_3, "");
+            } else if (msisdn.contains(MSISDNConstants.PLUS)) {
+                return msisdn.replace(MSISDNConstants.PLUS, "");
+            }
+        }
+        return msisdn;
     }
 }
