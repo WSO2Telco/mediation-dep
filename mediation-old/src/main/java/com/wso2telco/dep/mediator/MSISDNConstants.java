@@ -27,7 +27,36 @@ public final class MSISDNConstants {
 
     /** The Constant MSISDN. */
     public static final String MSISDN = "MSISDN";
-    
+
+    /** The Constant MSISDN_LIST. */
+    public static final String MSISDN_LIST = "MSISDN_LIST";
+
+    public static final String MSISDN_SUFFIX_LIST = "MSISDN_SUFFIX_LIST";
+
+    /** The Constant ADDRESSES. */
+    public static final String ADDRESSES = "ADDRESSES";
+
+    /** The Constant to Actual MSISDN when request user PCR MSISDN */
+    public static final String MASKED_MSISDN = "MASKED_MSISDN";
+
+    /** The Constant MASKED_MSISDN_SUFFIX. */
+    public static final String MASKED_MSISDN_SUFFIX = "MASKED_MSISDN_SUFFIX";
+
+    /** The Constant USER_MASKING_SECRET_KEY. */
+    public static final String USER_MASKING_SECRET_KEY = "USER_MASKING_SECRET_KEY";
+
+    /** The Constant to Actual MSISDNlist when request multiple user PCR MSISDN */
+    public static final String MASKED_MSISDN_LIST = "MASKED_MSISDN_LIST";
+
+    /** The Constant to Actual MASKED_MSISDN_SUFFIX_LIST when request multiple user PCR MSISDN */
+    public static final String MASKED_MSISDN_SUFFIX_LIST = "MASKED_MSISDN_SUFFIX_LIST";
+
+    /** The Constant to Actual MASKED_MSISDN_MAP when request multiple user PCR MSISDN */
+    public static final String MASKED_MSISDN_MAP = "MASKED_MSISDN_MAP";
+
+    /** The Constant to Actual MASKED_MSISDN_SUFFIX_MAP when request multiple user PCR MSISDN */
+    public static final String MASKED_MSISDN_SUFFIX_MAP = "MASKED_MSISDN_SUFFIX_MAP";
+
     /** The Constant AGGRIGATOR_ROLE. */
     public static final String AGGRIGATOR_ROLE = "aggregator";
 

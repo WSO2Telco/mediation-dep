@@ -24,8 +24,10 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.wso2telco.dep.user.masking.UserMaskHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.MessageContext;
 import org.json.JSONObject;
 
 /**
@@ -37,15 +39,22 @@ public final class ValidationUtils {
 
     static Log log = LogFactory.getLog(ValidationUtils.class);
 
-    /**
+	/**
 	 * This method extracts userId from payload and resource url and passed to
 	 * validate whether they are same
 	 */
-	public static void compareMsisdn(String resourcePath, JSONObject jsonBody) {
+	public static void compareMsisdn(String resourcePath, JSONObject jsonBody, boolean userAnonymization, MessageContext context) {
 		String urlmsisdn = null;
 		try {
 			urlmsisdn = URLDecoder.decode(resourcePath.substring(1,
 					resourcePath.indexOf("transactions") - 1), "UTF-8");
+			if (userAnonymization) {
+				try {
+					urlmsisdn = UserMaskHandler.maskUserId(urlmsisdn, false, (String)context.getProperty("USER_MASKING_SECRET_KEY"));
+				} catch (Exception e) {
+					log.debug("Error while decoding user ID");
+				}
+			}
 
 		} catch (UnsupportedEncodingException e) {
 			log.debug("Url MSISDN can not be decoded ");
@@ -53,25 +62,49 @@ public final class ValidationUtils {
 		// This validation assumes that userID should be with the prefix "tel:+" and back end
 		// still does not support with other prefixes for this API.
 		// Therefore below line should be modified in future depending on requirements
-		String payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId")
-					.substring(5);
-		
+		String payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId");
+		if (userAnonymization) {
+			try {
+				payloadMsisdn = UserMaskHandler.maskUserId(payloadMsisdn, false, (String)context.getProperty("USER_MASKING_SECRET_KEY"));
+			} catch (Exception e) {
+				log.debug("Error while decoeing user ID");
+			}
+		}
+		payloadMsisdn = getMsisdnNumber(payloadMsisdn);
+		compaireUserIds(urlmsisdn, payloadMsisdn, "endUserId");
+	}
+
+
+	/**
+	 * This method extracts SenderId of sendSMS API from payload and resource url and passed to
+	 * validate whether they are same
+	 */
+	public static void compareSenderId(String resourcePath, JSONObject jsonBody, MessageContext context) {
+		String urlmsisdn = null;
+		try {
+			urlmsisdn = URLDecoder.decode(resourcePath.substring(resourcePath.indexOf("outbound") + 9, resourcePath.indexOf("requests") - 1), "UTF-8");
+
+		} catch (UnsupportedEncodingException e) {
+			log.debug("Url MSISDN can not be decoded ");
+		}
+		compaireUserIds(urlmsisdn, getMsisdnNumber(jsonBody.getJSONObject("outboundSMSMessageRequest").getString("senderAddress")), "senderAddress");
+	}
+
+	private static void compaireUserIds(String urlmsisdn, String payloadMsisdn, String inputName) {
 		if(urlmsisdn != null){
 			urlmsisdn = getMsisdnNumber(urlmsisdn);
-        } else {
-           log.debug("Not valid msisdn in resourceURL");
-            throw new CustomException(MSISDNConstants.SVC0002, "", new String[] {"Not valid msisdn in URL"});
-        }
+		} else {
+			log.debug("Not valid msisdn in resourceURL");
+			throw new CustomException(MSISDNConstants.SVC0002, "", new String[] {"Not valid msisdn in URL"});
+		}
 
-        if(payloadMsisdn.equalsIgnoreCase(urlmsisdn.trim()) ){
-            log.debug("msisdn in resourceURL and payload msisdn are same");
-        } else {
-            log.debug("msisdn in resourceURL and payload msisdn are not same");
-            throw new CustomException(MSISDNConstants.SVC0002, "", new String[] { "Two different endUserId provided" });
-        }
-
+		if(payloadMsisdn.equalsIgnoreCase(urlmsisdn.trim()) ){
+			log.debug("msisdn in resourceURL and payload msisdn are same");
+		} else {
+			log.debug("msisdn in resourceURL and payload msisdn are not same");
+			throw new CustomException(MSISDNConstants.SVC0002, "", new String[] { "Two different " + inputName + " provided" });
+		}
 	}
-	
 
     /**
      * Returns array of MSISDNs without "tel:+" prefix

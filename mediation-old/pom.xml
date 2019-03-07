@@ -63,11 +63,15 @@
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
         </dependency>
-	<dependency>
-  	    <groupId>com.google.guava</groupId>
- 	    <artifactId>guava</artifactId>
-  	    <version>11.0.2</version>
-	</dependency>
+        <dependency>
+            <groupId>com.google.guava</groupId>
+            <artifactId>guava</artifactId>
+            <version>11.0.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.wso2telco.dep</groupId>
+            <artifactId>user-masking</artifactId>
+        </dependency>
         <!--<dependency>
             <groupId>wsdl4j.wso2</groupId>
             <artifactId>wsdl4j</artifactId>

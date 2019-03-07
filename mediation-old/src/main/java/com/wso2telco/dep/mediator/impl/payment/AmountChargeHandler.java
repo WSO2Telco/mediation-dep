@@ -27,11 +27,15 @@ import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.PaymentService;
+import com.wso2telco.dep.mediator.unmarshaler.GroupDTO;
+import com.wso2telco.dep.mediator.unmarshaler.GroupEventUnmarshaller;
+import com.wso2telco.dep.mediator.unmarshaler.OparatorNotinListException;
 import com.wso2telco.dep.mediator.util.*;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.payment.ValidatePaymentCharge;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
+import com.wso2telco.dep.user.masking.UserMaskHandler;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -41,6 +45,8 @@ import org.json.JSONObject;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -58,9 +64,9 @@ public class AmountChargeHandler implements PaymentHandler {
 	private PaymentService paymentService;
 
 	private PaymentExecutor executor;
-
+	
 	private ApiUtils apiUtils;
-
+	
 	private PaymentUtil paymentUtil;
 
 	private static List<String> validCategories = null;
@@ -81,13 +87,14 @@ public class AmountChargeHandler implements PaymentHandler {
         OperatorEndpoint endpoint = null;
         String clientCorrelator = null;
         String sending_add = null;
+		String sendingAddress = null;
 
 		String requestResourceURL = executor.getResourceUrl();
 
         FileReader fileReader = new FileReader();
         String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
  		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
-
+        		
         String hub_gateway_id = mediatorConfMap.get("hub_gateway_id");
         if (log.isDebugEnabled()) {
             log.debug("Hub / Gateway Id : " + hub_gateway_id);
@@ -106,6 +113,19 @@ public class AmountChargeHandler implements PaymentHandler {
         try {
 
             String endUserId = jsonBody.getJSONObject("amountTransaction").getString("endUserId");
+
+            if(executor.isUserAnonymization()) {
+                context.setProperty(MSISDNConstants.MASKED_MSISDN, endUserId);
+                endUserId = UserMaskHandler.maskUserId(endUserId, false,
+                        (String)context.getProperty(MSISDNConstants.USER_MASKING_SECRET_KEY) );
+                String endUserIdSuffix = HandlerUtils.getMSISDNSuffix(endUserId);
+                context.setProperty("MSISDN_SUFFIX", endUserIdSuffix);
+                String maskedEndUserIdSuffix = UserMaskHandler.maskUserId(endUserIdSuffix, true,
+                        (String) context.getProperty(MSISDNConstants.USER_MASKING_SECRET_KEY));
+                context.setProperty(MSISDNConstants.MASKED_MSISDN_SUFFIX, maskedEndUserIdSuffix);
+                context.setProperty("MASKED_RESOURCE", context.getProperty("RESOURCE"));
+            }
+
             String msisdn = endUserId.substring(5);
             //Double chargeamount = Double.parseDouble(jsonBody.getJSONObject("amountTransaction").getJSONObject("paymentAmount").getJSONObject("chargingInformation").getString("amount"));
 
@@ -125,9 +145,16 @@ public class AmountChargeHandler implements PaymentHandler {
 
             }
 
-            sending_add = endpoint.getEndpointref().getAddress();
+            sendingAddress = endpoint.getEndpointref().getAddress();
             if (log.isDebugEnabled()) {
                 log.info("sending endpoint found: " + sending_add + " Request ID: " + UID.getRequestID(context));
+            }
+
+            if(executor.isUserAnonymization()) {
+                String resourcePath = executor.getSubResourcePath();
+                String urlmsisdn = resourcePath.substring(1, resourcePath.indexOf("transactions") - 1);
+                String unmaskedUrlmsisdn = UserMaskHandler.maskUserId(URLDecoder.decode(urlmsisdn, "UTF-8"), false, (String) context.getProperty(MSISDNConstants.USER_MASKING_SECRET_KEY));
+                sendingAddress = sendingAddress.replace(urlmsisdn, URLEncoder.encode(unmaskedUrlmsisdn, "UTF-8"));
             }
 
             JSONObject objAmountTransaction = jsonBody.getJSONObject("amountTransaction");
@@ -191,7 +218,7 @@ public class AmountChargeHandler implements PaymentHandler {
 
 		// set information to the message context, to be used in the sequence
         HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
-        HandlerUtils.setEndpointProperty(context, sending_add);
+        HandlerUtils.setEndpointProperty(context, sendingAddress);
         HandlerUtils.setGatewayHost(context);
         HandlerUtils.setAuthorizationHeader(context, executor, endpoint);
         context.setProperty("operator", endpoint.getOperator());
@@ -220,12 +247,12 @@ public class AmountChargeHandler implements PaymentHandler {
 			Class clazz = Class.forName(validatorClass);
 			validator = (IServiceValidate) clazz.newInstance();
 		}else{
-			validator = new ValidatePaymentCharge();
+			validator = new ValidatePaymentCharge(executor.isUserAnonymization(), (String)context.getProperty("USER_MASKING_SECRET_KEY"));
 		}
 
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
-		ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody());
+        ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody(), executor.isUserAnonymization(), context);
 		return true;
 	}
 
@@ -389,7 +416,7 @@ public class AmountChargeHandler implements PaymentHandler {
 		}
 		return strResult;
 	}
-
+	
 	public static String nullOrTrimmed(String s) {
 		String rv = null;
 		if (s != null && s.trim().length() > 0) {
@@ -397,6 +424,6 @@ public class AmountChargeHandler implements PaymentHandler {
 		}
 		return rv;
 	}
-
+	 
 
 }

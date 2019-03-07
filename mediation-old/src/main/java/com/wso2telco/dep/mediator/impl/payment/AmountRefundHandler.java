@@ -55,6 +55,8 @@ import java.util.Map;
 public class AmountRefundHandler implements PaymentHandler {
 
 	private static Log log = LogFactory.getLog(AmountRefundHandler.class);
+    private static final String API_TYPE = "payment";
+    private static final String CREFUND = "crefund";
 	private OriginatingCountryCalculatorIDD occi;
 	private PaymentExecutor executor;
 	private PaymentService dbservice;
@@ -81,7 +83,7 @@ public class AmountRefundHandler implements PaymentHandler {
 		IServiceValidate validator = new ValidateRefund();
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
-		ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody());
+        ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody(), executor.isUserAnonymization(), context);
 		return true;
 	}
 
@@ -123,15 +125,22 @@ public class AmountRefundHandler implements PaymentHandler {
             context.setProperty(MSISDNConstants.MSISDN, endUserId);
             // OperatorEndpoint endpoint = null;
             if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
-                OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
-                searchDTO.setApi(APIType.PAYMENT);
-                searchDTO.setApiName((String) context.getProperty("API_NAME"));
-                searchDTO.setContext(context);
-                searchDTO.setIsredirect(false);
-                searchDTO.setMSISDN(endUserId.replace("tel:", ""));
-                searchDTO.setOperators(executor.getValidoperators(context));
-                searchDTO.setRequestPathURL(executor.getSubResourcePath());
-                endpoint = occi.getOperatorEndpoint(searchDTO);
+                if (context.getProperty("API_NAME").toString().equalsIgnoreCase(CREFUND)) {
+                    OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
+                    searchDTO.setApi(APIType.PAYMENT);
+                    searchDTO.setApiName((String) context.getProperty("API_NAME"));
+                    searchDTO.setContext(context);
+                    searchDTO.setIsredirect(false);
+                    searchDTO.setMSISDN(endUserId.replace("tel:", ""));
+                    searchDTO.setOperators(executor.getValidoperators(context));
+                    searchDTO.setRequestPathURL(executor.getSubResourcePath());
+                    endpoint = occi.getOperatorEndpoint(searchDTO);
+                } else {
+                    endpoint = occi.getAPIEndpointsByMSISDN(
+                            endUserId.replace("tel:", ""), API_TYPE,
+                            executor.getSubResourcePath(), false,
+                            executor.getValidoperators(context));
+                }
             }
 
             sending_add = endpoint.getEndpointref().getAddress();
