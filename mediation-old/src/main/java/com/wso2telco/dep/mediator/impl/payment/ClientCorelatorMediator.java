@@ -23,8 +23,8 @@ public class ClientCorelatorMediator extends AbstractMediator {
 
 			JSONObject jsonBody = new JSONObject(jsonPayloadToString);
 			String clientCorrelatorNew = context.getProperty("clientCorrelator").toString() ;
-			log.info("Client Correlator New : "+clientCorrelatorNew);
-			jsonBody.put("amountTransaction.clientCorrelator", clientCorrelatorNew);
+			log.debug("Client Correlator New : " + clientCorrelatorNew);
+			//jsonBody.put("amountTransaction.clientCorrelator", clientCorrelatorNew);
 			((JSONObject)jsonBody.get("amountTransaction")).put("clientCorrelator",clientCorrelatorNew);
 
 				    String transformedJson = jsonBody.toString();
