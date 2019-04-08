@@ -214,7 +214,7 @@ public class QuerySMSStatusHandler implements SMSHandler {
 
 		String resourceURL = mediatorConfMap.get("sendSMSResourceURL");
 		if (resourceURL != null && !resourceURL.isEmpty()) {
-			resourceURL = resourceURL.substring(0, resourceURL.length() - 1) + senderAddress;
+			resourceURL = resourceURL + senderAddress;
 		} else {
 			resourceURL = (String) mc.getProperty("REST_URL_PREFIX") + mc.getProperty("REST_FULL_REQUEST_PATH");
 			resourceURL = resourceURL.substring(0, resourceURL.indexOf("/requests"));
