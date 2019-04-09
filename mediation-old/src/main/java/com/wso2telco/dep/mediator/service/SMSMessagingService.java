@@ -236,6 +236,32 @@ public class SMSMessagingService {
 		}
 	}
 
+
+	public String getSMSRequestId(String senderAddress, String requestIdFromOperatorResponse)
+			throws BusinessException {
+
+		String requestId = null;
+		if (senderAddress == null || senderAddress.trim().length() <= 0) {
+
+			throw new BusinessException(ErrorType.INVALID_SENDER_ADDRESS);
+		}
+
+		if (senderAddress == null || senderAddress.trim().length() <= 0) {
+
+			throw new BusinessException(ErrorType.INVALID_OPERATOR_ID);
+		}
+
+		try {
+			requestId = smsMessagingDAO.getSMSRequestId(senderAddress, requestIdFromOperatorResponse);
+		} catch (Exception e) {
+
+			throw new BusinessException(GenaralError.INTERNAL_SERVER_ERROR);
+		}
+
+		return requestId;
+	}
+	
+
 	@SuppressWarnings("unchecked")
 	public Map<String, String> subscriptionNotifiMap(Integer moSubscriptionId) throws BusinessException {
 
