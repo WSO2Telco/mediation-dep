@@ -24,11 +24,7 @@ import com.wso2telco.dep.operatorservice.model.OperatorSubscriptionDTO;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -324,6 +320,51 @@ public class SMSMessagingDAO {
 		}
 
 		return gatewayRequestIds;
+	}
+
+	public String getSMSRequestId(String senderAddress, String pluginRequestId) throws SQLException, Exception {
+
+		Connection con = null;
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		String hubRequestId = null;
+
+		try {
+
+			con = DbUtils.getDbConnection(DataSourceNames.WSO2TELCO_DEP_DB);
+
+			StringBuilder queryString = new StringBuilder("SELECT hub_requestid ");
+			queryString.append("FROM ");
+			queryString.append(DatabaseTables.SEND_SMS_REQID.getTableName());
+			queryString.append(" WHERE plugin_requestid = ? AND sender_address = ?");
+
+			ps = con.prepareStatement(queryString.toString());
+
+			ps.setString(1, pluginRequestId);
+			ps.setString(2, senderAddress);
+
+			log.debug("sql query in getSMSRequestIds : " + ps);
+
+			rs = ps.executeQuery();
+
+			while (rs.next()) {
+
+				hubRequestId = rs.getString("hub_requestid");
+			}
+		} catch (SQLException e) {
+
+			log.error("database operation error in getSMSRequestId : ", e);
+			throw e;
+		} catch (Exception e) {
+
+			log.error("error in getSMSRequestId : ", e);
+			throw e;
+		} finally {
+
+			DbUtils.closeAllConnections(ps, con, rs);
+		}
+
+		return hubRequestId;
 	}
 
 	public Integer subscriptionEntry(String notifyURL) throws SQLException, Exception {
