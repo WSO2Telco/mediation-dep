@@ -23,9 +23,9 @@ import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.USSDService;
-import com.wso2telco.dep.mediator.util.*;
-import com.wso2telco.dep.oneapi.constant.ussd.USSDKeyConstants;
-import com.wso2telco.dep.oneapi.constant.ussd.USSDValueConstants;
+import com.wso2telco.dep.mediator.util.APIType;
+import com.wso2telco.dep.mediator.util.DataPublisherConstants;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.ussd.ValidateUssdSend;
@@ -78,6 +78,7 @@ public class SendUSSDHandler implements USSDHandler {
 	@Override
 	public boolean handle(MessageContext context) throws CustomException, AxisFault, Exception {
 
+		String requestid = UID.getUniqueID(Type.SEND_USSD.getCode(), context, executor.getApplicationid());
 		JSONObject jsonBody = executor.getJsonBody();
 
 		String address = jsonBody.getJSONObject(USSDKeyConstants.OUT_BOUND_USSD_MESSAGE_REQUEST)
