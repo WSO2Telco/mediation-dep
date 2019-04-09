@@ -25,6 +25,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.wso2telco.core.dbutils.fileutils.FileReader;
+import com.wso2telco.dep.mediator.util.FileNames;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,6 +45,8 @@ import com.wso2telco.dep.mediator.ResponseHandler;
 import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
 import com.wso2telco.dep.mediator.entity.smsmessaging.SendSMSRequest;
 import com.wso2telco.dep.mediator.entity.smsmessaging.SendSMSResponse;
+import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.SouthboundDeliveryReceiptSubscriptionRequest;
+import com.wso2telco.dep.mediator.internal.ApiUtils;
 import com.wso2telco.dep.mediator.impl.AbstractHandler;
 import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
@@ -98,6 +102,9 @@ public class SendSMSHandler extends AbstractHandler{
 	/** The smsMessagingDAO. */
 	private SMSMessagingService smsMessagingService;
 
+	/** The api utils. */
+	private ApiUtils apiUtils;
+
 	/**
 	 * Instantiates a new send sms handler.
 	 *
@@ -114,6 +121,7 @@ public class SendSMSHandler extends AbstractHandler{
 		occi = new OriginatingCountryCalculatorIDD();
 		responseHandler = new ResponseHandler();
 		smsMessagingService = new SMSMessagingService();
+		apiUtils = new ApiUtils();
 	}
 
 	/*
@@ -212,6 +220,9 @@ public class SendSMSHandler extends AbstractHandler{
 		HandlerUtils.setEndpointProperty(context, sending_add);
 		HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
 
+		FileReader fileReader = new FileReader();
+		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
+		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
 
 		// read sendSMSResourceURL from mediatorConfMap and set to message context
 		String sendSmsResourceUrlPrefix = getProperty("sendSMSResourceURL");
@@ -234,6 +245,18 @@ public class SendSMSHandler extends AbstractHandler{
 		} catch (UnsupportedEncodingException e) {
 			log.error(e.getMessage(), e);
 			encodedSenderAddress = senderAddress;
+		}
+
+		String notifyURL = subsrequest.getOutboundSMSMessageRequest().getReceiptRequest().getNotifyURL();
+		if(notifyURL != null && !(notifyURL.equals("")) && !notifyURL.isEmpty()) {
+			HashMap<String, String> jwtDetails = apiUtils.getJwtTokenDetails(context);
+			String serviceProvider = jwtDetails.get("subscriber");
+			log.debug("Subscriber Name : " + serviceProvider);
+			String hubDNSubsGatewayEndpoint = mediatorConfMap.get("hubSubsGatewayEndpoint");
+			log.debug("Hub / Gateway DN Notify URL : " + hubDNSubsGatewayEndpoint);
+			int dnSubscriptionId = smsMessagingService.outboundSubscriptionEntry(notifyURL, serviceProvider);
+	        String subsEndpoint = hubDNSubsGatewayEndpoint + "/" + dnSubscriptionId;
+			context.setProperty("notifyURL", subsEndpoint);
 		}
 
 		context.setProperty("SEND_SMS_RESOURCE_URL_PREFIX", sendSmsResourceUrlPrefix);
