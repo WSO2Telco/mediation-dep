@@ -116,11 +116,11 @@ public class AmountChargeHandler implements PaymentHandler {
 
             if(executor.isUserAnonymization()) {
                 context.setProperty(MSISDNConstants.MASKED_MSISDN, endUserId);
-                endUserId = UserMaskHandler.maskUserId(endUserId, false,
+                endUserId = UserMaskHandler.transcryptUserId(endUserId, false,
                         (String)context.getProperty(MSISDNConstants.USER_MASKING_SECRET_KEY) );
                 String endUserIdSuffix = HandlerUtils.getMSISDNSuffix(endUserId);
                 context.setProperty("MSISDN_SUFFIX", endUserIdSuffix);
-                String maskedEndUserIdSuffix = UserMaskHandler.maskUserId(endUserIdSuffix, true,
+                String maskedEndUserIdSuffix = UserMaskHandler.transcryptUserId(endUserIdSuffix, true,
                         (String) context.getProperty(MSISDNConstants.USER_MASKING_SECRET_KEY));
                 context.setProperty(MSISDNConstants.MASKED_MSISDN_SUFFIX, maskedEndUserIdSuffix);
                 context.setProperty("MASKED_RESOURCE", context.getProperty("RESOURCE"));
@@ -153,7 +153,7 @@ public class AmountChargeHandler implements PaymentHandler {
             if(executor.isUserAnonymization()) {
                 String resourcePath = executor.getSubResourcePath();
                 String urlmsisdn = resourcePath.substring(1, resourcePath.indexOf("transactions") - 1);
-                String unmaskedUrlmsisdn = UserMaskHandler.maskUserId(URLDecoder.decode(urlmsisdn, "UTF-8"), false, (String) context.getProperty(MSISDNConstants.USER_MASKING_SECRET_KEY));
+                String unmaskedUrlmsisdn = UserMaskHandler.transcryptUserId(URLDecoder.decode(urlmsisdn, "UTF-8"), false, (String) context.getProperty(MSISDNConstants.USER_MASKING_SECRET_KEY));
                 sendingAddress = sendingAddress.replace(urlmsisdn, URLEncoder.encode(unmaskedUrlmsisdn, "UTF-8"));
             }
 

@@ -50,7 +50,7 @@ public final class ValidationUtils {
 					resourcePath.indexOf("transactions") - 1), "UTF-8");
 			if (userAnonymization) {
 				try {
-					urlmsisdn = UserMaskHandler.maskUserId(urlmsisdn, false, (String)context.getProperty("USER_MASKING_SECRET_KEY"));
+					urlmsisdn = UserMaskHandler.transcryptUserId(urlmsisdn, false, (String)context.getProperty("USER_MASKING_SECRET_KEY"));
 				} catch (Exception e) {
 					log.debug("Error while decoding user ID");
 				}
@@ -65,7 +65,7 @@ public final class ValidationUtils {
 		String payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId");
 		if (userAnonymization) {
 			try {
-				payloadMsisdn = UserMaskHandler.maskUserId(payloadMsisdn, false, (String)context.getProperty("USER_MASKING_SECRET_KEY"));
+				payloadMsisdn = UserMaskHandler.transcryptUserId(payloadMsisdn, false, (String)context.getProperty("USER_MASKING_SECRET_KEY"));
 			} catch (Exception e) {
 				log.debug("Error while decoeing user ID");
 			}

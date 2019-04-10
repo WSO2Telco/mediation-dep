@@ -140,7 +140,7 @@ public class SendSMSHandler extends AbstractHandler{
             
             String firstAddress = addressArray.getString(0);
 			if (executor.isUserAnonymization() && UserMaskHandler.isMaskedUserId(firstAddress)) {
-				firstAddress = UserMaskHandler.maskUserId(firstAddress, false, (String)context.getProperty("USER_MASKING_SECRET_KEY"));
+				firstAddress = UserMaskHandler.transcryptUserId(firstAddress, false, (String)context.getProperty("USER_MASKING_SECRET_KEY"));
 			}
             
             if(firstAddress.contains("tel:+")){
@@ -160,7 +160,7 @@ public class SendSMSHandler extends AbstractHandler{
             	
             	String address = addressArray.getString(a);
 				if (executor.isUserAnonymization() && UserMaskHandler.isMaskedUserId(address)) {
-					address = UserMaskHandler.maskUserId(address, false, (String)context.getProperty("USER_MASKING_SECRET_KEY"));
+					address = UserMaskHandler.transcryptUserId(address, false, (String)context.getProperty("USER_MASKING_SECRET_KEY"));
 				}
             	
             	if(address.contains("tel:+")){
@@ -188,7 +188,7 @@ public class SendSMSHandler extends AbstractHandler{
 		// Get resolved MSISDN if request used User Anonymization
 		if (executor.isUserAnonymization() && UserMaskHandler.isMaskedUserId(firstAddress)) {
 			context.setProperty(MSISDNConstants.MASKED_MSISDN_SUFFIX, HandlerUtils.getMSISDNSuffix(firstAddress));
-			firstAddress = UserMaskHandler.maskUserId(firstAddress, false, (String)context.getProperty("USER_MASKING_SECRET_KEY"));
+			firstAddress = UserMaskHandler.transcryptUserId(firstAddress, false, (String)context.getProperty("USER_MASKING_SECRET_KEY"));
 		}
 
 		// taking the operator endpoint with first address, since this is for same o,perator
@@ -255,7 +255,7 @@ public class SendSMSHandler extends AbstractHandler{
 				maskedAddressList += (addresses[i] + ",");
 				// Address List may contains unmasked user Ids too for build address list
 				if (UserMaskHandler.isMaskedUserId(addressElement.getString(i))) {
-					resolvedAddress = UserMaskHandler.maskUserId(addressElement.getString(i), false,
+					resolvedAddress = UserMaskHandler.transcryptUserId(addressElement.getString(i), false,
 							(String)context.getProperty(MSISDNConstants.USER_MASKING_SECRET_KEY));
 					resolvedAddressSuffix = HandlerUtils.getMSISDNSuffix(resolvedAddress);
 				}
