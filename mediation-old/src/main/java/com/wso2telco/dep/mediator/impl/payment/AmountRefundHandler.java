@@ -164,7 +164,7 @@ public class AmountRefundHandler implements PaymentHandler {
 
             JSONObject paymentAmount = objAmountTransaction.getJSONObject("paymentAmount");
 
-            if (paymentAmount.has("chargingMetaData")) {
+            if (paymentAmount.has("chargingMetaData") && !paymentAmount.isNull("chargingMetaData")) {
 
                 JSONObject chargingMetaData = paymentAmount.getJSONObject("chargingMetaData");
                 /* String subscriber = paymentUtil.storeSubscription(context); */
