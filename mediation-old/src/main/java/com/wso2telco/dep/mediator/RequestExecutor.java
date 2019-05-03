@@ -325,11 +325,15 @@ public abstract class RequestExecutor {
 		}
 
 		getValidoperators(context);
-    	subResourcePath = (String) context.getProperty("REST_SUB_REQUEST_PATH");
+		//REST_SUB_REQUEST_PATH
+    	subResourcePath = (String) context.getProperty("RESOURCE");
 		resourceUrl = (String) context.getProperty("REST_FULL_REQUEST_PATH");
 		httpMethod = (String) context.getProperty("HTTP_METHOD");
-		if(context.getProperty("USER_ANONYMIZATION") != null) {
-			this.userAnonymization = Boolean.valueOf((String)context.getProperty("USER_ANONYMIZATION"));
+
+		Map<String, String> transportHeaders = (Map<String, String>) ((Axis2MessageContext) context)
+				.getAxis2MessageContext().getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+		if(transportHeaders.get("USER_ANONYMIZATION") != null) {
+			this.userAnonymization = Boolean.valueOf(transportHeaders.get("USER_ANONYMIZATION"));
 		}
 
 		/*String jsonPayloadToString = JsonUtil

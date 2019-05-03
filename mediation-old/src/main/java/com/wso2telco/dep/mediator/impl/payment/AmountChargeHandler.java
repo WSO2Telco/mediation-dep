@@ -36,6 +36,7 @@ import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.payment.ValidatePaymentCharge;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
 import com.wso2telco.dep.user.masking.UserMaskHandler;
+import com.wso2telco.dep.user.masking.configuration.UserMaskingConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -117,11 +118,11 @@ public class AmountChargeHandler implements PaymentHandler {
             if(executor.isUserAnonymization()) {
                 context.setProperty(MSISDNConstants.MASKED_MSISDN, endUserId);
                 endUserId = UserMaskHandler.transcryptUserId(endUserId, false,
-                        (String)context.getProperty(MSISDNConstants.USER_MASKING_SECRET_KEY) );
+                        UserMaskingConfiguration.getInstance().getSecretKey());
                 String endUserIdSuffix = HandlerUtils.getMSISDNSuffix(endUserId);
                 context.setProperty("MSISDN_SUFFIX", endUserIdSuffix);
                 String maskedEndUserIdSuffix = UserMaskHandler.transcryptUserId(endUserIdSuffix, true,
-                        (String) context.getProperty(MSISDNConstants.USER_MASKING_SECRET_KEY));
+                        UserMaskingConfiguration.getInstance().getSecretKey());
                 context.setProperty(MSISDNConstants.MASKED_MSISDN_SUFFIX, maskedEndUserIdSuffix);
                 context.setProperty("MASKED_RESOURCE", context.getProperty("RESOURCE"));
             }
@@ -153,7 +154,8 @@ public class AmountChargeHandler implements PaymentHandler {
             if(executor.isUserAnonymization()) {
                 String resourcePath = executor.getSubResourcePath();
                 String urlmsisdn = resourcePath.substring(1, resourcePath.indexOf("transactions") - 1);
-                String unmaskedUrlmsisdn = UserMaskHandler.transcryptUserId(URLDecoder.decode(urlmsisdn, "UTF-8"), false, (String) context.getProperty(MSISDNConstants.USER_MASKING_SECRET_KEY));
+                String unmaskedUrlmsisdn = UserMaskHandler.transcryptUserId(URLDecoder.decode(urlmsisdn, "UTF-8"),
+						false, UserMaskingConfiguration.getInstance().getSecretKey());
                 sendingAddress = sendingAddress.replace(urlmsisdn, URLEncoder.encode(unmaskedUrlmsisdn, "UTF-8"));
             }
 
@@ -247,7 +249,7 @@ public class AmountChargeHandler implements PaymentHandler {
 			Class clazz = Class.forName(validatorClass);
 			validator = (IServiceValidate) clazz.newInstance();
 		}else{
-			validator = new ValidatePaymentCharge(executor.isUserAnonymization(), (String)context.getProperty("USER_MASKING_SECRET_KEY"));
+			validator = new ValidatePaymentCharge(executor.isUserAnonymization(), UserMaskingConfiguration.getInstance().getSecretKey());
 		}
 
 		validator.validateUrl(requestPath);

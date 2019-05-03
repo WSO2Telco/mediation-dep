@@ -41,6 +41,7 @@ import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.ValidateSend
 import com.wso2telco.dep.operatorservice.model.OperatorApplicationDTO;
 import com.wso2telco.dep.subscriptionvalidator.exceptions.ValidatorException;
 import com.wso2telco.dep.user.masking.UserMaskHandler;
+import com.wso2telco.dep.user.masking.configuration.UserMaskingConfiguration;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -256,7 +257,7 @@ public class SendSMSHandler extends AbstractHandler{
 				// Address List may contains unmasked user Ids too for build address list
 				if (UserMaskHandler.isMaskedUserId(addressElement.getString(i))) {
 					resolvedAddress = UserMaskHandler.transcryptUserId(addressElement.getString(i), false,
-							(String)context.getProperty(MSISDNConstants.USER_MASKING_SECRET_KEY));
+							UserMaskingConfiguration.getInstance().getSecretKey());
 					resolvedAddressSuffix = HandlerUtils.getMSISDNSuffix(resolvedAddress);
 				}
 				String maskedAddressSuffix = HandlerUtils.getMSISDNSuffix(addresses[i]);
