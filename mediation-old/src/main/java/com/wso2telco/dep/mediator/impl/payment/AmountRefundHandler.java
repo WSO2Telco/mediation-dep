@@ -81,7 +81,7 @@ public class AmountRefundHandler implements PaymentHandler {
 		IServiceValidate validator = new ValidateRefund();
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
-		ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody());
+		ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody(), APIType.PAYMENT);
 		return true;
 	}
 
