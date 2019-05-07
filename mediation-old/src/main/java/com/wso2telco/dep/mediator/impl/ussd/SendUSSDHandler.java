@@ -25,10 +25,8 @@ import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.USSDService;
-import com.wso2telco.dep.mediator.util.APIType;
-import com.wso2telco.dep.mediator.util.DataPublisherConstants;
-import com.wso2telco.dep.mediator.util.FileNames;
-import com.wso2telco.dep.mediator.util.HandlerUtils;
+import com.wso2telco.dep.mediator.util.*;
+import com.wso2telco.dep.oneapi.constant.ussd.USSDKeyConstants;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.ussd.ValidateUssdSend;
@@ -137,8 +135,8 @@ public class SendUSSDHandler implements USSDHandler {
 		context.setProperty("OPERATOR_ID", endpoint.getOperatorId());
 
 
-		if (responseRequest.has("notifyURL")) {
-			String notifyUrl = responseRequest.getString("notifyURL").trim();
+		if (!responseRequest.isNull(USSDKeyConstants.KEY_NOTIFY_URL)) {
+			String notifyUrl = responseRequest.getString(USSDKeyConstants.KEY_NOTIFY_URL).trim();
 			if (notifyUrl != null && !(notifyUrl.equals("")) && !notifyUrl.isEmpty()) {
 				Integer subscriptionId = ussdService.ussdRequestEntry(notifyUrl, consumerKey, endpoint.getOperator(), userId);
 				log.info("created subscriptionId  -  " + subscriptionId + " Request ID: " + UID.getRequestID(context));
