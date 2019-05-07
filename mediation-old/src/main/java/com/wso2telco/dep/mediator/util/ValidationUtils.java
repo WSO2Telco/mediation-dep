@@ -17,16 +17,19 @@
 package com.wso2telco.dep.mediator.util;
 
 import com.wso2telco.dep.mediator.MSISDNConstants;
+import com.wso2telco.dep.oneapi.constant.payment.PaymentKeyConstants;
+import com.wso2telco.dep.oneapi.constant.payment.PaymentResourceConstants;
+import com.wso2telco.dep.oneapi.constant.ussd.USSDKeyConstants;
+import com.wso2telco.dep.oneapi.constant.ussd.USSDResourceConstants;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.json.JSONObject;
 
 /**
  *@author WSO2telco
@@ -35,43 +38,119 @@ import org.json.JSONObject;
  */
 public final class ValidationUtils {
 
-    static Log log = LogFactory.getLog(ValidationUtils.class);
+	static Log log = LogFactory.getLog(ValidationUtils.class);
 
-    /**
+	/**
+	 * This method extracts userId from payload and resource url and passed to
+	 * validate whether they are same. Deprecated due to the api has the only support for {@link APIType#PAYMENT}
+	 *
+	 * @param resourcePath
+	 * @param jsonBody
+	 */
+	@Deprecated
+	public static void compareMsisdn(String resourcePath, JSONObject jsonBody) {
+		compareMsisdn(resourcePath, jsonBody, APIType.PAYMENT);
+	}
+
+	/**
 	 * This method extracts userId from payload and resource url and passed to
 	 * validate whether they are same
 	 */
-	public static void compareMsisdn(String resourcePath, JSONObject jsonBody) {
-		String urlmsisdn = null;
-		try {
-			urlmsisdn = URLDecoder.decode(resourcePath.substring(1,
-					resourcePath.indexOf("transactions") - 1), "UTF-8");
+	public static void compareMsisdn(String resourcePath, JSONObject jsonBody, APIType apiType) {
 
-		} catch (UnsupportedEncodingException e) {
-			log.debug("Url MSISDN can not be decoded ");
-		}
-		// This validation assumes that userID should be with the prefix "tel:+" and back end
-		// still does not support with other prefixes for this API.
-		// Therefore below line should be modified in future depending on requirements
-		String payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId")
-					.substring(5);
-		
-		if(urlmsisdn != null){
+		String urlmsisdn = resolveURLMsisdn(resourcePath, apiType);
+
+		String payloadMsisdn = resolvePayloadMsisdn(jsonBody, apiType);
+
+		if (urlmsisdn != null) {
 			urlmsisdn = getMsisdnNumber(urlmsisdn);
-        } else {
-           log.debug("Not valid msisdn in resourceURL");
-            throw new CustomException(MSISDNConstants.SVC0002, "", new String[] {"Not valid msisdn in URL"});
-        }
+		} else {
+			log.debug("Not valid msisdn in resourceURL");
+			throw new CustomException(MSISDNConstants.SVC0002, "", new String[]{"Not valid msisdn in URL"});
+		}
 
-        if(payloadMsisdn.equalsIgnoreCase(urlmsisdn.trim()) ){
-            log.debug("msisdn in resourceURL and payload msisdn are same");
-        } else {
-            log.debug("msisdn in resourceURL and payload msisdn are not same");
-            throw new CustomException(MSISDNConstants.SVC0002, "", new String[] { "Two different endUserId provided" });
-        }
-
+		if (payloadMsisdn.equalsIgnoreCase(urlmsisdn.trim())) {
+			log.debug("msisdn in resourceURL and payload msisdn are same");
+		} else {
+			log.debug("msisdn in resourceURL and payload msisdn are not same");
+			throw new CustomException(MSISDNConstants.SVC0002, "",
+					new String[]{"Two different MSISDNs provided in resourceURL and payload"});
+		}
 	}
-	
+
+		/**
+	 * Resolve msisdn from the url
+	 *
+	 * @param resourcePath
+	 * @param apiType
+	 * @return
+	 */
+	private static String resolveURLMsisdn(String resourcePath, APIType apiType) {
+
+		switch (apiType) {
+			case PAYMENT:
+				return decodeMsisdnFromPaymentResourcePathh(resourcePath);
+			case USSD:
+				return decodeMsisdnFromUssdResourcePath(resourcePath);
+			default:
+				throw new UnsupportedOperationException("Not supported yet.");
+		}
+	}
+
+	/**
+	 * decode msisdn from ussd resource path
+	 *
+	 * @param resourcePath
+	 * @return
+	 */
+	private static String decodeMsisdnFromUssdResourcePath(String resourcePath) {
+		try {
+			return URLDecoder.decode((resourcePath.substring(resourcePath.indexOf(USSDResourceConstants.RESOURCE_PATH_OUTBOUND) +
+					USSDResourceConstants.RESOURCE_PATH_OUTBOUND.length() + 1)), "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			log.debug("Url MSISDN can not be decoded.");
+		}
+
+		return null;
+	}
+
+	/**
+	 * decode msisdn from payment resource path
+	 *
+	 * @param resourcePath
+	 * @return
+	 */
+	private static String decodeMsisdnFromPaymentResourcePathh(String resourcePath) {
+		try {
+			return URLDecoder.decode(resourcePath.substring(1,
+					resourcePath.indexOf(PaymentResourceConstants.RESOURCE_PATH_TRANSACTIONS) - 1), "UTF-8");
+		} catch (UnsupportedEncodingException e) {
+			log.debug("Url MSISDN can not be decoded.");
+		}
+
+		return null;
+	}
+
+	/**
+	 * This validation assumes that userID should be with the prefix "tel:+" and back end
+	 * still does not support with other prefixes for this API.
+	 *
+	 * @param jsonBody
+	 * @param apiType
+	 * @return
+	 */
+    private static String resolvePayloadMsisdn(JSONObject jsonBody, APIType apiType) {
+        switch (apiType) {
+            case USSD:
+                return getMsisdnNumber(jsonBody.getJSONObject(USSDKeyConstants.KEY_OUT_BOUND_USSD_MESSAGE_REQUEST).
+                        getString(USSDKeyConstants.KEY_ADDRESS));
+            case PAYMENT:
+                return getMsisdnNumber(jsonBody.getJSONObject(PaymentKeyConstants.KEY_AMOUNT_TRANSACTION).
+                        getString(PaymentKeyConstants.KEY_END_USER_ID));
+            default:
+                throw new UnsupportedOperationException("The API type not supported yet.");
+        }
+    }
 
     /**
      * Returns array of MSISDNs without "tel:+" prefix
@@ -83,7 +162,7 @@ public final class ValidationUtils {
 		}
 		return userMsisdn.toArray(new String[userMsisdn.size()]);
 	}
-	
+
 	/**
      * Returns array of MSISDNs without "tel:" prefix
      */
