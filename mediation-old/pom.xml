@@ -60,6 +60,10 @@
             <artifactId>subscription-validator</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.wso2telco.dep</groupId>
+            <artifactId>oneapi</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.wso2.carbon.apimgt</groupId>
             <artifactId>org.wso2.carbon.apimgt.gateway</artifactId>
         </dependency>
@@ -68,6 +72,17 @@
  	    <artifactId>guava</artifactId>
   	    <version>11.0.2</version>
 	</dependency>
+        <!--Unit test dependencies -->
+        <dependency>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.assertj</groupId>
+            <artifactId>assertj-core</artifactId>
+            <scope>test</scope>
+        </dependency>
         <!--<dependency>
             <groupId>wsdl4j.wso2</groupId>
             <artifactId>wsdl4j</artifactId>
