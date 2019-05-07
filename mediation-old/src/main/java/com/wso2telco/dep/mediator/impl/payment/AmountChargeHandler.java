@@ -27,10 +27,10 @@ import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.PaymentService;
-import com.wso2telco.dep.mediator.unmarshaler.GroupDTO;
-import com.wso2telco.dep.mediator.unmarshaler.GroupEventUnmarshaller;
-import com.wso2telco.dep.mediator.unmarshaler.OparatorNotinListException;
-import com.wso2telco.dep.mediator.util.*;
+import com.wso2telco.dep.mediator.util.APIType;
+import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
+import com.wso2telco.dep.mediator.util.ValidationUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.payment.ValidatePaymentCharge;
@@ -128,8 +128,6 @@ public class AmountChargeHandler implements PaymentHandler {
             }
 
             String msisdn = endUserId.substring(5);
-            //Double chargeamount = Double.parseDouble(jsonBody.getJSONObject("amountTransaction").getJSONObject("paymentAmount").getJSONObject("chargingInformation").getString("amount"));
-
             context.setProperty(MSISDNConstants.USER_MSISDN, msisdn);
             context.setProperty(MSISDNConstants.MSISDN, endUserId);
 
