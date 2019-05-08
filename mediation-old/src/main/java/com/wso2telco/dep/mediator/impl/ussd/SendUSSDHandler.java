@@ -48,9 +48,6 @@ import org.json.JSONObject;
  */
 public class SendUSSDHandler implements USSDHandler {
 
-	public static final String MTINIT = "mtinit";
-
-	public static final String MTCONT = "mtcont";
 	/** The log. */
 	private Log log = LogFactory.getLog(SendUSSDHandler.class);
 
@@ -88,9 +85,8 @@ public class SendUSSDHandler implements USSDHandler {
 		String requestid = UID.getUniqueID(Type.SEND_USSD.getCode(), context, executor.getApplicationid());
 		JSONObject jsonBody = executor.getJsonBody();
 
-		String address = jsonBody.getJSONObject("outboundUSSDMessageRequest").getString("address");
-        JSONObject responseRequest = jsonBody.getJSONObject("outboundUSSDMessageRequest").getJSONObject("responseRequest");
-
+		String address = jsonBody.getJSONObject(USSDKeyConstants.OUT_BOUND_USSD_MESSAGE_REQUEST)
+				.getString(USSDKeyConstants.ADDRESS);
         String msisdn = address.substring(5);
 
 		String consumerKey = "";
@@ -123,19 +119,24 @@ public class SendUSSDHandler implements USSDHandler {
 		context.setProperty("OPERATOR_NAME", endpoint.getOperator());
 		context.setProperty("OPERATOR_ID", endpoint.getOperatorId());
 
+		if (!jsonBody.getJSONObject(USSDKeyConstants.OUT_BOUND_USSD_MESSAGE_REQUEST)
+				.isNull(USSDKeyConstants.RESPONSE_REQUEST)) {
 
-		if (!responseRequest.isNull(USSDKeyConstants.KEY_NOTIFY_URL)) {
-			String notifyUrl = responseRequest.getString(USSDKeyConstants.KEY_NOTIFY_URL).trim();
-			if (notifyUrl != null && !(notifyUrl.equals("")) && !notifyUrl.isEmpty()) {
-				Integer subscriptionId = ussdService.ussdRequestEntry(notifyUrl, consumerKey, endpoint.getOperator(), userId);
-				log.info("created subscriptionId  -  " + subscriptionId + " Request ID: " + UID.getRequestID(context));
+			JSONObject responseRequest = jsonBody.getJSONObject(USSDKeyConstants.OUT_BOUND_USSD_MESSAGE_REQUEST)
+					.getJSONObject(USSDKeyConstants.RESPONSE_REQUEST);
+			if (!responseRequest.isNull(USSDKeyConstants.NOTIFY_URL)) {
 
-                String subsEndpoint = ConfigFileReader.getInstance().getMediatorConfigMap().get("ussdGatewayEndpoint") + subscriptionId;
-                log.info("Subsendpoint - " + subsEndpoint + " Request ID: " + UID.getRequestID(context));
-                context.setProperty("subsEndPoint", subsEndpoint);
+				String notifyUrl = responseRequest.getString(USSDKeyConstants.NOTIFY_URL).trim();
+				if (!notifyUrl.isEmpty()) {
+					Integer subscriptionId = ussdService.ussdRequestEntry(notifyUrl, consumerKey, endpoint.getOperator(), userId);
+					log.info("created subscriptionId  -  " + subscriptionId + " Request ID: " + UID.getRequestID(context));
+
+                    String subsEndpoint = ConfigFileReader.getInstance().getMediatorConfigMap().get("ussdGatewayEndpoint") + subscriptionId;
+                    log.info("Subsendpoint - " + subsEndpoint + " Request ID: " + UID.getRequestID(context));
+                    context.setProperty("subsEndPoint", subsEndpoint);
+				}
 			}
 		}
-
 		context.setProperty(MSISDNConstants.USER_MSISDN, msisdn);
 		context.setProperty(MSISDNConstants.MSISDN, address);
 
@@ -150,8 +151,9 @@ public class SendUSSDHandler implements USSDHandler {
 	}
 
 	private void validateUssdAction(JSONObject jsonBody, MessageContext context) throws Exception {
-		String ussdAction = jsonBody.getJSONObject("outboundUSSDMessageRequest").getString("ussdAction");
-		if ( !(ussdAction.equals(MTINIT) || ussdAction.equals(MTCONT)) ){
+		String ussdAction = jsonBody.getJSONObject(USSDKeyConstants.OUT_BOUND_USSD_MESSAGE_REQUEST)
+				.getString(USSDKeyConstants.USSD_ACTION);
+		if ( !(ussdAction.equals(USSDValueConstants.MTINIT) || ussdAction.equals(USSDValueConstants.MTCONT)) ){
 			((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 405);
 			throw new Exception("Ussd Action Not Allowed!");
 		}
