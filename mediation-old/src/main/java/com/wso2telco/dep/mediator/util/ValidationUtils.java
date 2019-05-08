@@ -105,8 +105,8 @@ public final class ValidationUtils {
 	 */
 	private static String decodeMsisdnFromUssdResourcePath(String resourcePath) {
 		try {
-			return URLDecoder.decode((resourcePath.substring(resourcePath.indexOf(USSDResourceConstants.RESOURCE_PATH_OUTBOUND) +
-					USSDResourceConstants.RESOURCE_PATH_OUTBOUND.length() + 1)), "UTF-8");
+			return URLDecoder.decode((resourcePath.substring(resourcePath.indexOf(USSDResourceConstants.OUTBOUND) +
+					USSDResourceConstants.OUTBOUND.length() + 1)), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			log.debug("Url MSISDN can not be decoded.");
 		}
@@ -123,7 +123,7 @@ public final class ValidationUtils {
 	private static String decodeMsisdnFromPaymentResourcePathh(String resourcePath) {
 		try {
 			return URLDecoder.decode(resourcePath.substring(1,
-					resourcePath.indexOf(PaymentResourceConstants.RESOURCE_PATH_TRANSACTIONS) - 1), "UTF-8");
+					resourcePath.indexOf(PaymentResourceConstants.TRANSACTIONS) - 1), "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			log.debug("Url MSISDN can not be decoded.");
 		}
@@ -142,11 +142,11 @@ public final class ValidationUtils {
     private static String resolvePayloadMsisdn(JSONObject jsonBody, APIType apiType) {
         switch (apiType) {
             case USSD:
-                return getMsisdnNumber(jsonBody.getJSONObject(USSDKeyConstants.KEY_OUT_BOUND_USSD_MESSAGE_REQUEST).
-                        getString(USSDKeyConstants.KEY_ADDRESS));
+                return getMsisdnNumber(jsonBody.getJSONObject(USSDKeyConstants.OUT_BOUND_USSD_MESSAGE_REQUEST).
+                        getString(USSDKeyConstants.ADDRESS));
             case PAYMENT:
-                return getMsisdnNumber(jsonBody.getJSONObject(PaymentKeyConstants.KEY_AMOUNT_TRANSACTION).
-                        getString(PaymentKeyConstants.KEY_END_USER_ID));
+                return getMsisdnNumber(jsonBody.getJSONObject(PaymentKeyConstants.AMOUNT_TRANSACTION).
+                        getString(PaymentKeyConstants.END_USER_ID));
             default:
                 throw new UnsupportedOperationException("The API type not supported yet.");
         }
