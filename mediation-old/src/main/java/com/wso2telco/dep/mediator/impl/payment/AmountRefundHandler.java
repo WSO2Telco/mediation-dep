@@ -18,7 +18,6 @@
 package com.wso2telco.dep.mediator.impl.payment;
 
 import com.wso2telco.core.dbutils.fileutils.FileReader;
-import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
 import com.wso2telco.dep.mediator.internal.AggregatorValidator;
@@ -27,10 +26,7 @@ import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.PaymentService;
-import com.wso2telco.dep.mediator.util.APIType;
-import com.wso2telco.dep.mediator.util.FileNames;
-import com.wso2telco.dep.mediator.util.HandlerUtils;
-import com.wso2telco.dep.mediator.util.ValidationUtils;
+import com.wso2telco.dep.mediator.util.*;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.payment.ValidateRefund;
@@ -46,6 +42,8 @@ import org.json.JSONObject;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -83,8 +81,9 @@ public class AmountRefundHandler implements PaymentHandler {
 		IServiceValidate validator = new ValidateRefund(executor.isUserAnonymization(), UserMaskingConfiguration.getInstance().getSecretKey());
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
-        ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody(), executor.isUserAnonymization(), context);
-		return true;
+        ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody());
+		UserMaskingUtils.initializeUserMaskingProperties(executor, context, jsonBody);
+        return true;
 	}
 
 	@Override
@@ -118,24 +117,7 @@ public class AmountRefundHandler implements PaymentHandler {
 
         try {
             JSONObject jsonBody = executor.getJsonBody();
-
-            String endUserId = jsonBody.getJSONObject("amountTransaction").getString("endUserId");
-
-            if(executor.isUserAnonymization()) {
-                context.setProperty(MSISDNConstants.MASKED_MSISDN, endUserId);
-                endUserId = UserMaskHandler.transcryptUserId(endUserId, false,
-                        UserMaskingConfiguration.getInstance().getSecretKey());
-                String endUserIdSuffix = HandlerUtils.getMSISDNSuffix(endUserId);
-                context.setProperty("MSISDN_SUFFIX", endUserIdSuffix);
-                String maskedEndUserIdSuffix = UserMaskHandler.transcryptUserId(endUserIdSuffix, true,
-                        UserMaskingConfiguration.getInstance().getSecretKey());
-                context.setProperty(MSISDNConstants.MASKED_MSISDN_SUFFIX, maskedEndUserIdSuffix);
-                context.setProperty("MASKED_RESOURCE", context.getProperty("RESOURCE"));
-            }
-
-            String msisdn = endUserId.substring(5);
-            context.setProperty(MSISDNConstants.USER_MSISDN, msisdn);
-            context.setProperty(MSISDNConstants.MSISDN, endUserId);
+            String endUserId = (String) context.getProperty("MSISDN");
             if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
                     OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
                     searchDTO.setApi(APIType.PAYMENT);
@@ -151,6 +133,14 @@ public class AmountRefundHandler implements PaymentHandler {
             sending_add = endpoint.getEndpointref().getAddress();
             if (log.isDebugEnabled()) {
                 log.debug("sending endpoint found: " + sending_add);
+            }
+
+            if(executor.isUserAnonymization()) {
+                String resourcePath = executor.getSubResourcePath();
+                String urlMsisdn = resourcePath.substring(1, resourcePath.indexOf("transactions") - 1);
+                String unmaskedUrlMsisdn = UserMaskHandler.transcryptUserId(URLDecoder.decode(urlMsisdn, "UTF-8"),
+                        false, UserMaskingConfiguration.getInstance().getSecretKey());
+                sending_add = sending_add.replace(urlMsisdn, URLEncoder.encode(unmaskedUrlMsisdn, "UTF-8"));
             }
 
 
