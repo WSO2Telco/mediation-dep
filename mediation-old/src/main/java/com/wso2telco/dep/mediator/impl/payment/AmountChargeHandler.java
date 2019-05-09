@@ -18,7 +18,6 @@
 package com.wso2telco.dep.mediator.impl.payment;
 
 import com.wso2telco.core.dbutils.fileutils.FileReader;
-import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
 import com.wso2telco.dep.mediator.internal.AggregatorValidator;
@@ -27,10 +26,7 @@ import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.PaymentService;
-import com.wso2telco.dep.mediator.util.APIType;
-import com.wso2telco.dep.mediator.util.FileNames;
-import com.wso2telco.dep.mediator.util.HandlerUtils;
-import com.wso2telco.dep.mediator.util.ValidationUtils;
+import com.wso2telco.dep.mediator.util.*;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.payment.ValidatePaymentCharge;
@@ -112,25 +108,7 @@ public class AmountChargeHandler implements PaymentHandler {
 
         JSONObject jsonBody = executor.getJsonBody();
         try {
-
-            String endUserId = jsonBody.getJSONObject("amountTransaction").getString("endUserId");
-
-            if(executor.isUserAnonymization()) {
-                context.setProperty(MSISDNConstants.MASKED_MSISDN, endUserId);
-                endUserId = UserMaskHandler.transcryptUserId(endUserId, false,
-                        UserMaskingConfiguration.getInstance().getSecretKey());
-                String endUserIdSuffix = HandlerUtils.getMSISDNSuffix(endUserId);
-                context.setProperty("MSISDN_SUFFIX", endUserIdSuffix);
-                String maskedEndUserIdSuffix = UserMaskHandler.transcryptUserId(endUserIdSuffix, true,
-                        UserMaskingConfiguration.getInstance().getSecretKey());
-                context.setProperty(MSISDNConstants.MASKED_MSISDN_SUFFIX, maskedEndUserIdSuffix);
-                context.setProperty("MASKED_RESOURCE", context.getProperty("RESOURCE"));
-            }
-
-            String msisdn = endUserId.substring(5);
-            context.setProperty(MSISDNConstants.USER_MSISDN, msisdn);
-            context.setProperty(MSISDNConstants.MSISDN, endUserId);
-
+			String endUserId = (String) context.getProperty("MSISDN");
             if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
                 OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
                 searchDTO.setApi(APIType.PAYMENT);
@@ -141,7 +119,6 @@ public class AmountChargeHandler implements PaymentHandler {
                 searchDTO.setOperators(executor.getValidoperators(context));
                 searchDTO.setRequestPathURL(executor.getSubResourcePath());
                 endpoint = occi.getOperatorEndpoint(searchDTO);
-
             }
 
             sendingAddress = endpoint.getEndpointref().getAddress();
@@ -151,10 +128,10 @@ public class AmountChargeHandler implements PaymentHandler {
 
             if(executor.isUserAnonymization()) {
                 String resourcePath = executor.getSubResourcePath();
-                String urlmsisdn = resourcePath.substring(1, resourcePath.indexOf("transactions") - 1);
-                String unmaskedUrlmsisdn = UserMaskHandler.transcryptUserId(URLDecoder.decode(urlmsisdn, "UTF-8"),
+                String urlMsisdn = resourcePath.substring(1, resourcePath.indexOf("transactions") - 1);
+                String unmaskedUrlMsisdn = UserMaskHandler.transcryptUserId(URLDecoder.decode(urlMsisdn, "UTF-8"),
 						false, UserMaskingConfiguration.getInstance().getSecretKey());
-                sendingAddress = sendingAddress.replace(urlmsisdn, URLEncoder.encode(unmaskedUrlmsisdn, "UTF-8"));
+                sendingAddress = sendingAddress.replace(urlMsisdn, URLEncoder.encode(unmaskedUrlMsisdn, "UTF-8"));
             }
 
             JSONObject objAmountTransaction = jsonBody.getJSONObject("amountTransaction");
@@ -204,17 +181,14 @@ public class AmountChargeHandler implements PaymentHandler {
                     if (validCategories == null || validCategories.isEmpty() || (!validCategories.contains(chargingMeta.getString("purchaseCategoryCode")))) {
                         validCategories = paymentService.getValidPayCategories();
                     }
-
                 }
-
                 //validatePaymentCategory(chargingMeta, validCategories);
                 paymentUtil.validatePaymentCategory(chargingMeta, validCategories);
             }
-        }catch (JSONException e){
+        } catch (JSONException e){
             log.error("Manipulating received JSON Object: " + e);
             throw new CustomException("SVC0001", "", new String[]{"Incorrect JSON Object received"});
         }
-
 
 		// set information to the message context, to be used in the sequence
         HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
@@ -227,9 +201,7 @@ public class AmountChargeHandler implements PaymentHandler {
         context.setProperty("clientCorrelator", clientCorrelator);
 		context.setProperty("OPERATOR_NAME", endpoint.getOperator());
 		context.setProperty("OPERATOR_ID", endpoint.getOperatorId());
-
         return true;
-
 	}
 
 	@Override
@@ -243,17 +215,17 @@ public class AmountChargeHandler implements PaymentHandler {
 			throw new Exception("Method not allowed");
 		}
 
-		if(validatorClass != null){
+		if (validatorClass != null){
 			Class clazz = Class.forName(validatorClass);
 			validator = (IServiceValidate) clazz.newInstance();
-		}else{
+		} else {
 			validator = new ValidatePaymentCharge(executor.isUserAnonymization(), UserMaskingConfiguration.getInstance().getSecretKey());
 		}
-
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
-        ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody(), executor.isUserAnonymization(), context);
-		return true;
+        ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody());
+		UserMaskingUtils.initializeUserMaskingProperties(executor, context, jsonBody);
+        return true;
 	}
 
 	/**

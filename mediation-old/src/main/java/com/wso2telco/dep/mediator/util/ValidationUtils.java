@@ -44,34 +44,15 @@ public final class ValidationUtils {
 	 * This method extracts userId from payload and resource url and passed to
 	 * validate whether they are same
 	 */
-	public static void compareMsisdn(String resourcePath, JSONObject jsonBody, boolean userAnonymization, MessageContext context) {
+	public static void compareMsisdn(String resourcePath, JSONObject jsonBody) {
 		String urlmsisdn = null;
 		try {
-			urlmsisdn = URLDecoder.decode(resourcePath.substring(1,
-					resourcePath.indexOf("transactions") - 1), "UTF-8");
-			if (userAnonymization) {
-				try {
-					urlmsisdn = UserMaskHandler.transcryptUserId(urlmsisdn, false, UserMaskingConfiguration.getInstance().getSecretKey());
-				} catch (Exception e) {
-					log.debug("Error while decoding user ID");
-				}
-			}
-
+			urlmsisdn = getMsisdnNumber(URLDecoder.decode(resourcePath.substring(1,
+					resourcePath.indexOf("transactions") - 1), "UTF-8"));
 		} catch (UnsupportedEncodingException e) {
 			log.debug("Url MSISDN can not be decoded ");
 		}
-		// This validation assumes that userID should be with the prefix "tel:+" and back end
-		// still does not support with other prefixes for this API.
-		// Therefore below line should be modified in future depending on requirements
-		String payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId");
-		if (userAnonymization) {
-			try {
-				payloadMsisdn = UserMaskHandler.transcryptUserId(payloadMsisdn, false, UserMaskingConfiguration.getInstance().getSecretKey());
-			} catch (Exception e) {
-				log.debug("Error while decoeing user ID");
-			}
-		}
-		payloadMsisdn = getMsisdnNumber(payloadMsisdn);
+		String payloadMsisdn = getMsisdnNumber(jsonBody.getJSONObject("amountTransaction").getString("endUserId"));
 		compaireUserIds(urlmsisdn, payloadMsisdn, "endUserId");
 	}
 
@@ -92,9 +73,7 @@ public final class ValidationUtils {
 	}
 
 	private static void compaireUserIds(String urlmsisdn, String payloadMsisdn, String inputName) {
-		if(urlmsisdn != null){
-			urlmsisdn = getMsisdnNumber(urlmsisdn);
-		} else {
+		if(urlmsisdn == null){
 			log.debug("Not valid msisdn in resourceURL");
 			throw new CustomException(MSISDNConstants.SVC0002, "", new String[] {"Not valid msisdn in URL"});
 		}
