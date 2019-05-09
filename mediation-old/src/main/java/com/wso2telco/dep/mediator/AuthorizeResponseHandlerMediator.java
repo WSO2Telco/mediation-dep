@@ -59,6 +59,9 @@ public class AuthorizeResponseHandlerMediator extends AbstractMediator {
 
         messageContext.setProperty(DataPublisherConstants.MSISDN,
                 messageContext.getProperty(MSISDNConstants.USER_MSISDN));
+        if(Boolean.valueOf((String)messageContext.getProperty("USER_ANONYMIZATION")).booleanValue()) {
+            messageContext.setProperty(DataPublisherConstants.MSISDN, messageContext.getProperty(MSISDNConstants.MASKED_MSISDN));
+        }
 
         boolean isPaymentReq = false;
         String paymentType=null;

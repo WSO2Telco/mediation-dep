@@ -95,6 +95,9 @@ public abstract class RequestExecutor {
 	// <TO-DO>
 	private String strErr;
 
+	/** userAnonymization request header */
+	private boolean userAnonymization;
+
 	/**
 	 * Gets the str err.
 	 *
@@ -205,6 +208,23 @@ public abstract class RequestExecutor {
 	}
 
 	/**
+	 *  Get the request uses User Anonymization
+	 * @return
+	 */
+	public boolean isUserAnonymization() {
+		return userAnonymization;
+	}
+
+	/**
+	 * Set the request uses User Anonymization
+	 * @param userAnonymization
+	 */
+	public void setUserAnonymization(boolean userAnonymization) {
+		this.userAnonymization = userAnonymization;
+	}
+
+
+	/**
 	 * Gets the validoperators.
 	 *
 	 * @return the validoperators
@@ -305,10 +325,16 @@ public abstract class RequestExecutor {
 		}
 
 		getValidoperators(context);
-    	subResourcePath = (String) context.getProperty("REST_SUB_REQUEST_PATH");
+		//REST_SUB_REQUEST_PATH
+    	subResourcePath = (String) context.getProperty("RESOURCE");
 		resourceUrl = (String) context.getProperty("REST_FULL_REQUEST_PATH");
 		httpMethod = (String) context.getProperty("HTTP_METHOD");
 
+		Map<String, String> transportHeaders = (Map<String, String>) ((Axis2MessageContext) context)
+				.getAxis2MessageContext().getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
+		if(transportHeaders.get("USER_ANONYMIZATION") != null) {
+			this.userAnonymization = Boolean.valueOf(transportHeaders.get("USER_ANONYMIZATION"));
+		}
 
 		/*String jsonPayloadToString = JsonUtil
 				.jsonPayloadToString(((Axis2MessageContext) context).getAxis2MessageContext());

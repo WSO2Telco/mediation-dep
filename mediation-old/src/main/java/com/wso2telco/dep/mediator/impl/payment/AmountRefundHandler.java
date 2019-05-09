@@ -35,6 +35,8 @@ import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.payment.ValidateRefund;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
+import com.wso2telco.dep.user.masking.UserMaskHandler;
+import com.wso2telco.dep.user.masking.configuration.UserMaskingConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
@@ -78,10 +80,10 @@ public class AmountRefundHandler implements PaymentHandler {
 			throw new Exception("Method not allowed");
 		}
 
-		IServiceValidate validator = new ValidateRefund();
+		IServiceValidate validator = new ValidateRefund(executor.isUserAnonymization(), UserMaskingConfiguration.getInstance().getSecretKey());
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
-		ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody());
+        ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody(), executor.isUserAnonymization(), context);
 		return true;
 	}
 
@@ -118,20 +120,32 @@ public class AmountRefundHandler implements PaymentHandler {
             JSONObject jsonBody = executor.getJsonBody();
 
             String endUserId = jsonBody.getJSONObject("amountTransaction").getString("endUserId");
+
+            if(executor.isUserAnonymization()) {
+                context.setProperty(MSISDNConstants.MASKED_MSISDN, endUserId);
+                endUserId = UserMaskHandler.transcryptUserId(endUserId, false,
+                        UserMaskingConfiguration.getInstance().getSecretKey());
+                String endUserIdSuffix = HandlerUtils.getMSISDNSuffix(endUserId);
+                context.setProperty("MSISDN_SUFFIX", endUserIdSuffix);
+                String maskedEndUserIdSuffix = UserMaskHandler.transcryptUserId(endUserIdSuffix, true,
+                        UserMaskingConfiguration.getInstance().getSecretKey());
+                context.setProperty(MSISDNConstants.MASKED_MSISDN_SUFFIX, maskedEndUserIdSuffix);
+                context.setProperty("MASKED_RESOURCE", context.getProperty("RESOURCE"));
+            }
+
             String msisdn = endUserId.substring(5);
             context.setProperty(MSISDNConstants.USER_MSISDN, msisdn);
             context.setProperty(MSISDNConstants.MSISDN, endUserId);
-            // OperatorEndpoint endpoint = null;
             if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
-                OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
-                searchDTO.setApi(APIType.PAYMENT);
-                searchDTO.setApiName((String) context.getProperty("API_NAME"));
-                searchDTO.setContext(context);
-                searchDTO.setIsredirect(false);
-                searchDTO.setMSISDN(endUserId.replace("tel:", ""));
-                searchDTO.setOperators(executor.getValidoperators(context));
-                searchDTO.setRequestPathURL(executor.getSubResourcePath());
-                endpoint = occi.getOperatorEndpoint(searchDTO);
+                    OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
+                    searchDTO.setApi(APIType.PAYMENT);
+                    searchDTO.setApiName((String) context.getProperty("API_NAME"));
+                    searchDTO.setContext(context);
+                    searchDTO.setIsredirect(false);
+                    searchDTO.setMSISDN(endUserId.replace("tel:", ""));
+                    searchDTO.setOperators(executor.getValidoperators(context));
+                    searchDTO.setRequestPathURL(executor.getSubResourcePath());
+                    endpoint = occi.getOperatorEndpoint(searchDTO);
             }
 
             sending_add = endpoint.getEndpointref().getAddress();

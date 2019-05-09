@@ -135,6 +135,7 @@ public class SMSOutboundNotificationsHandler implements SMSHandler {
 			context.setProperty("MSISDN", msisdn);
 			context.setProperty(DataPublisherConstants.OPERATOR_ID,operator);
 			context.setProperty(APIMgtGatewayConstants.USER_ID, serviceProvider);
+			context.setProperty("OPERATOR_NAME", operator);
 		} else {
 
 			OutboundRequest outboundRequest = gson.fromJson(executor.getJsonBody().toString(), OutboundRequest.class);
@@ -152,6 +153,7 @@ public class SMSOutboundNotificationsHandler implements SMSHandler {
 			context.setProperty("MSISDN", msisdn);
 			context.setProperty(DataPublisherConstants.OPERATOR_ID,operator);
 			context.setProperty(APIMgtGatewayConstants.USER_ID, serviceProvider);
+			context.setProperty("OPERATOR_NAME", operator);
 		}
 
 		HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
