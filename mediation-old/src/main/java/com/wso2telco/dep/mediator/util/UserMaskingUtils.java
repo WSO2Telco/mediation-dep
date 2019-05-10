@@ -11,8 +11,8 @@ import org.json.JSONObject;
 
 public class UserMaskingUtils {
 
-    public static String initializeUserMaskingProperties(PaymentExecutor executor, MessageContext context,
-                                                         JSONObject payload) throws UserMaskingException {
+    public static String setPaymentUserMaskingContextProperties(PaymentExecutor executor, MessageContext context,
+                                                                JSONObject payload) throws UserMaskingException {
 
         String endUserId = payload.getJSONObject("amountTransaction").getString("endUserId");
         if (executor.isUserAnonymization()) {

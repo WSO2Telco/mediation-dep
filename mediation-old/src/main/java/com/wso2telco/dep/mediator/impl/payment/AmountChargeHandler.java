@@ -224,7 +224,7 @@ public class AmountChargeHandler implements PaymentHandler {
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
         ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody());
-		UserMaskingUtils.initializeUserMaskingProperties(executor, context, jsonBody);
+		UserMaskingUtils.setPaymentUserMaskingContextProperties(executor, context, jsonBody);
         return true;
 	}
 
