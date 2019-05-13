@@ -18,6 +18,7 @@
 package com.wso2telco.dep.mediator.impl.payment;
 
 import com.wso2telco.core.dbutils.fileutils.FileReader;
+import com.wso2telco.dep.mediator.MediatorConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
 import com.wso2telco.dep.mediator.internal.AggregatorValidator;
@@ -35,6 +36,8 @@ import com.wso2telco.dep.user.masking.UserMaskHandler;
 import com.wso2telco.dep.user.masking.configuration.UserMaskingConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpPost;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONException;
@@ -83,7 +86,7 @@ public class AmountChargeHandler implements PaymentHandler {
 		HashMap<String, String> jwtDetails = apiUtils.getJwtTokenDetails(context);
         OperatorEndpoint endpoint = null;
         String clientCorrelator = null;
-        String sending_add = null;
+        String sendingAdd = null;
 		String sendingAddress = null;
 
 		String requestResourceURL = executor.getResourceUrl();
@@ -92,9 +95,9 @@ public class AmountChargeHandler implements PaymentHandler {
         String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
  		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
         		
-        String hub_gateway_id = mediatorConfMap.get("hub_gateway_id");
+        String hubGatewayId = mediatorConfMap.get("hub_gateway_id");
         if (log.isDebugEnabled()) {
-            log.debug("Hub / Gateway Id : " + hub_gateway_id);
+            log.debug("Hub / Gateway Id : " + hubGatewayId);
         }
 
         String appId = jwtDetails.get("applicationid");
@@ -123,7 +126,7 @@ public class AmountChargeHandler implements PaymentHandler {
 
             sendingAddress = endpoint.getEndpointref().getAddress();
             if (log.isDebugEnabled()) {
-                log.info("sending endpoint found: " + sending_add + " Request ID: " + UID.getRequestID(context));
+                log.info("sending endpoint found: " + sendingAdd + " Request ID: " + UID.getRequestID(context));
             }
 
             if(executor.isUserAnonymization()) {
@@ -136,8 +139,8 @@ public class AmountChargeHandler implements PaymentHandler {
 
             JSONObject objAmountTransaction = jsonBody.getJSONObject("amountTransaction");
 
-            if (!objAmountTransaction.isNull("clientCorrelator")) {
-                clientCorrelator = nullOrTrimmed(objAmountTransaction.get("clientCorrelator").toString());
+            if (!objAmountTransaction.isNull(AttributeConstants.CLIENT_CORRELATOR)) {
+                clientCorrelator = nullOrTrimmed(objAmountTransaction.get(AttributeConstants.CLIENT_CORRELATOR).toString());
             }
 
             if (clientCorrelator == null || clientCorrelator.equals("")) {
@@ -149,40 +152,37 @@ public class AmountChargeHandler implements PaymentHandler {
                 if (log.isDebugEnabled()) {
                     log.debug("hashString : " + hashString);
                 }
-                clientCorrelator = hashString + "-" + requestId + ":" + hub_gateway_id + ":" + appId;
+                clientCorrelator = hashString + "-" + requestId + ":" + hubGatewayId + ":" + appId;
 
             } else {
 
                 if (log.isDebugEnabled()) {
                     log.debug("clientCorrelator provided by application");
                 }
-                clientCorrelator = clientCorrelator + ":" + hub_gateway_id + ":" + appId;
+                clientCorrelator = clientCorrelator + ":" + hubGatewayId + ":" + appId;
             }
 
             if (objAmountTransaction.has("chargingMetaData")) {
 
                 JSONObject chargingMeta = objAmountTransaction.getJSONObject("paymentAmount").getJSONObject("chargingMetaData");
 
-                boolean isAggregator = paymentUtil.isAggregator(context);
+                boolean isAggregator = PaymentUtil.isAggregator(context);
 
-                if (isAggregator) {
-                    //JSONObject chargingMeta = objAmountTransaction.getJSONObject("paymentAmount").getJSONObject("chargingMetaData");
-                    if (!chargingMeta.isNull("onBehalfOf")) {
-                        new AggregatorValidator().validateMerchant(
-                                Integer.valueOf(executor.getApplicationid()),
-                                endpoint.getOperator(), subscriber,
-                                chargingMeta.getString("onBehalfOf"));
-                    }
-                }
+				if (isAggregator && !chargingMeta.isNull("onBehalfOf")) {
+					new AggregatorValidator().validateMerchant(
+							Integer.valueOf(executor.getApplicationid()),
+							endpoint.getOperator(), subscriber,
+							chargingMeta.getString("onBehalfOf"));
+				}
 
-                if ((!chargingMeta.isNull("purchaseCategoryCode"))
-                        && (!chargingMeta.getString("purchaseCategoryCode").isEmpty())) {
+                if ((!chargingMeta.isNull(AttributeConstants.PURCHASE_CATEGORY_CODE))
+                        && (!chargingMeta.getString(AttributeConstants.PURCHASE_CATEGORY_CODE).isEmpty())) {
 
-                    if (validCategories == null || validCategories.isEmpty() || (!validCategories.contains(chargingMeta.getString("purchaseCategoryCode")))) {
+                    if (validCategories == null || validCategories.isEmpty() ||
+							(!validCategories.contains(chargingMeta.getString(AttributeConstants.PURCHASE_CATEGORY_CODE)))) {
                         validCategories = paymentService.getValidPayCategories();
                     }
                 }
-                //validatePaymentCategory(chargingMeta, validCategories);
                 paymentUtil.validatePaymentCategory(chargingMeta, validCategories);
             }
         } catch (JSONException e){
@@ -198,7 +198,7 @@ public class AmountChargeHandler implements PaymentHandler {
         context.setProperty("operator", endpoint.getOperator());
         context.setProperty("requestResourceUrl", requestResourceURL);
         context.setProperty("requestID", requestId);
-        context.setProperty("clientCorrelator", clientCorrelator);
+        context.setProperty(AttributeConstants.CLIENT_CORRELATOR, clientCorrelator);
 		context.setProperty("OPERATOR_NAME", endpoint.getOperator());
 		context.setProperty("OPERATOR_ID", endpoint.getOperatorId());
         return true;
@@ -209,8 +209,8 @@ public class AmountChargeHandler implements PaymentHandler {
 		IServiceValidate validator;
 		String validatorClass = (String) context.getProperty("validatorClass");
 
-		if (!httpMethod.equalsIgnoreCase("POST")) {
-			((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 405);
+		if (!httpMethod.equalsIgnoreCase(HttpPost.METHOD_NAME)) {
+			((Axis2MessageContext) context).getAxis2MessageContext().setProperty(MediatorConstants.HTTP_SC, HttpStatus.SC_METHOD_NOT_ALLOWED);
 			log.error("Method not allowed");
 			throw new Exception("Method not allowed");
 		}
@@ -228,167 +228,6 @@ public class AmountChargeHandler implements PaymentHandler {
         return true;
 	}
 
-	/**
-	 * Check spend limit.
-	 *
-	 * @param msisdn
-	 *            the msisdn
-	 * @param operator
-	 *            the operator
-	 * @param mc
-	 *            the mc
-	 * @return true, if successful
-	 * @throws AxataDBUtilException
-	 *             the axata db util exception
-	 */
-	/*private boolean checkSpendLimit(String msisdn, String operator, MessageContext context) throws AxataDBUtilException {
-		AuthenticationContext authContext = APISecurityUtils.getAuthenticationContext(context);
-		String consumerKey = "";
-		if (authContext != null) {
-			consumerKey = authContext.getConsumerKey();
-		}
-
-		SpendLimitHandler spendLimitHandler = new SpendLimitHandler();
-		if (spendLimitHandler.isMSISDNSpendLimitExceeded(msisdn)) {
-			throw new CustomException("POL1001", "The %1 charging limit for this user has been exceeded", new String[] { "daily" });
-		} else if (spendLimitHandler.isApplicationSpendLimitExceeded(consumerKey)) {
-			throw new CustomException("POL1001","The %1 charging limit for this application has been exceeded",new String[] { "daily" });
-		} else if (spendLimitHandler.isOperatorSpendLimitExceeded(operator)) {
-			throw new CustomException("POL1001","The %1 charging limit for this operator has been exceeded",new String[] { "daily" });
-		}
-		return true;
-	}*/
-
-	/**
-	 * Store subscription.
-	 *
-	 * @param context
-	 *            the context
-	 * @return the string
-	 * @throws AxisFault
-	 *             the axis fault
-	 */
-	/*private String storeSubscription(MessageContext context) throws AxisFault {
-		String subscription = null;
-
-		org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) context).getAxis2MessageContext();
-		Object headers = axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-		if (headers != null && headers instanceof Map) {
-			try {
-				Map headersMap = (Map) headers;
-				String jwtparam = (String) headersMap.get("x-jwt-assertion");
-				String[] jwttoken = jwtparam.split("\\.");
-				String jwtbody = Base64Coder.decodeString(jwttoken[1]);
-				JSONObject jwtobj = new JSONObject(jwtbody);
-				subscription = jwtobj.getString("http://wso2.org/claims/subscriber");
-
-			} catch (JSONException ex) {
-				throw new AxisFault("Error retriving application id");
-			}
-		}
-
-		return subscription;
-	}*/
-
-	/**
-	 * Checks if is aggregator.
-	 *
-	 * @param context
-	 *            the context
-	 * @return true, if is aggregator
-	 * @throws AxisFault
-	 *             the axis fault
-	 */
-	/*private boolean isAggregator(MessageContext context) throws AxisFault {
-		boolean aggregator = false;
-
-		try {
-			org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) context).getAxis2MessageContext();
-			Object headers = axis2MessageContext.getProperty(org.apache.axis2.context.MessageContext.TRANSPORT_HEADERS);
-			if (headers != null && headers instanceof Map) {
-				Map headersMap = (Map) headers;
-				String jwtparam = (String) headersMap.get("x-jwt-assertion");
-				String[] jwttoken = jwtparam.split("\\.");
-				String jwtbody = Base64Coder.decodeString(jwttoken[1]);
-				JSONObject jwtobj = new JSONObject(jwtbody);
-				String claimaggr = jwtobj.getString("http://wso2.org/claims/role");
-				if (claimaggr != null) {
-					String[] allowedRoles = claimaggr.split(",");
-					for (int i = 0; i < allowedRoles.length; i++) {
-						if (allowedRoles[i].contains(MSISDNConstants.AGGRIGATOR_ROLE)) {
-							aggregator = true;
-							break;
-						}
-					}
-				}
-			}
-		} catch (Exception e) {
-			log.info("Error retrive aggregator");
-		}
-
-		return aggregator;
-	}*/
-
-	/**
-	 * Validate payment category.
-	 *
-	 * @param chargingMeta
-	 *            the chargingMeta
-	 * @param lstCategories
-	 *            the lst categories
-	 * @throws JSONException
-	 *             the JSON exception
-	 */
-	/*private void validatePaymentCategory(JSONObject chargingMeta, List<String> lstCategories) throws JSONException {
-		boolean isvalid = false;
-		String chargeCategory = "";
-		if ((!chargingMeta.isNull("purchaseCategoryCode"))	&& (!chargingMeta.getString("purchaseCategoryCode").isEmpty())) {
-
-			chargeCategory = chargingMeta.getString("purchaseCategoryCode");
-			for (String d : lstCategories) {
-				if (d.equalsIgnoreCase(chargeCategory)) {
-					isvalid = true;
-					break;
-				}
-			}
-		} else {
-			isvalid = true;
-		}
-
-		if (!isvalid) {
-			throw new CustomException("POL0001","A policy error occurred. Error code is %1",new String[] { "Invalid " + "purchaseCategoryCode : "+ chargeCategory });
-		}
-	}
-*/
-	/**
-	 * Str_piece.
-	 *
-	 * @param str
-	 *            the str
-	 * @param separator
-	 *            the separator
-	 * @param index
-	 *            the index
-	 * @return the string
-	 */
-	private String strPiece(String str, char separator, int index) {
-		String strResult = "";
-		int count = 0;
-		for (int i = 0; i < str.length(); i++) {
-			if (str.charAt(i) == separator) {
-				count++;
-				if (count == index) {
-					break;
-				}
-			} else {
-				if (count == index - 1) {
-					strResult += str.charAt(i);
-				}
-			}
-		}
-		return strResult;
-	}
-	
 	public static String nullOrTrimmed(String s) {
 		String rv = null;
 		if (s != null && s.trim().length() > 0) {

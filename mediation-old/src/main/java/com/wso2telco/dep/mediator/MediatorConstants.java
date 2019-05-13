@@ -32,4 +32,6 @@ public final class MediatorConstants {
 
     /** The Constant NOTIFY_URL */
     public static final String NOTIFY_URL = "notifyUrl";
+
+    public static final String HTTP_SC = "HTTP_SC";
 }
