@@ -21,6 +21,9 @@ package com.wso2telco.dep.mediator.impl.payment;
 import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.internal.Base64Coder;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
+import com.wso2telco.dep.user.masking.UserMaskHandler;
+import com.wso2telco.dep.user.masking.configuration.UserMaskingConfiguration;
+import com.wso2telco.dep.user.masking.exceptions.UserMaskingException;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -29,6 +32,9 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
@@ -146,6 +152,17 @@ public class PaymentUtil {
 			}
 		}
 		return str_result;
+	}
+
+	public static String decodeSendingAddressIfMasked(PaymentExecutor executor, String sendingAddress) throws UnsupportedEncodingException, UserMaskingException {
+		if(executor.isUserAnonymization()) {
+			String resourcePath = executor.getSubResourcePath();
+			String urlMsisdn = resourcePath.substring(1, resourcePath.indexOf("transactions") - 1);
+			String unmaskedUrlMsisdn = UserMaskHandler.transcryptUserId(URLDecoder.decode(urlMsisdn, "UTF-8"),
+					false, UserMaskingConfiguration.getInstance().getSecretKey());
+			sendingAddress = sendingAddress.replace(urlMsisdn, URLEncoder.encode(unmaskedUrlMsisdn, "UTF-8"));
+		}
+		return sendingAddress;
 	}
 
 }

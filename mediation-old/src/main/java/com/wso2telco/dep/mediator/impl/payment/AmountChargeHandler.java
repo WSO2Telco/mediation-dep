@@ -127,16 +127,9 @@ public class AmountChargeHandler implements PaymentHandler {
                 log.info("sending endpoint found: " + sending_add + " Request ID: " + UID.getRequestID(context));
             }
 
-            if(executor.isUserAnonymization()) {
-                String resourcePath = executor.getSubResourcePath();
-                String urlMsisdn = resourcePath.substring(1, resourcePath.indexOf("transactions") - 1);
-                String unmaskedUrlMsisdn = UserMaskHandler.transcryptUserId(URLDecoder.decode(urlMsisdn, "UTF-8"),
-						false, UserMaskingConfiguration.getInstance().getSecretKey());
-                sendingAddress = sendingAddress.replace(urlMsisdn, URLEncoder.encode(unmaskedUrlMsisdn, "UTF-8"));
-            }
+            sendingAddress = PaymentUtil.decodeSendingAddressIfMasked(executor, sendingAddress);
 
             JSONObject objAmountTransaction = jsonBody.getJSONObject("amountTransaction");
-
             if (!objAmountTransaction.isNull("clientCorrelator")) {
                 clientCorrelator = nullOrTrimmed(objAmountTransaction.get("clientCorrelator").toString());
             }

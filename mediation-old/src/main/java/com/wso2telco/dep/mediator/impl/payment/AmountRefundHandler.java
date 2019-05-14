@@ -136,14 +136,7 @@ public class AmountRefundHandler implements PaymentHandler {
                 log.debug("sending endpoint found: " + sending_add);
             }
 
-            if(executor.isUserAnonymization()) {
-                String resourcePath = executor.getSubResourcePath();
-                String urlMsisdn = resourcePath.substring(1, resourcePath.indexOf("transactions") - 1);
-                String unmaskedUrlMsisdn = UserMaskHandler.transcryptUserId(URLDecoder.decode(urlMsisdn, "UTF-8"),
-                        false, UserMaskingConfiguration.getInstance().getSecretKey());
-                sending_add = sending_add.replace(urlMsisdn, URLEncoder.encode(unmaskedUrlMsisdn, "UTF-8"));
-            }
-
+            sending_add = PaymentUtil.decodeSendingAddressIfMasked(executor, sending_add);
 
             if (!jsonBody.has("amountTransaction")) {
                 throw new CustomException("SVC0001", "", new String[]{"Incorrect JSON Object received"});
