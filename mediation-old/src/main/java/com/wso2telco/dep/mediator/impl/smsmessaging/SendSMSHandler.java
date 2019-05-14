@@ -141,7 +141,7 @@ public class SendSMSHandler extends AbstractHandler{
             
             String firstAddress = addressArray.getString(0);
 			if (executor.isUserAnonymization() && UserMaskHandler.isMaskedUserId(firstAddress)) {
-				firstAddress = UserMaskHandler.transcryptUserId(firstAddress, false, (String)context.getProperty("USER_MASKING_SECRET_KEY"));
+				firstAddress = UserMaskHandler.transcryptUserId(firstAddress, false, UserMaskingConfiguration.getInstance().getSecretKey());
 			}
             
             if(firstAddress.contains("tel:+")){
@@ -161,7 +161,7 @@ public class SendSMSHandler extends AbstractHandler{
             	
             	String address = addressArray.getString(a);
 				if (executor.isUserAnonymization() && UserMaskHandler.isMaskedUserId(address)) {
-					address = UserMaskHandler.transcryptUserId(address, false, (String)context.getProperty("USER_MASKING_SECRET_KEY"));
+					address = UserMaskHandler.transcryptUserId(address, false, UserMaskingConfiguration.getInstance().getSecretKey());
 				}
             	
             	if(address.contains("tel:+")){
@@ -189,7 +189,7 @@ public class SendSMSHandler extends AbstractHandler{
 		// Get resolved MSISDN if request used User Anonymization
 		if (executor.isUserAnonymization() && UserMaskHandler.isMaskedUserId(firstAddress)) {
 			context.setProperty(MSISDNConstants.MASKED_MSISDN_SUFFIX, HandlerUtils.getMSISDNSuffix(firstAddress));
-			firstAddress = UserMaskHandler.transcryptUserId(firstAddress, false, (String)context.getProperty("USER_MASKING_SECRET_KEY"));
+			firstAddress = UserMaskHandler.transcryptUserId(firstAddress, false, UserMaskingConfiguration.getInstance().getSecretKey());
 		}
 
 		// taking the operator endpoint with first address, since this is for same o,perator
@@ -316,6 +316,7 @@ public class SendSMSHandler extends AbstractHandler{
 		searchDTO.setMSISDN(address);
 		searchDTO.setOperators(executor.getValidoperators(messageContext));
 		searchDTO.setRequestPathURL(executor.getSubResourcePath());
+		searchDTO.setLoggingMsisdn((String)messageContext.getProperty("MASKED_MSISDN"));
 		return occi.getOperatorEndpoint(searchDTO);
 	}
 
@@ -335,7 +336,7 @@ public class SendSMSHandler extends AbstractHandler{
 
 		context.setProperty(DataPublisherConstants.OPERATION_TYPE, 200);
 
-		IServiceValidate validator = new ValidateSendSms(executor.isUserAnonymization(), (String)context.getProperty("USER_MASKING_SECRET_KEY"));
+		IServiceValidate validator = new ValidateSendSms(executor.isUserAnonymization(), UserMaskingConfiguration.getInstance().getSecretKey());
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
 		ValidationUtils.compareSenderId(executor.getSubResourcePath(), executor.getJsonBody(), context);

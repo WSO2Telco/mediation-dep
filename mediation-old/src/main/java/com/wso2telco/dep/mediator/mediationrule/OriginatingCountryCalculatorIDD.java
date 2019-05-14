@@ -294,7 +294,11 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
 			 * if(countryCode>=0){ mcc = String.valueOf("+"+countryCode); }
              */
             // mcc not known in mediator
-            log.debug("Unable to obtain Operator from the Header, Oprator look for mcc_range_table - operator : " + operator + " mcc : " + mcc + " msisdn : " + msisdn.toString());
+
+            //loggingMsisdn is available only when user masking is enabled
+            String loggingMsidn = searchDTO.getLoggingMsisdn() == null? searchDTO.getMSISDN(): searchDTO.getLoggingMsisdn();
+            log.debug("Unable to obtain Operator from the Header, Operator look for mcc_range_table - operator : "
+                    + operator + " mcc : " + mcc + " msisdn : " + loggingMsidn);
             try {
                 operator = mncQueryclient.QueryNetwork(mcc, msisdn.toString());
             } catch (Exception e) {

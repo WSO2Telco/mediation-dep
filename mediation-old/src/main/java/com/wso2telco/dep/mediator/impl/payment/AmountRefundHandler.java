@@ -127,6 +127,7 @@ public class AmountRefundHandler implements PaymentHandler {
                     searchDTO.setMSISDN(endUserId.replace("tel:", ""));
                     searchDTO.setOperators(executor.getValidoperators(context));
                     searchDTO.setRequestPathURL(executor.getSubResourcePath());
+                    searchDTO.setLoggingMsisdn((String)context.getProperty("MASKED_MSISDN"));
                     endpoint = occi.getOperatorEndpoint(searchDTO);
             }
 
