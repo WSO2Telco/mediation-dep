@@ -16,7 +16,7 @@ public class ValidationUtilsTest {
     private String msisdn = "94373524301";
 
     @Test
-    public void testCompareMsisdn_Payment_EqualMsisdns_thenNoExceptions() {
+    public void testCompareMsisdn_PaymentEqualMsisdns_thenNoExceptions() {
 
         String jsonBody = "{\n" +
                 "    \"amountTransaction\": {\n" +
@@ -39,7 +39,7 @@ public class ValidationUtilsTest {
     }
 
     @Test(expectedExceptions = CustomException.class)
-    public void testCompareMsisdn_Payment_DifferentMsisdns() {
+    public void testCompareMsisdn_PaymentDifferentMsisdns() {
 
         String jsonBody = "{\n" +
                 "    \"amountTransaction\": {\n" +
@@ -62,7 +62,7 @@ public class ValidationUtilsTest {
     }
 
     @Test(expectedExceptions = CustomException.class)
-    public void testCompareMsisdn_Payment_URLMsisdnNull() {
+    public void testCompareMsisdn_PaymentURLMsisdnNull() {
 
         String jsonBody = "{\n" +
                 "    \"amountTransaction\": {\n" +
