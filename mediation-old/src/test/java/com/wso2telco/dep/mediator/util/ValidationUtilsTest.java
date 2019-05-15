@@ -16,7 +16,7 @@ public class ValidationUtilsTest {
     private String msisdn = "94373524301";
 
     @Test
-    public void testCompareMsisdn_Payment_EqualMsisdns() {
+    public void testCompareMsisdn_Payment_EqualMsisdns_thenNoExceptions() {
 
         String jsonBody = "{\n" +
                 "    \"amountTransaction\": {\n" +
