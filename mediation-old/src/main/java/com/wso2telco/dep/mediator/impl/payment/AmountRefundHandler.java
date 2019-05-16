@@ -132,9 +132,8 @@ public class AmountRefundHandler implements PaymentHandler {
             if (log.isDebugEnabled()) {
                 log.debug("sending endpoint found: " + sending_add);
             }
-
+          
             sending_add = PaymentUtil.decodeSendingAddressIfMasked(executor, sending_add);
-
             if (!jsonBody.has("amountTransaction")) {
                 throw new CustomException("SVC0001", "", new String[]{"Incorrect JSON Object received"});
             }

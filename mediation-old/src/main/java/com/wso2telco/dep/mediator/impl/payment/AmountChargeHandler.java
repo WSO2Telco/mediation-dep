@@ -125,7 +125,6 @@ public class AmountChargeHandler implements PaymentHandler {
             }
 
             sendingAddress = PaymentUtil.decodeSendingAddressIfMasked(executor, sendingAddress);
-
             JSONObject objAmountTransaction = jsonBody.getJSONObject("amountTransaction");
             if (!objAmountTransaction.isNull("clientCorrelator")) {
                 clientCorrelator = nullOrTrimmed(objAmountTransaction.get("clientCorrelator").toString());
