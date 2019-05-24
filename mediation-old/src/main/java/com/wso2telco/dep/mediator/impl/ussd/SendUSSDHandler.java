@@ -48,6 +48,12 @@ import org.json.JSONObject;
  */
 public class SendUSSDHandler implements USSDHandler {
 
+	public static final String MTINIT = "mtinit";
+	public static final String MTCONT = "mtcont";
+	public static final String MTFIN = "mtfin";
+	public static final String MOCONT = "mocont";
+	public static final String MOFIN = "mofin";
+
 	/** The log. */
 	private Log log = LogFactory.getLog(SendUSSDHandler.class);
 
@@ -155,7 +161,8 @@ public class SendUSSDHandler implements USSDHandler {
 				.getString(USSDKeyConstants.USSD_ACTION);
 		if ( !(ussdAction.equals(USSDValueConstants.MTINIT) || ussdAction.equals(USSDValueConstants.MTCONT)) ){
 			((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 405);
-			throw new Exception("Ussd Action Not Allowed!");
+			throw new CustomException("SVC0002", "Invalid input value for message part %1",
+			        new String[]{"Invalid ussdAction"});
 		}
 	}
 
