@@ -37,7 +37,10 @@ public class OparatorEndPointSearchDTO implements Serializable {
 		private boolean isredirect;
 		private List<OperatorApplicationDTO> operators;
 		private MessageContext context;
-		private String MSISDN ;
+		private String MSISDN;
+
+		//To hold the masked MSISDN in usermasking enabled scenarios. This will be used for logging purposes.
+		private String loggingMsisdn;
 		
 		
 		public String getApiName() {
@@ -95,6 +98,13 @@ public class OparatorEndPointSearchDTO implements Serializable {
 		public void setOperators(List<OperatorApplicationDTO> operators) {
 			this.operators = operators;
 		}
-	
-	}
+
+		public String getLoggingMsisdn() {
+			return loggingMsisdn;
+		}
+
+		public void setLoggingMsisdn(String loggingMsisdn) {
+			this.loggingMsisdn = loggingMsisdn;
+		}
+}
 

@@ -33,7 +33,6 @@ import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.payment.ValidateRefund;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
-import com.wso2telco.dep.user.masking.UserMaskHandler;
 import com.wso2telco.dep.user.masking.configuration.UserMaskingConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -46,8 +45,6 @@ import org.json.JSONObject;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -131,6 +128,7 @@ public class AmountRefundHandler implements PaymentHandler {
                     searchDTO.setMSISDN(endUserId.replace("tel:", ""));
                     searchDTO.setOperators(executor.getValidoperators(context));
                     searchDTO.setRequestPathURL(executor.getSubResourcePath());
+                    searchDTO.setLoggingMsisdn((String)context.getProperty("MASKED_MSISDN"));
                     endpoint = occi.getOperatorEndpoint(searchDTO);
             }
 
@@ -139,15 +137,7 @@ public class AmountRefundHandler implements PaymentHandler {
                 log.debug("sending endpoint found: " + sendingAdd);
             }
 
-            if(executor.isUserAnonymization()) {
-                String resourcePath = executor.getSubResourcePath();
-                String urlMsisdn = resourcePath.substring(1, resourcePath.indexOf("transactions") - 1);
-                String unmaskedUrlMsisdn = UserMaskHandler.transcryptUserId(URLDecoder.decode(urlMsisdn, "UTF-8"),
-                        false, UserMaskingConfiguration.getInstance().getSecretKey());
-                sendingAdd = sendingAdd.replace(urlMsisdn, URLEncoder.encode(unmaskedUrlMsisdn, "UTF-8"));
-            }
-
-
+            sendingAdd = PaymentUtil.decodeSendingAddressIfMasked(executor, sendingAdd);
             if (!jsonBody.has(AttributeConstants.AMOUNT_TRANSACTION)) {
                 throw new CustomException("SVC0001", "", new String[]{"Incorrect JSON Object received"});
             }

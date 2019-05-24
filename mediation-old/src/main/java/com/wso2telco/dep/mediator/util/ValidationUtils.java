@@ -64,12 +64,14 @@ public final class ValidationUtils {
 	public static void compareSenderId(String resourcePath, JSONObject jsonBody, MessageContext context) {
 		String urlmsisdn = null;
 		try {
-			urlmsisdn = URLDecoder.decode(resourcePath.substring(resourcePath.indexOf("outbound") + 9, resourcePath.indexOf("requests") - 1), "UTF-8");
+			urlmsisdn = URLDecoder.decode(resourcePath.substring(resourcePath.indexOf("outbound") + 9,
+					resourcePath.indexOf("requests") - 1), "UTF-8");
 
 		} catch (UnsupportedEncodingException e) {
 			log.debug("Url MSISDN can not be decoded ");
 		}
-		compaireUserIds(urlmsisdn, getMsisdnNumber(jsonBody.getJSONObject("outboundSMSMessageRequest").getString("senderAddress")), "senderAddress");
+		compaireUserIds(getMsisdnNumber(urlmsisdn), getMsisdnNumber(jsonBody.getJSONObject("outboundSMSMessageRequest")
+				.getString("senderAddress")), "senderAddress");
 	}
 
 	private static void compaireUserIds(String urlmsisdn, String payloadMsisdn, String inputName) {

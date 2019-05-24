@@ -32,7 +32,6 @@ import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.payment.ValidatePaymentCharge;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
-import com.wso2telco.dep.user.masking.UserMaskHandler;
 import com.wso2telco.dep.user.masking.configuration.UserMaskingConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -45,8 +44,6 @@ import org.json.JSONObject;
 import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
-import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -121,6 +118,7 @@ public class AmountChargeHandler implements PaymentHandler {
                 searchDTO.setMSISDN(endUserId);
                 searchDTO.setOperators(executor.getValidoperators(context));
                 searchDTO.setRequestPathURL(executor.getSubResourcePath());
+                searchDTO.setLoggingMsisdn((String)context.getProperty("MASKED_MSISDN"));
                 endpoint = occi.getOperatorEndpoint(searchDTO);
             }
 
@@ -129,20 +127,12 @@ public class AmountChargeHandler implements PaymentHandler {
                 log.info("sending endpoint found: " + sendingAdd + " Request ID: " + UID.getRequestID(context));
             }
 
-            if(executor.isUserAnonymization()) {
-                String resourcePath = executor.getSubResourcePath();
-                String urlMsisdn = resourcePath.substring(1, resourcePath.indexOf("transactions") - 1);
-                String unmaskedUrlMsisdn = UserMaskHandler.transcryptUserId(URLDecoder.decode(urlMsisdn, "UTF-8"),
-						false, UserMaskingConfiguration.getInstance().getSecretKey());
-                sendingAddress = sendingAddress.replace(urlMsisdn, URLEncoder.encode(unmaskedUrlMsisdn, "UTF-8"));
-            }
-
+            sendingAddress = PaymentUtil.decodeSendingAddressIfMasked(executor, sendingAddress);
             JSONObject objAmountTransaction = jsonBody.getJSONObject("amountTransaction");
-
             if (!objAmountTransaction.isNull(AttributeConstants.CLIENT_CORRELATOR)) {
                 clientCorrelator = nullOrTrimmed(objAmountTransaction.get(AttributeConstants.CLIENT_CORRELATOR).toString());
             }
-
+          
             if (clientCorrelator == null || clientCorrelator.equals("")) {
 
                 if (log.isDebugEnabled()) {

@@ -115,9 +115,6 @@ public class SendSMSHandler extends AbstractHandler{
 		
 		// append request id to client correlator
 		JSONObject jsonBody = executor.getJsonBody();
-		//JSONObject clientclr = jsonBody.getJSONObject("outboundSMSMessageRequest");
-		//clientclr.put("clientCorrelator", clientclr.getString("clientCorrelator") + ":" + requestid);
-
 		Gson gson = new GsonBuilder().serializeNulls().create();
 		SendSMSRequest subsrequest = gson.fromJson(jsonBody.toString(), SendSMSRequest.class);
 		String senderAddress = subsrequest.getOutboundSMSMessageRequest().getSenderAddress();
@@ -134,63 +131,30 @@ public class SendSMSHandler extends AbstractHandler{
 		}
 		int smsCount = getSMSMessageCount(subsrequest.getOutboundSMSMessageRequest().getOutboundTextMessage().getMessage());
 		context.setProperty(DataPublisherConstants.RESPONSE, String.valueOf(smsCount));
-		
-		if (!jsonBody.getJSONObject("outboundSMSMessageRequest").isNull("address")) {
 
+		String firstAddress = null;
+		if (!jsonBody.getJSONObject("outboundSMSMessageRequest").isNull("address")) {
             JSONArray addressArray = jsonBody.getJSONObject("outboundSMSMessageRequest").getJSONArray("address");
-            
-            String firstAddress = addressArray.getString(0);
-			if (executor.isUserAnonymization() && UserMaskHandler.isMaskedUserId(firstAddress)) {
-				firstAddress = UserMaskHandler.transcryptUserId(firstAddress, false, (String)context.getProperty("USER_MASKING_SECRET_KEY"));
-			}
-            
-            if(firstAddress.contains("tel:+")){
-        		
-            	firstAddress = firstAddress.replace("tel:+", "");
-        	} else if(firstAddress.contains("tel:")){
-        		
-        		firstAddress = firstAddress.replace("tel:", "");
-        	}else if(firstAddress.contains("+")){
-        		
-        		firstAddress = firstAddress.replace("+", "");
-        	}
-            
-            String firstAddressPrefix = firstAddress.substring(0, 2);          
-            
+            firstAddress = addressArray.getString(0);
+            if (executor.isUserAnonymization()) {
+				context.setProperty(MSISDNConstants.MASKED_MSISDN_SUFFIX, ValidationUtils.getMsisdnNumber(firstAddress));
+				firstAddress = UserMaskHandler.transcryptUserId(firstAddress, false, UserMaskingConfiguration.getInstance().getSecretKey());
+            }
+
+            String firstAddressPrefix = ValidationUtils.getMsisdnNumber(firstAddress).substring(0, 2);
     		for (int a = 0; a < addressArray.length(); a++) {
-            	
-            	String address = addressArray.getString(a);
-				if (executor.isUserAnonymization() && UserMaskHandler.isMaskedUserId(address)) {
-					address = UserMaskHandler.transcryptUserId(address, false, (String)context.getProperty("USER_MASKING_SECRET_KEY"));
+    			String address = addressArray.getString(a);
+				if (executor.isUserAnonymization()) {
+					address = UserMaskHandler.transcryptUserId(address, false, UserMaskingConfiguration.getInstance().getSecretKey());
 				}
-            	
-            	if(address.contains("tel:+")){
-            		
-            		address = address.replace("tel:+", "");
-            	} else if(address.contains("tel:")){
-            		
-            		address = address.replace("tel:", "");
-            	}else if(address.contains("+")){
-            		
-            		address = address.replace("+", "");
-            	}
-            	
+
+				address = ValidationUtils.getMsisdnNumber(address);
             	String prefix = address.substring(0,2);
-            	
             	if(!firstAddressPrefix.equals(prefix)){
-            		
             		throw new CustomException("SVC0001", "", new String[] { "Cross operator addresses not supported" });
             	}
             }
         }
-
-        // Get first address to find operator endpoint
-		String firstAddress = jsonBody.getJSONObject("outboundSMSMessageRequest").getJSONArray("address").getString(0);
-		// Get resolved MSISDN if request used User Anonymization
-		if (executor.isUserAnonymization() && UserMaskHandler.isMaskedUserId(firstAddress)) {
-			context.setProperty(MSISDNConstants.MASKED_MSISDN_SUFFIX, HandlerUtils.getMSISDNSuffix(firstAddress));
-			firstAddress = UserMaskHandler.transcryptUserId(firstAddress, false, (String)context.getProperty("USER_MASKING_SECRET_KEY"));
-		}
 
 		// taking the operator endpoint with first address, since this is for same o,perator
 		OperatorEndpoint operatorEndpoint = getEndpoint(firstAddress, context, API_TYPE);
@@ -209,7 +173,6 @@ public class SendSMSHandler extends AbstractHandler{
 		HandlerUtils.setAuthorizationHeader(context, executor, operatorEndpoint);
 		HandlerUtils.setEndpointProperty(context, sending_add);
 		HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
-
 
 		// read sendSMSResourceURL from mediatorConfMap and set to message context
 		String sendSmsResourceUrlPrefix = getProperty("sendSMSResourceURL");
@@ -316,6 +279,7 @@ public class SendSMSHandler extends AbstractHandler{
 		searchDTO.setMSISDN(address);
 		searchDTO.setOperators(executor.getValidoperators(messageContext));
 		searchDTO.setRequestPathURL(executor.getSubResourcePath());
+		searchDTO.setLoggingMsisdn((String)messageContext.getProperty("MASKED_MSISDN"));
 		return occi.getOperatorEndpoint(searchDTO);
 	}
 
@@ -335,7 +299,7 @@ public class SendSMSHandler extends AbstractHandler{
 
 		context.setProperty(DataPublisherConstants.OPERATION_TYPE, 200);
 
-		IServiceValidate validator = new ValidateSendSms(executor.isUserAnonymization(), (String)context.getProperty("USER_MASKING_SECRET_KEY"));
+		IServiceValidate validator = new ValidateSendSms(executor.isUserAnonymization(), UserMaskingConfiguration.getInstance().getSecretKey());
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
 		ValidationUtils.compareSenderId(executor.getSubResourcePath(), executor.getJsonBody(), context);
