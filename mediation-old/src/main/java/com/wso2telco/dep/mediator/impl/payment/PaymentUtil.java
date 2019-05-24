@@ -154,13 +154,12 @@ public class PaymentUtil {
 		return str_result;
 	}
 
-	public static String decodeSendingAddressIfMasked(PaymentExecutor executor, String sendingAddress) throws UnsupportedEncodingException, UserMaskingException {
+	public static String decodeSendingAddressIfMasked(PaymentExecutor executor, MessageContext context, String sendingAddress) throws UnsupportedEncodingException, UserMaskingException {
 		if(executor.isUserAnonymization()) {
 			String resourcePath = executor.getSubResourcePath();
 			String urlMsisdn = resourcePath.substring(1, resourcePath.indexOf("transactions") - 1);
-			String unmaskedUrlMsisdn = UserMaskHandler.transcryptUserId(URLDecoder.decode(urlMsisdn, "UTF-8"),
-					false, UserMaskingConfiguration.getInstance().getSecretKey());
-			sendingAddress = sendingAddress.replace(urlMsisdn, URLEncoder.encode(unmaskedUrlMsisdn, "UTF-8"));
+			String unmaskedMsisdn = (String) context.getProperty(MSISDNConstants.MSISDN);
+			sendingAddress = sendingAddress.replace(urlMsisdn, URLEncoder.encode(unmaskedMsisdn, "UTF-8"));
 		}
 		return sendingAddress;
 	}

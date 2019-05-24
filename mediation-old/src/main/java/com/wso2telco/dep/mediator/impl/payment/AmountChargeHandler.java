@@ -18,6 +18,7 @@
 package com.wso2telco.dep.mediator.impl.payment;
 
 import com.wso2telco.core.dbutils.fileutils.FileReader;
+import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.MediatorConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
@@ -127,7 +128,7 @@ public class AmountChargeHandler implements PaymentHandler {
                 log.info("sending endpoint found: " + sendingAdd + " Request ID: " + UID.getRequestID(context));
             }
 
-            sendingAddress = PaymentUtil.decodeSendingAddressIfMasked(executor, sendingAddress);
+            sendingAddress = PaymentUtil.decodeSendingAddressIfMasked(executor, context, sendingAddress);
             JSONObject objAmountTransaction = jsonBody.getJSONObject("amountTransaction");
             if (!objAmountTransaction.isNull(AttributeConstants.CLIENT_CORRELATOR)) {
                 clientCorrelator = nullOrTrimmed(objAmountTransaction.get(AttributeConstants.CLIENT_CORRELATOR).toString());
@@ -205,16 +206,16 @@ public class AmountChargeHandler implements PaymentHandler {
 			throw new Exception("Method not allowed");
 		}
 
+        UserMaskingUtils.setPaymentUserMaskingContextProperties(executor, context, jsonBody);
 		if (validatorClass != null){
 			Class clazz = Class.forName(validatorClass);
 			validator = (IServiceValidate) clazz.newInstance();
 		} else {
-			validator = new ValidatePaymentCharge(executor.isUserAnonymization(), UserMaskingConfiguration.getInstance().getSecretKey());
+			validator = new ValidatePaymentCharge(executor.isUserAnonymization(), (String) context.getProperty(MSISDNConstants.MSISDN));
 		}
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
         ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody());
-		UserMaskingUtils.setPaymentUserMaskingContextProperties(executor, context, jsonBody);
         return true;
 	}
 
