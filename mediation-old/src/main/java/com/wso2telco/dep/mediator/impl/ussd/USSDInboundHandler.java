@@ -37,6 +37,7 @@ import org.apache.axis2.addressing.EndpointReference;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
 
 // TODO: Auto-generated Javadoc
@@ -45,6 +46,12 @@ import org.json.JSONObject;
  * The Class USSDInboundHandler.
  */
 public class USSDInboundHandler implements USSDHandler {
+	
+	public static final String MTCONT = "mtcont";
+	public static final String MTFIN = "mtfin";
+	public static final String MOINIT = "moinit";
+	public static final String MOCONT = "mocont";
+	public static final String MOFIN = "mofin";
 
 	/** The log. */
 	private Log log = LogFactory.getLog(USSDInboundHandler.class);
@@ -105,8 +112,11 @@ public class USSDInboundHandler implements USSDHandler {
 		context.setProperty("spEndpoint", notifyUrl);
 
 		JSONObject jsonBody = executor.getJsonBody();
+		
+		validateUssdAction(jsonBody, context);
+		
 		//jsonBody.getJSONObject("inboundUSSDMessageRequest").getJSONObject("responseRequest").put("notifyURL", ussdSPDetails.get(0));
-
+		
 		String address = jsonBody.getJSONObject("inboundUSSDMessageRequest").getString("address");
 		String msisdn = address.substring(5);
 		context.setProperty(MediatorConstants.USER_MSISDN, msisdn);
@@ -148,6 +158,16 @@ public class USSDInboundHandler implements USSDHandler {
 		return true;
 	}
 
+	
+	private void validateUssdAction(JSONObject jsonBody, MessageContext context) throws Exception {
+		String ussdAction = jsonBody.getJSONObject("inboundUSSDMessageRequest").getString("ussdAction");
+		if ( !( ussdAction.equals(MTCONT) || ussdAction.equals(MTFIN) || ussdAction.equals(MOINIT) || ussdAction.equals(MOCONT) || ussdAction.equals(MOFIN))){
+			((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 405);
+			throw new CustomException("SVC0002", "Invalid input value for message part %1",
+			        new String[]{"Invalid ussdAction"});
+		}
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
