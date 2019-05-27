@@ -78,12 +78,11 @@ public class AmountRefundHandler implements PaymentHandler {
 			                               .setProperty(MediatorConstants.HTTP_SC, HttpStatus.SC_METHOD_NOT_ALLOWED);
 			throw new Exception("Method not allowed");
 		}
-
-		IServiceValidate validator = new ValidateRefund(executor.isUserAnonymization(), UserMaskingConfiguration.getInstance().getSecretKey());
+        UserMaskingUtils.setPaymentUserMaskingContextProperties(executor, context, jsonBody);
+        ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody());
+		IServiceValidate validator = new ValidateRefund(executor.isUserAnonymization(), (String) context.getProperty(MSISDNConstants.MSISDN));
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
-        ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody());
-		UserMaskingUtils.setPaymentUserMaskingContextProperties(executor, context, jsonBody);
         return true;
 	}
 
@@ -137,7 +136,7 @@ public class AmountRefundHandler implements PaymentHandler {
                 log.debug("sending endpoint found: " + sendingAdd);
             }
 
-            sendingAdd = PaymentUtil.decodeSendingAddressIfMasked(executor, sendingAdd);
+            sendingAdd = PaymentUtil.decodeSendingAddressIfMasked(executor, context, sendingAdd);
             if (!jsonBody.has(AttributeConstants.AMOUNT_TRANSACTION)) {
                 throw new CustomException("SVC0001", "", new String[]{"Incorrect JSON Object received"});
             }
