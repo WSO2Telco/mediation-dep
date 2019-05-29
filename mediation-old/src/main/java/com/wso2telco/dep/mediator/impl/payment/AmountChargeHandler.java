@@ -21,19 +21,19 @@ import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.MediatorConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
+import com.wso2telco.dep.mediator.delegator.CarbonUtilsDelegator;
+import com.wso2telco.dep.mediator.delegator.OCCIDelegator;
+import com.wso2telco.dep.mediator.delegator.ValidatorUtilsDelegator;
 import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
 import com.wso2telco.dep.mediator.internal.AggregatorValidator;
 import com.wso2telco.dep.mediator.internal.ApiUtils;
 import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
-import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.PaymentService;
 import com.wso2telco.dep.mediator.util.*;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.payment.ValidatePaymentCharge;
-import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
-import com.wso2telco.dep.user.masking.configuration.UserMaskingConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
@@ -42,7 +42,6 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
 import java.util.HashMap;
@@ -57,27 +56,59 @@ public class AmountChargeHandler implements PaymentHandler {
 
 	private Log log = LogFactory.getLog(AmountChargeHandler.class);
 
-	private OriginatingCountryCalculatorIDD occi;
+	private OCCIDelegator occi;
 
 	private PaymentService paymentService;
 
 	private PaymentExecutor executor;
-	
+
 	private ApiUtils apiUtils;
-	
+
 	private PaymentUtil paymentUtil;
 
 	private static List<String> validCategories = null;
 
-	public AmountChargeHandler(PaymentExecutor executor) {
+    private CarbonUtilsDelegator carbonUtilsDelegator;
+    private ValidatorUtilsDelegator validatorUtilsDelegator;
+    private FileReader fileReader;
+
+    @Deprecated
+    public AmountChargeHandler(PaymentExecutor executor) {
 		this.executor = executor;
-		occi = new OriginatingCountryCalculatorIDD();
+		occi = OCCIDelegator.getInstance();
 		paymentService = new PaymentService();
 		apiUtils = new ApiUtils();
 		paymentUtil = new PaymentUtil();
+		fileReader = new FileReader();
+        carbonUtilsDelegator = CarbonUtilsDelegator.getInstance();
+        validatorUtilsDelegator  = ValidatorUtilsDelegator.getInstance();
 	}
 
-	public boolean handle(MessageContext context) throws Exception {
+    /**
+     *
+     * @param occi
+     * @param paymentService
+     * @param executor
+     * @param apiUtils
+     * @param paymentUtil
+     * @param carbonUtilsDelegator
+     * @param fileReader
+     */
+    public AmountChargeHandler(OCCIDelegator occi, PaymentService paymentService,
+                               PaymentExecutor executor, ApiUtils apiUtils, PaymentUtil paymentUtil,
+                               CarbonUtilsDelegator carbonUtilsDelegator, FileReader fileReader,
+                               ValidatorUtilsDelegator validatorUtilsDelegator) {
+        this.occi = occi;
+        this.paymentService = paymentService;
+        this.executor = executor;
+        this.apiUtils = apiUtils;
+        this.paymentUtil = paymentUtil;
+        this.carbonUtilsDelegator = carbonUtilsDelegator;
+        this.fileReader = fileReader;
+        this.validatorUtilsDelegator = validatorUtilsDelegator;
+    }
+
+    public boolean handle(MessageContext context) throws Exception {
 
 		String requestId = UID.getUniqueID(Type.PAYMENT.getCode(), context, executor.getApplicationid());
 
@@ -89,10 +120,9 @@ public class AmountChargeHandler implements PaymentHandler {
 
 		String requestResourceURL = executor.getResourceUrl();
 
-        FileReader fileReader = new FileReader();
-        String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
+        String file = carbonUtilsDelegator.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
  		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
-        		
+
         String hubGatewayId = mediatorConfMap.get("hub_gateway_id");
         if (log.isDebugEnabled()) {
             log.debug("Hub / Gateway Id : " + hubGatewayId);
@@ -110,7 +140,7 @@ public class AmountChargeHandler implements PaymentHandler {
         JSONObject jsonBody = executor.getJsonBody();
         try {
 			String endUserId = (String) context.getProperty("MSISDN");
-            if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
+            if (validatorUtilsDelegator.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
                 OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
                 searchDTO.setApi(APIType.PAYMENT);
                 searchDTO.setApiName((String) context.getProperty("API_NAME"));
@@ -133,7 +163,7 @@ public class AmountChargeHandler implements PaymentHandler {
             if (!objAmountTransaction.isNull(AttributeConstants.CLIENT_CORRELATOR)) {
                 clientCorrelator = nullOrTrimmed(objAmountTransaction.get(AttributeConstants.CLIENT_CORRELATOR).toString());
             }
-          
+
             if (clientCorrelator == null || clientCorrelator.equals("")) {
 
                 if (log.isDebugEnabled()) {
@@ -153,7 +183,7 @@ public class AmountChargeHandler implements PaymentHandler {
                 clientCorrelator = clientCorrelator + ":" + hubGatewayId + ":" + appId;
             }
 
-            if (objAmountTransaction.has("chargingMetaData")) {
+            if (objAmountTransaction.getJSONObject("paymentAmount").has("chargingMetaData")) {
 
                 JSONObject chargingMeta = objAmountTransaction.getJSONObject("paymentAmount").getJSONObject("chargingMetaData");
 
@@ -184,7 +214,7 @@ public class AmountChargeHandler implements PaymentHandler {
 		// set information to the message context, to be used in the sequence
         HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
         HandlerUtils.setEndpointProperty(context, sendingAddress);
-        HandlerUtils.setGatewayHost(context);
+        context.setProperty("hubGateway", mediatorConfMap.get("hubGateway"));
         HandlerUtils.setAuthorizationHeader(context, executor, endpoint);
         context.setProperty("operator", endpoint.getOperator());
         context.setProperty("requestResourceUrl", requestResourceURL);
@@ -226,6 +256,6 @@ public class AmountChargeHandler implements PaymentHandler {
 		}
 		return rv;
 	}
-	 
+
 
 }
