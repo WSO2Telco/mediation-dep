@@ -17,6 +17,9 @@ package com.wso2telco.dep.mediator.internal;
 
  
 // TODO: Auto-generated Javadoc
+
+import java.util.Base64;
+
 /**
  * The Class Base64Coder.
  */
@@ -139,13 +142,15 @@ public static char[] encode (byte[] in, int iOff, int iLen) {
       out[op] = op < oDataLen ? map1[o3] : '='; op++; }
    return out; }
 
- 
+
 /**
  * Decode string.
  *
+ * @Depricated instead use {@link Base64#getMimeDecoder()#decode(String)}
  * @param s the s
  * @return the string
  */
+@Deprecated
 public static String decodeString (String s) {
    return new String(decode(s)); }
 

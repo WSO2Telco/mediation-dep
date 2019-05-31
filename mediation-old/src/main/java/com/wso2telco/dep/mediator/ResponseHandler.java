@@ -17,25 +17,6 @@
  */
 package com.wso2telco.dep.mediator;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.wso2telco.core.dbutils.fileutils.FileReader;
-import com.wso2telco.dep.mediator.entity.smsmessaging.DeliveryInfo;
-import com.wso2telco.dep.mediator.entity.smsmessaging.DeliveryInfoList;
-import com.wso2telco.dep.mediator.entity.smsmessaging.QuerySMSStatusResponse;
-import com.wso2telco.dep.mediator.entity.smsmessaging.SendSMSResponse;
-import com.wso2telco.dep.mediator.internal.UID;
-import com.wso2telco.dep.mediator.util.DataPublisherConstants;
-import com.wso2telco.dep.mediator.util.FileNames;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.json.JSONException;
-import org.json.JSONObject;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -43,7 +24,21 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.wso2telco.dep.mediator.entity.smsmessaging.DeliveryInfo;
+import com.wso2telco.dep.mediator.entity.smsmessaging.DeliveryInfoList;
+import com.wso2telco.dep.mediator.entity.smsmessaging.QuerySMSStatusResponse;
+import com.wso2telco.dep.mediator.entity.smsmessaging.SendSMSResponse;
+import com.wso2telco.dep.mediator.internal.UID;
+import com.wso2telco.dep.mediator.util.ConfigFileReader;
+import com.wso2telco.dep.mediator.util.DataPublisherConstants;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 // TODO: Auto-generated Javadoc
 
@@ -127,13 +122,7 @@ public class ResponseHandler {
 	 */
 	private String getResourceURL(MessageContext mc, String senderAddress) {
 
-		FileReader fileReader = new FileReader();
-		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
-		              + FileNames.MEDIATOR_CONF_FILE.getFileName();
-
-		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
-
-		String resourceURL = mediatorConfMap.get("sendSMSResourceURL");
+		String resourceURL = ConfigFileReader.getInstance().getMediatorConfigMap().get("sendSMSResourceURL");
 		if (resourceURL != null && !resourceURL.isEmpty()) {
 			resourceURL = resourceURL.substring(1, resourceURL.length() - 1) + senderAddress;
 		} else {
@@ -156,14 +145,6 @@ public class ResponseHandler {
 	 */
 	public String makePaymentResponse(String jsonBody, String clientCorrelator, String requestResourceURL, String requestid) throws JSONException {
 
-		String jsonPayload = null;
-
-		FileReader fileReader = new FileReader();
-		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
-		              + FileNames.MEDIATOR_CONF_FILE.getFileName();
-
-		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
-
 		Gson gson = new GsonBuilder().serializeNulls().create();
 		JSONObject jsonObj = new JSONObject(jsonBody);
 		JSONObject objPay = jsonObj.getJSONObject("amountTransaction");
@@ -175,7 +156,7 @@ public class ResponseHandler {
 		String pluginResourceUrlParts[] = pluginResourceUrl.split("/");
 /*		String hubResourceURL = mediatorConfMap.get("hubGateway") + "/payment/v1/" + endUserId + "/transactions/amount/" + pluginResourceUrlParts[pluginResourceUrlParts.length - 1];
 */
-		String hubResourceURL = mediatorConfMap.get("hubGateway")  + requestResourceURL + "/" + pluginResourceUrlParts[pluginResourceUrlParts.length - 1];
+		String hubResourceURL = ConfigFileReader.getInstance().getMediatorConfigMap().get("hubGateway")  + requestResourceURL + "/" + pluginResourceUrlParts[pluginResourceUrlParts.length - 1];
 		log.debug("Creating payment charge response -> hubResourceURL : " + hubResourceURL);
 		log.debug("Creating payment charge response -> requestid : " + requestid);
 
@@ -194,13 +175,7 @@ public class ResponseHandler {
 
 	 public String makePaymentResponseContext(MessageContext context, String jsonBody, String clientCorrelator, String requestResourceURL, String requestid) throws JSONException {
 
-         String jsonPayload = null;
-         FileReader fileReader = new FileReader();
-         String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
-                       + FileNames.MEDIATOR_CONF_FILE.getFileName();
- 		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
-
-         Gson gson = new GsonBuilder().serializeNulls().create();
+		 Gson gson = new GsonBuilder().serializeNulls().create();
          JSONObject jsonObj = new JSONObject(jsonBody);
          JSONObject objPay = jsonObj.getJSONObject("amountTransaction");
 
@@ -210,7 +185,7 @@ public class ResponseHandler {
          log.debug("Creating payment charge response -> pluginResourceUrl : " + pluginResourceUrl);
          String pluginResourceUrlParts[] = pluginResourceUrl.split("/");
          /*String hubResourceURL = Util.getApplicationProperty("hubGateway") + "/payment/v1/" + endUserId + "/transactions/amount/" + pluginResourceUrlParts[pluginResourceUrlParts.length - 1];*/
-         String hubResourceURL = mediatorConfMap.get("hubGateway") + requestResourceURL + "/" + pluginResourceUrlParts[pluginResourceUrlParts.length - 1];
+         String hubResourceURL = ConfigFileReader.getInstance().getMediatorConfigMap().get("hubGateway") + requestResourceURL + "/" + pluginResourceUrlParts[pluginResourceUrlParts.length - 1];
          log.debug("Creating payment charge response -> hubResourceURL : " + hubResourceURL);
          log.debug("Creating payment charge response -> requestid : " + requestid);
 
@@ -282,16 +257,13 @@ public class ResponseHandler {
 
         JSONObject jsonObj = new JSONObject(jsonBody);
         JSONObject objPay = jsonObj.getJSONObject("makePayment");
-        FileReader fileReader = new FileReader();
-        String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
-                      + FileNames.MEDIATOR_CONF_FILE.getFileName();
-		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
-        String endUserId = objPay.get("endUserId").toString();
+
+				String endUserId = objPay.get("endUserId").toString();
         log.debug("Creating wallet payment charge response -> endUserId : " + endUserId);
         String pluginResourceUrl = objPay.getString("notifyURL");
         log.debug("Creating wallet payment charge response -> notifyURL : " + pluginResourceUrl);
         String pluginResourceUrlParts[] = pluginResourceUrl.split("/");
-        String hubResourceURL = mediatorConfMap.get("hubGateway") + requestResourceURL + "/" + pluginResourceUrlParts[pluginResourceUrlParts.length - 1];
+        String hubResourceURL = ConfigFileReader.getInstance().getMediatorConfigMap().get("hubGateway") + requestResourceURL + "/" + pluginResourceUrlParts[pluginResourceUrlParts.length - 1];
         log.debug("Creating wallet payment charge response -> hubResourceURL : " + hubResourceURL);
        log.debug("Creating wallet payment charge response -> requestid : " + requestid);
 

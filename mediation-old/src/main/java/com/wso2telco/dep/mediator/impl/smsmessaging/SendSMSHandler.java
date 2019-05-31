@@ -20,20 +20,9 @@ package com.wso2telco.dep.mediator.impl.smsmessaging;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import com.wso2telco.core.dbutils.fileutils.FileReader;
-import com.wso2telco.dep.mediator.util.FileNames;
-import org.apache.axis2.AxisFault;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
 import com.google.common.base.CharMatcher;
 import com.google.gson.Gson;
@@ -45,13 +34,13 @@ import com.wso2telco.dep.mediator.ResponseHandler;
 import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
 import com.wso2telco.dep.mediator.entity.smsmessaging.SendSMSRequest;
 import com.wso2telco.dep.mediator.entity.smsmessaging.SendSMSResponse;
-import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.SouthboundDeliveryReceiptSubscriptionRequest;
-import com.wso2telco.dep.mediator.internal.ApiUtils;
 import com.wso2telco.dep.mediator.impl.AbstractHandler;
+import com.wso2telco.dep.mediator.internal.ApiUtils;
 import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.SMSMessagingService;
+import com.wso2telco.dep.mediator.util.ConfigFileReader;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
@@ -59,7 +48,6 @@ import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.ValidateSendSms;
 import com.wso2telco.dep.operatorservice.model.OperatorApplicationDTO;
 import com.wso2telco.dep.subscriptionvalidator.exceptions.ValidatorException;
-import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -67,14 +55,6 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONArray;
 import org.json.JSONObject;
-import org.wso2.carbon.utils.CarbonUtils;
-import java.io.File;
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 
 // TODO: Auto-generated Javadoc
@@ -219,10 +199,7 @@ public class SendSMSHandler extends AbstractHandler{
 		HandlerUtils.setAuthorizationHeader(context, executor, operatorEndpoint);
 		HandlerUtils.setEndpointProperty(context, sending_add);
 		HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
-
-		FileReader fileReader = new FileReader();
-		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
-		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
+		Map<String, String> mediatorConfMap = ConfigFileReader.getInstance().getMediatorConfigMap();
 
 		// read sendSMSResourceURL from mediatorConfMap and set to message context
 		String sendSmsResourceUrlPrefix = getProperty("sendSMSResourceURL");

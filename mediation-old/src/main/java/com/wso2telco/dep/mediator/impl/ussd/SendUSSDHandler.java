@@ -17,7 +17,6 @@
  */
 package com.wso2telco.dep.mediator.impl.ussd;
 
-import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
@@ -37,10 +36,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import java.io.File;
-import java.util.Map;
 
 // TODO: Auto-generated Javadoc
 
@@ -52,9 +47,6 @@ public class SendUSSDHandler implements USSDHandler {
 	/** The log. */
 	private Log log = LogFactory.getLog(SendUSSDHandler.class);
 
-	/** The Constant API_TYPE. */
-	private static final String API_TYPE = "ussd";
-
 	/** The occi. */
 	private OriginatingCountryCalculatorIDD occi;
 
@@ -63,12 +55,6 @@ public class SendUSSDHandler implements USSDHandler {
 
 	/** The ussdDAO. */
 	private USSDService ussdService;
-
-	/** Configuration file */
-	private String file = CarbonUtils.getCarbonConfigDirPath() + File.separator	+ FileNames.MEDIATOR_CONF_FILE.getFileName();
-
-	/** Loaded configurations */
-	private Map<String, String> mediatorConfMap;
 
 	/**
 	 * Instantiates a new send ussd handler.
@@ -80,7 +66,6 @@ public class SendUSSDHandler implements USSDHandler {
 		occi = new OriginatingCountryCalculatorIDD();
 		this.executor = executor;
 		ussdService = new USSDService();
-		mediatorConfMap = new FileReader().readPropertyFile(file);
 	}
 
 	/*
@@ -141,7 +126,7 @@ public class SendUSSDHandler implements USSDHandler {
 					Integer subscriptionId = ussdService.ussdRequestEntry(notifyUrl, consumerKey, endpoint.getOperator(), userId);
 					log.info("created subscriptionId  -  " + subscriptionId + " Request ID: " + UID.getRequestID(context));
 
-					String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint") + subscriptionId;
+					String subsEndpoint = ConfigFileReader.getInstance().getMediatorConfigMap().get("ussdGatewayEndpoint") + subscriptionId;
 					log.info("Subsendpoint - " + subsEndpoint + " Request ID: " + UID.getRequestID(context));
 					context.setProperty("subsEndPoint", subsEndpoint);
 				}

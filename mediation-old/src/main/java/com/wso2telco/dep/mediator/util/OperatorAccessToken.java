@@ -17,7 +17,18 @@
  */
 package com.wso2telco.dep.mediator.util;
 
-import com.wso2telco.core.dbutils.fileutils.FileReader;
+import java.io.BufferedReader;
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 import com.wso2telco.dep.mediator.ICallresponse;
 import com.wso2telco.dep.mediator.RequestExecutor;
 import com.wso2telco.dep.mediator.internal.UID;
@@ -28,16 +39,6 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.json.JSONObject;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import java.io.*;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
 
 /**
  * Util class to get operator access token
@@ -48,11 +49,7 @@ public class OperatorAccessToken {
 
     public static String getAccessToken(String operator, MessageContext messageContext) throws Exception {
         String response = "";
-        FileReader fileReader = new FileReader();
-        String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
-                + FileNames.MEDIATOR_CONF_FILE.getFileName();
-        Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
-
+        Map<String, String> mediatorConfMap =  ConfigFileReader.getInstance().getMediatorConfigMap();
         String tokenPoolService = mediatorConfMap.get("tokenpoolservice");
         String resourceURL = mediatorConfMap.get("tokenpoolResourceURL");
         log.info("tokenPoolService Enabled: " + tokenPoolService + "with tokenPoolService URL: " + resourceURL);

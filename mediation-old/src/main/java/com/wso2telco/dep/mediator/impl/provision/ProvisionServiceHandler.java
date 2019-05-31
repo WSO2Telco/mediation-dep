@@ -17,9 +17,11 @@
  */
 package com.wso2telco.dep.mediator.impl.provision;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.entity.provision.CallbackReference;
@@ -32,7 +34,7 @@ import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.ProvisionService;
-import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.ConfigFileReader;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.provision.ValidateProvisionService;
@@ -41,11 +43,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.Map;
 
 public class ProvisionServiceHandler implements ProvisionHandler {
 
@@ -97,12 +94,8 @@ public class ProvisionServiceHandler implements ProvisionHandler {
 		String notifyUrl = null;
 		String requestBody = null;
 		String responseResourcrUrl = null;
-		
-		FileReader fileReader = new FileReader();
-		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
-		
-		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
 
+		Map<String, String> mediatorConfMap = ConfigFileReader.getInstance().getMediatorConfigMap();
 		ProvisionServiceResponse provisionServiceResponse;
 
 		String hub_gateway_id = mediatorConfMap.get("hub_gateway_id");

@@ -17,7 +17,14 @@
  */
 package com.wso2telco.dep.mediator.mediationrule;
 
-import com.wso2telco.core.dbutils.fileutils.FileReader;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import com.wso2telco.core.mnc.resolver.MNCQueryClient;
 import com.wso2telco.core.mnc.resolver.mncrange.McnRangeDbUtil;
 import com.wso2telco.core.msisdnvalidator.InvalidMSISDNException;
@@ -25,8 +32,8 @@ import com.wso2telco.core.msisdnvalidator.MSISDN;
 import com.wso2telco.core.msisdnvalidator.MSISDNUtil;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
+import com.wso2telco.dep.mediator.util.ConfigFileReader;
 import com.wso2telco.dep.mediator.util.ErrorHolder;
-import com.wso2telco.dep.mediator.util.FileNames;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.operatorservice.model.OperatorApplicationDTO;
 import com.wso2telco.dep.operatorservice.model.OperatorEndPointDTO;
@@ -36,15 +43,6 @@ import org.apache.axis2.context.MessageContext;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.wso2.carbon.utils.CarbonUtils;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -96,12 +94,10 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
 
     }
 
+    //TODO refactor this class and remove static block
     static {
 
-        FileReader fileReader = new FileReader();
-
-        String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
-        Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
+        Map<String, String> mediatorConfMap = ConfigFileReader.getInstance().getMediatorConfigMap();
 
         //oparatorOnHeaderName
         if (mediatorConfMap.containsKey(MNOHEADER)) {
@@ -219,17 +215,7 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
                     .getProperty(MessageContext.TRANSPORT_HEADERS);
             if (headers != null && headers instanceof Map) {
                 Map headersMap = (Map) headers;
-                /*if (headersMap != null) {
-					log.info("printing header");
-					for (Object iterator : headersMap.entrySet()) {
-						Map.Entry entry = (Map.Entry) iterator;
-						log.info("Key :" + entry.getKey() + " value : "
-								+ entry.getValue());
-					}
-				}*/
-
                 operatorCode = (String) headersMap.get(oparatorOnHeaderName);
-
             }
 
             //Check if regular expression applicable 
@@ -378,62 +364,6 @@ public class OriginatingCountryCalculatorIDD extends OriginatingCountryCalculato
         }
 
         return endpoints;
-    }
-
-    /**
-     * Str_piece.
-     *
-     * @param str the str
-     * @param separator the separator
-     * @param index the index
-     * @return the string
-     */
-    private String str_piece(String str, char separator, int index) {
-
-        String str_result = "";
-        int count = 0;
-
-        for (int i = 0; i < str.length(); i++) {
-
-            if (str.charAt(i) == separator) {
-
-                count++;
-                if (count == index) {
-
-                    break;
-                }
-            } else {
-
-                if (count == index - 1) {
-
-                    str_result += str.charAt(i);
-                }
-            }
-        }
-
-        return str_result;
-    }
-
-    /**
-     * Gets the application property.
-     *
-     * @param operatorcode the operatorcode
-     * @param api the api
-     * @return the application property
-     */
-    private String getApplicationProperty(String operatorcode, String api) {
-
-        String endpoint = null;
-        for (OperatorEndPointDTO d : operatorEndpoints) {
-
-            if ((d.getApi().contains(api)) && (d.getOperatorcode().contains(operatorcode))) {
-
-                endpoint = d.getEndpoint();
-                break;
-            }
-        }
-
-        return endpoint;
     }
 
     /**
