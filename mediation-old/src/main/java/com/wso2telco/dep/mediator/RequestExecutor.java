@@ -20,7 +20,6 @@ package com.wso2telco.dep.mediator;
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
@@ -33,8 +32,27 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.wso2telco.core.dbutils.exception.BusinessException;
+import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.InboundSMSMessage;
+import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.InboundSMSMessageList;
+import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.SouthboundRetrieveResponse;
+import com.wso2telco.dep.mediator.internal.UID;
+import com.wso2telco.dep.mediator.unmarshaler.GroupDTO;
+import com.wso2telco.dep.mediator.unmarshaler.GroupEventUnmarshaller;
+import com.wso2telco.dep.mediator.unmarshaler.OparatorNotinListException;
+import com.wso2telco.dep.mediator.util.ConfigFileReader;
+import com.wso2telco.dep.mediator.util.DataPublisherConstants;
+import com.wso2telco.dep.mediator.util.MediationHelper;
+import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
+import com.wso2telco.dep.oneapivalidation.exceptions.RequestError;
+import com.wso2telco.dep.oneapivalidation.exceptions.ResponseError;
 import com.wso2telco.dep.operatorservice.exception.OperatorServiceException;
 import com.wso2telco.dep.operatorservice.model.Operator;
+import com.wso2telco.dep.operatorservice.model.OperatorAppSearchDTO;
+import com.wso2telco.dep.operatorservice.model.OperatorApplicationDTO;
+import com.wso2telco.dep.operatorservice.service.OparatorService;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -43,28 +61,6 @@ import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.wso2telco.core.dbutils.exception.BusinessException;
-import com.wso2telco.core.dbutils.fileutils.FileReader;
-import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.InboundSMSMessage;
-import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.InboundSMSMessageList;
-import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.SouthboundRetrieveResponse;
-import com.wso2telco.dep.mediator.internal.UID;
-import com.wso2telco.dep.mediator.unmarshaler.GroupDTO;
-import com.wso2telco.dep.mediator.unmarshaler.GroupEventUnmarshaller;
-import com.wso2telco.dep.mediator.unmarshaler.OparatorNotinListException;
-import com.wso2telco.dep.mediator.util.DataPublisherConstants;
-import com.wso2telco.dep.mediator.util.FileNames;
-import com.wso2telco.dep.mediator.util.MediationHelper;
-import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
-import com.wso2telco.dep.oneapivalidation.exceptions.RequestError;
-import com.wso2telco.dep.oneapivalidation.exceptions.ResponseError;
-import com.wso2telco.dep.operatorservice.model.OperatorAppSearchDTO;
-import com.wso2telco.dep.operatorservice.model.OperatorApplicationDTO;
-import com.wso2telco.dep.operatorservice.service.OparatorService;
 
 // TODO: Auto-generated Javadoc
 
@@ -1447,10 +1443,7 @@ public abstract class RequestExecutor {
 		if (operator == null) {
 			return response;
 		}
-		FileReader fileReader = new FileReader();
-		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
-				+ FileNames.MEDIATOR_CONF_FILE.getFileName();
-		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
+		Map<String, String> mediatorConfMap = ConfigFileReader.getInstance().getMediatorConfigMap();
 
 		String tokenPoolService = mediatorConfMap.get("tokenpoolservice");
 		String resourceURL = mediatorConfMap.get("tokenpoolResourceURL");
@@ -1670,11 +1663,7 @@ public abstract class RequestExecutor {
 
     private String modifyEndpoint(String sendingAdd, String operator, MessageContext context){
 
-        FileReader fileReader = new FileReader();
-        String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
-                      + FileNames.MEDIATOR_CONF_FILE.getFileName();
-        Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
-        String esbEndpoint = mediatorConfMap.get("esbEndpoint");
+	    String esbEndpoint = ConfigFileReader.getInstance().getMediatorConfigMap().get("esbEndpoint");
         String isUserInfoEnabled = "false";
         String operatorEndpoint = sendingAdd;
         String consumerKey = "";
