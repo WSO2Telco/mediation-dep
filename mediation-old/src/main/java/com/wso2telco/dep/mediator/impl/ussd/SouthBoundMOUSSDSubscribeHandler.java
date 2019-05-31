@@ -17,12 +17,11 @@
  */
 package com.wso2telco.dep.mediator.impl.ussd;
 
-import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.internal.ApiUtils;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.USSDService;
-import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.ConfigFileReader;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.ussd.ValidateUssdSubscription;
@@ -32,11 +31,8 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.json.JSONObject;
-import org.wso2.carbon.utils.CarbonUtils;
 
-import java.io.File;
 import java.util.List;
-import java.util.Map;
 
 // TODO: Auto-generated Javadoc
 
@@ -63,13 +59,6 @@ public class SouthBoundMOUSSDSubscribeHandler implements USSDHandler {
 	
 	private ApiUtils apiUtils;
 
-	/** Configurations file */
-	private String file =
-			CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
-
-	/** Loaded configurations */
-	private Map<String, String> mediatorConfMap;
-
 	/**
 	 * Instantiates a new MOUSSD subscribe handler.
 	 *
@@ -82,7 +71,6 @@ public class SouthBoundMOUSSDSubscribeHandler implements USSDHandler {
 		this.executor = ussdExecutor;
 		ussdService = new USSDService();
 		apiUtils = new ApiUtils();
-		mediatorConfMap = new FileReader().readPropertyFile(file);
 	}
 
 	/*
@@ -104,7 +92,7 @@ public class SouthBoundMOUSSDSubscribeHandler implements USSDHandler {
         String operatorId="";
         Integer subscriptionId = ussdService.ussdRequestEntry(notifyUrl,consumerKey,operatorId,userId);
 
-        String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint") + subscriptionId;
+        String subsEndpoint = ConfigFileReader.getInstance().getMediatorConfigMap().get("ussdGatewayEndpoint") + subscriptionId;
         log.info("Subsendpoint - " + subsEndpoint);
 
         List<OperatorEndpoint> endpoints = occi.getAPIEndpointsByApp(API_TYPE, executor.getSubResourcePath(),

@@ -19,7 +19,6 @@
 package com.wso2telco.dep.mediator.impl.payment;
 
 import com.wso2telco.dep.mediator.MSISDNConstants;
-import com.wso2telco.dep.mediator.internal.Base64Coder;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
@@ -29,6 +28,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 
@@ -55,7 +55,7 @@ public class PaymentUtil {
 				Map headersMap = (Map) headers;
 				String jwtparam = (String) headersMap.get("x-jwt-assertion");
 				String[] jwttoken = jwtparam.split("\\.");
-				String jwtbody = Base64Coder.decodeString(jwttoken[1]);
+				String jwtbody = new String(Base64.getMimeDecoder().decode(jwttoken[1]));
 				JSONObject jwtobj = new JSONObject(jwtbody);
 				subscription = jwtobj
 						.getString("http://wso2.org/claims/subscriber");
@@ -82,7 +82,7 @@ public class PaymentUtil {
 				Map headersMap = (Map) headers;
 				String jwtparam = (String) headersMap.get("x-jwt-assertion");
 				String[] jwttoken = jwtparam.split("\\.");
-				String jwtbody = Base64Coder.decodeString(jwttoken[1]);
+				String jwtbody = new String(Base64.getMimeDecoder().decode(jwttoken[1]));
 				JSONObject jwtobj = new JSONObject(jwtbody);
 				String claimaggr = jwtobj
 						.getString("http://wso2.org/claims/role");

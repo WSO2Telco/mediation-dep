@@ -68,6 +68,10 @@ public class Util {
 		return props.getProperty(key);
 	}
 
+	/**
+	 * @Depricated use {@link com.wso2telco.framework.configuration.IConfigFileReaderService}
+	 */
+	@Deprecated
 	public static void getPropertyFile() {
 		try {
 			String configPath = CarbonUtils.getCarbonConfigDirPath() + File.separator + "axiataMediator_conf.properties";
@@ -98,6 +102,12 @@ public class Util {
 		}
 	}
 
+	/**
+	 * @Deepricated use {@link com.wso2telco.framework.configuration.IConfigFileReaderService}
+	 * @param path
+	 * @throws IOException
+	 */
+	@Deprecated
 	public static void getPropertyFileByPath(String path) throws IOException {
 
 		Properties props = new Properties();

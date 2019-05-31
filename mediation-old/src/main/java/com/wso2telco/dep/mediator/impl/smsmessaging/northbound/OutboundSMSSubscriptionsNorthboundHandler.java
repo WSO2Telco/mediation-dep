@@ -17,9 +17,12 @@
  */
 package com.wso2telco.dep.mediator.impl.smsmessaging.northbound;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.entity.smsmessaging.CallbackReference;
 import com.wso2telco.dep.mediator.entity.smsmessaging.northbound.DeliveryReceiptGroupSubscription;
@@ -33,27 +36,17 @@ import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.SMSMessagingService;
-import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.ConfigFileReader;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
-import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.ValidateCancelSubscription;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.northbound.ValidateNBOutboundSubscription;
-import com.wso2telco.dep.operatorservice.model.OperatorSubscriptionDTO;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 // TODO: Auto-generated Javadoc
 
@@ -80,12 +73,6 @@ public class OutboundSMSSubscriptionsNorthboundHandler implements SMSHandler {
 	/** The api utils. */
 	private ApiUtils apiUtils;
 
-	/** The configuration file */
-	private String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
-
-	/** The configurations */
-	private Map<String, String> mediatorConfMap;
-
 	/** The Gson Builder */
 	private Gson gson = new GsonBuilder().serializeNulls().create();
 
@@ -100,7 +87,6 @@ public class OutboundSMSSubscriptionsNorthboundHandler implements SMSHandler {
 		occi = new OriginatingCountryCalculatorIDD();
 		smsMessagingService = new SMSMessagingService();
 		apiUtils = new ApiUtils();
-		mediatorConfMap = new FileReader().readPropertyFile(file);
 	}
 
 	/*
@@ -171,7 +157,8 @@ public class OutboundSMSSubscriptionsNorthboundHandler implements SMSHandler {
 
 		String serviceProvider = jwtDetails.get("subscriber");
 		log.debug("Subscriber Name : " + serviceProvider);
-		
+
+		Map<String, String> mediatorConfMap = ConfigFileReader.getInstance().getMediatorConfigMap();
 		String hubDNSubsGatewayEndpoint = mediatorConfMap.get("hubDNSubsGatewayEndpoint");
 		log.debug("Hub DN Notify URL : " + hubDNSubsGatewayEndpoint);
 		
