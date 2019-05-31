@@ -24,16 +24,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.wso2telco.core.dbutils.fileutils.FileReader;
-import com.wso2telco.dep.mediator.util.FileNames;
-import org.apache.axis2.AxisFault;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.json.JSONArray;
-import org.json.JSONObject;
-
 import com.google.common.base.CharMatcher;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -44,8 +34,6 @@ import com.wso2telco.dep.mediator.ResponseHandler;
 import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
 import com.wso2telco.dep.mediator.entity.smsmessaging.SendSMSRequest;
 import com.wso2telco.dep.mediator.entity.smsmessaging.SendSMSResponse;
-import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.SouthboundDeliveryReceiptSubscriptionRequest;
-import com.wso2telco.dep.mediator.internal.ApiUtils;
 import com.wso2telco.dep.mediator.impl.AbstractHandler;
 import com.wso2telco.dep.mediator.internal.ApiUtils;
 import com.wso2telco.dep.mediator.internal.Type;
