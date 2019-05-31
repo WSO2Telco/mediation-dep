@@ -17,23 +17,20 @@
  */
 package com.wso2telco.dep.mediator.impl.smsmessaging.northbound;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
-import com.wso2telco.dep.mediator.entity.smsmessaging.northbound.InboundSMSMessage;
-import com.wso2telco.dep.mediator.entity.smsmessaging.northbound.InboundSMSMessageList;
 import com.wso2telco.dep.mediator.entity.smsmessaging.northbound.NorthboundRetrieveRequest;
-import com.wso2telco.dep.mediator.entity.smsmessaging.northbound.NorthboundRetrieveResponse;
 import com.wso2telco.dep.mediator.entity.smsmessaging.northbound.Registrations;
 import com.wso2telco.dep.mediator.impl.smsmessaging.SMSExecutor;
 import com.wso2telco.dep.mediator.impl.smsmessaging.SMSHandler;
-import com.wso2telco.dep.mediator.internal.APICall;
-import com.wso2telco.dep.mediator.internal.ApiUtils;
 import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
-import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.ConfigFileReader;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
@@ -46,13 +43,6 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 
 
 // TODO: Auto-generated Javadoc
@@ -72,17 +62,8 @@ private static final String API_TYPE = "smsmessaging";
 /** The occi. */
 private OriginatingCountryCalculatorIDD occi;
 
-/** The api util. */
-private ApiUtils apiUtil;
-
 /** The executor. */
 private SMSExecutor executor;
-
-/** Configuration file */
-private String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
-
-/** Configuration Map */
-private Map<String, String> mediatorConfMap;
 
 /**
  * Instantiates a new NB retrieve sms handler.
@@ -93,8 +74,6 @@ private Map<String, String> mediatorConfMap;
 public RetrieveSMSNorthboundHandler(SMSExecutor executor) {
 	this.executor = executor;
 	occi = new OriginatingCountryCalculatorIDD();
-	apiUtil = new ApiUtils();
-	mediatorConfMap = new FileReader().readPropertyFile(file);
 }
 
 /*
@@ -186,7 +165,7 @@ public boolean handle(MessageContext context) throws CustomException, AxisFault,
     HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
     JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), requestStr, true, true);
 
-	String ResourceUrlPrefix = mediatorConfMap.get("hubGateway");
+	String ResourceUrlPrefix = ConfigFileReader.getInstance().getMediatorConfigMap().get("hubGateway");
 	context.setProperty("responseResourceURL", ResourceUrlPrefix + "/inbound/registrations/messages");
 
 	return true;

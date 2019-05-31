@@ -17,7 +17,10 @@
  */
 package com.wso2telco.dep.mediator.impl.payment;
 
-import com.wso2telco.core.dbutils.fileutils.FileReader;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
@@ -28,7 +31,7 @@ import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.PaymentService;
 import com.wso2telco.dep.mediator.util.APIType;
-import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.ConfigFileReader;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.mediator.util.ValidationUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
@@ -41,12 +44,6 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -97,9 +94,7 @@ public class AmountRefundHandler implements PaymentHandler {
         String clientCorrelator = null;
         String sending_add = null;
 
-        FileReader fileReader = new FileReader();
-        String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
-        Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
+        Map<String, String> mediatorConfMap = ConfigFileReader.getInstance().getMediatorConfigMap();
         String hub_gateway_id = mediatorConfMap.get("hub_gateway_id");
         if (log.isDebugEnabled()) {
             log.debug("Hub / Gateway Id : " + hub_gateway_id);
@@ -217,10 +212,7 @@ public class AmountRefundHandler implements PaymentHandler {
 		String jsonResponse = null;
 
 		try {
-
-			FileReader fileReader = new FileReader();
-	       	String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
-			Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
+			Map<String, String> mediatorConfMap = ConfigFileReader.getInstance().getMediatorConfigMap();
 			String ResourceUrlPrefix = mediatorConfMap.get("hubGateway");
 
 			JSONObject jsonObj = new JSONObject(responseStr);

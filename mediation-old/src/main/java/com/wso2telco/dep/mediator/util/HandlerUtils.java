@@ -15,15 +15,12 @@
  ******************************************************************************/
 package com.wso2telco.dep.mediator.util;
 
-import com.wso2telco.core.dbutils.fileutils.FileReader;
+import java.util.Map;
+
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.RequestExecutor;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import java.io.File;
-import java.util.Map;
 
 /**
  * Utility class to set custom properties inside custom handlers
@@ -77,10 +74,8 @@ public class HandlerUtils {
      *
      * @param messageContext the message context for which the gateway host is set
      */
-    public static void setGatewayHost(MessageContext messageContext){
-        FileReader fileReader = new FileReader();
-        String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
-        Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
+    public static void setGatewayHost(MessageContext messageContext)throws Exception{
+        Map<String, String> mediatorConfMap = ConfigFileReader.getInstance().getMediatorConfigMap();
         messageContext.setProperty("hubGateway", mediatorConfMap.get("hubGateway"));
     }
 }
