@@ -1,5 +1,3 @@
-package com.wso2telco.dep.mediator.delegator;
-
 /**
  * Copyright (c) 2019, WSO2.Telco Inc. (http://www.wso2telco.com) All Rights Reserved.
  * <p>
@@ -15,6 +13,7 @@ package com.wso2telco.dep.mediator.delegator;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+package com.wso2telco.dep.mediator.delegator;
 
 import com.wso2telco.dep.subscriptionvalidator.exceptions.ValidatorException;
 import com.wso2telco.dep.subscriptionvalidator.services.MifeValidator;

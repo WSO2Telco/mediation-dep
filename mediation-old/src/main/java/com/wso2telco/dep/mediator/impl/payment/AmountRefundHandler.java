@@ -21,6 +21,9 @@ import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.MediatorConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
+import com.wso2telco.dep.mediator.delegator.CarbonUtilsDelegator;
+import com.wso2telco.dep.mediator.delegator.OCCIDelegator;
+import com.wso2telco.dep.mediator.delegator.ValidatorUtilsDelegator;
 import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
 import com.wso2telco.dep.mediator.internal.AggregatorValidator;
 import com.wso2telco.dep.mediator.internal.ApiUtils;
@@ -56,21 +59,49 @@ import java.util.Map;
 public class AmountRefundHandler implements PaymentHandler {
 
 	private static Log log = LogFactory.getLog(AmountRefundHandler.class);
-	private OriginatingCountryCalculatorIDD occi;
-	private PaymentExecutor executor;
-	private PaymentService dbservice;
-	private ApiUtils apiUtils;
-	private PaymentUtil paymentUtil;
 
+    private OCCIDelegator occi;
+
+    private PaymentService paymentService;
+
+    private PaymentExecutor executor;
+
+    private ApiUtils apiUtils;
+
+    private PaymentUtil paymentUtil;
+
+    private static List<String> validCategories = null;
+
+    private CarbonUtilsDelegator carbonUtilsDelegator;
+    private ValidatorUtilsDelegator validatorUtilsDelegator;
+    private FileReader fileReader;
+
+    @Deprecated
 	public AmountRefundHandler(PaymentExecutor executor) {
-		this.executor = executor;
-		occi = new OriginatingCountryCalculatorIDD();
-		dbservice = new PaymentService();
-		apiUtils = new ApiUtils();
-		paymentUtil = new PaymentUtil();
+        this.executor = executor;
+        occi = OCCIDelegator.getInstance();
+        paymentService = new PaymentService();
+        apiUtils = new ApiUtils();
+        paymentUtil = new PaymentUtil();
+        fileReader = new FileReader();
+        carbonUtilsDelegator = CarbonUtilsDelegator.getInstance();
+        validatorUtilsDelegator  = ValidatorUtilsDelegator.getInstance();
 	}
 
-	@Override
+    public AmountRefundHandler(OCCIDelegator occi, PaymentService paymentService, PaymentExecutor executor,
+                               ApiUtils apiUtils, PaymentUtil paymentUtil, CarbonUtilsDelegator carbonUtilsDelegator,
+                               ValidatorUtilsDelegator validatorUtilsDelegator, FileReader fileReader) {
+        this.occi = occi;
+        this.paymentService = paymentService;
+        this.executor = executor;
+        this.apiUtils = apiUtils;
+        this.paymentUtil = paymentUtil;
+        this.carbonUtilsDelegator = carbonUtilsDelegator;
+        this.validatorUtilsDelegator = validatorUtilsDelegator;
+        this.fileReader = fileReader;
+    }
+
+    @Override
 	public boolean validate(String httpMethod, String requestPath,
 			JSONObject jsonBody, MessageContext context) throws Exception {
 		if (!httpMethod.equalsIgnoreCase(HttpPost.METHOD_NAME)) {
@@ -98,8 +129,7 @@ public class AmountRefundHandler implements PaymentHandler {
         String clientCorrelator = null;
         String sendingAdd = null;
 
-        FileReader fileReader = new FileReader();
-        String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
+        String file = carbonUtilsDelegator.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
         Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
         String hubGatewayId = mediatorConfMap.get("hub_gateway_id");
         if (log.isDebugEnabled()) {
@@ -118,7 +148,7 @@ public class AmountRefundHandler implements PaymentHandler {
         try {
             JSONObject jsonBody = executor.getJsonBody();
             String endUserId = (String) context.getProperty(MSISDNConstants.MSISDN);
-            if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
+            if (validatorUtilsDelegator.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
                     OparatorEndPointSearchDTO searchDTO = new OparatorEndPointSearchDTO();
                     searchDTO.setApi(APIType.PAYMENT);
                     searchDTO.setApiName((String) context.getProperty("API_NAME"));
@@ -180,7 +210,7 @@ public class AmountRefundHandler implements PaymentHandler {
 
 
                 // validate payment categoreis
-                List<String> validPayCategories = dbservice.getValidPayCategories();
+                List<String> validPayCategories = paymentService.getValidPayCategories();
                 paymentUtil.validatePaymentCategory(chargingMetaData, validPayCategories);
             }
         } catch (JSONException e) {
@@ -191,7 +221,7 @@ public class AmountRefundHandler implements PaymentHandler {
         // set information to the message context, to be used in the sequence
         HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
         HandlerUtils.setEndpointProperty(context, sendingAdd);
-        HandlerUtils.setGatewayHost(context);
+        context.setProperty("hubGateway", mediatorConfMap.get("hubGateway"));
         HandlerUtils.setAuthorizationHeader(context, executor, endpoint);
         context.setProperty("requestResourceUrl", executor.getResourceUrl());
         context.setProperty("requestID", requestId);

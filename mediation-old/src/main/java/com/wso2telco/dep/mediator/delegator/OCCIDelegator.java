@@ -1,9 +1,3 @@
-package com.wso2telco.dep.mediator.delegator;
-
-import com.wso2telco.dep.mediator.OperatorEndpoint;
-import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
-import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
-
 /**
  * Copyright (c) 2019, WSO2.Telco Inc. (http://www.wso2telco.com) All Rights Reserved.
  * <p>
@@ -19,6 +13,13 @@ import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+package com.wso2telco.dep.mediator.delegator;
+
+import com.wso2telco.dep.mediator.OperatorEndpoint;
+import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
+import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
+
 public class OCCIDelegator {
 
     private static final OCCIDelegator INSTANCE = new OCCIDelegator();
