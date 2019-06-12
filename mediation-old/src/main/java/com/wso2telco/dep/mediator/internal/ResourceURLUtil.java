@@ -196,7 +196,7 @@ public class ResourceURLUtil {
     }
 
 	/**
-	 * Returns array of path parameters by splitting '&' notation.
+	 * Returns array of decoded path parameters by splitting '&' notation.
 	 *
 	 * <b>Note:</b> This does not check whether parameter has "=" notation.
 	 *
@@ -209,12 +209,16 @@ public class ResourceURLUtil {
 	public String[] getParamPairs(String url) throws UnsupportedEncodingException {
 
 		List<String> paramPairs = new ArrayList<String>();
-		String[] urlParts = url.split("\\?");
+		String[] urlParts = url.split("\\?",2);
 		if (urlParts.length >= 2) {
 			String query = urlParts[1];
 			for (String param : query.split("&")) {
 				if(!param.isEmpty()) {
-					paramPairs.add(URLDecoder.decode(param, "UTF-8"));
+					if(!param.contains("+")){
+                        paramPairs.add(URLDecoder.decode(param, "UTF-8"));
+                    }else {
+                        paramPairs.add(param);
+                    }
 				}
 			}
 		}
