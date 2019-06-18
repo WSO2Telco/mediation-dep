@@ -78,8 +78,6 @@ public class USSDInboundResponseMediator extends AbstractMediator {
 
             if (action.equalsIgnoreCase("mofin")) {
                 log.info("Subsendpoint - " + subsEndpoint + " Request ID: " + UID.getRequestID(messageContext));
-                boolean deleted = ussdService.ussdEntryDelete(Integer.valueOf(subscriptionId));
-                log.info("Entry deleted " + deleted + " Request ID: " + UID.getRequestID(messageContext));
             }
 
             OperatorEndpoint endpoint = new OperatorEndpoint(new EndpointReference(ussdSPDetails.get(0)), null);
