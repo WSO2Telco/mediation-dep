@@ -21,7 +21,7 @@ public abstract class AbstractHandler implements SMSHandler {
 	@SuppressWarnings({ "deprecation", "static-access" })
 	protected AbstractHandler() throws ValidatorException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		if (mediatorConfMap == null) {
-      mediatorConfMap = ConfigFileReader.getInstance().getMediatorConfigMap();
+			mediatorConfMap = ConfigFileReader.getInstance().getMediatorConfigMap();
 		}
 		if(validatorList.isEmpty()){
 			validatorList = new ArrayList<ValidatorClassDTO>();

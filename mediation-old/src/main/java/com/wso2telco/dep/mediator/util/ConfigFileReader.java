@@ -5,6 +5,7 @@ import java.util.Map;
 
 import com.google.common.base.Joiner;
 import framework.configuration.ConfigFile;
+import framework.configuration.ConfigFileReaderServiceFactory;
 import framework.configuration.impl.ConfigFileReaderServiceImpl;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -38,7 +39,7 @@ public final class ConfigFileReader
   {
     try
     {
-      return ConfigFileReaderServiceImpl.getInstance().readFile(ConfigFile.MEDIATOR_CONF);
+      return ConfigFileReaderServiceFactory.getConfigFileReaderSerice().readFile(ConfigFile.MEDIATOR_CONF);
     }
     catch (Exception e)
     {

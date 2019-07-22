@@ -25,6 +25,7 @@ import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.USSDService;
 import com.wso2telco.dep.mediator.util.APIType;
+import com.wso2telco.dep.mediator.util.ConfigFileReader;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.mediator.util.ValidationUtils;

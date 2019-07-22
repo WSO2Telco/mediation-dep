@@ -64,7 +64,7 @@ public class CreditRefundHandler implements CreditHandler {
         String clientCorrelator = null;
         String requestResourceURL = executor.getResourceUrl();
 
-      Map<String, String> mediatorConfMap = ConfigFileReader.getInstance().getMediatorConfigMap();
+        Map<String, String> mediatorConfMap = ConfigFileReader.getInstance().getMediatorConfigMap();
         String hub_gateway_id = mediatorConfMap.get("hub_gateway_id");
         log.debug("Hub / Gateway Id : " + hub_gateway_id);
 
