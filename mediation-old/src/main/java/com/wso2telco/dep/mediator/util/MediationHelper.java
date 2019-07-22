@@ -1,8 +1,6 @@
 package com.wso2telco.dep.mediator.util;
 
 import com.wso2telco.core.dbutils.exception.BusinessException;
-import com.wso2telco.dep.mediator.RequestExecutor;
-import com.wso2telco.dep.mediator.internal.Base64Coder;
 import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -11,6 +9,7 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.util.Base64;
 import java.util.Map;
 
 public class MediationHelper {
@@ -63,7 +62,7 @@ public class MediationHelper {
                     throw new BusinessException("Can't find 'x-jwt-assertion' header in request");
                 }
                 String[] jwttoken = jwtparam.split("\\.");
-                String jwtbody = Base64Coder.decodeString(jwttoken[1]);
+                String jwtbody = new String(Base64.getMimeDecoder().decode(jwttoken[1]));
                 JSONObject jwtobj = new JSONObject(jwtbody);
                 applicationid = jwtobj.getString("http://wso2.org/claims/applicationid");
                 if (log.isDebugEnabled()) {

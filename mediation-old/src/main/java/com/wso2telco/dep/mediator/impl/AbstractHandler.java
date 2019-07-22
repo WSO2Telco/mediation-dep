@@ -1,22 +1,18 @@
 package com.wso2telco.dep.mediator.impl;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.synapse.MessageContext;
-import org.wso2.carbon.apimgt.api.APIManagementException;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.impl.smsmessaging.SMSHandler;
-import com.wso2telco.dep.mediator.util.FileNames;
+import com.wso2telco.dep.mediator.util.ConfigFileReader;
 import com.wso2telco.dep.subscriptionvalidator.exceptions.ValidatorException;
 import com.wso2telco.dep.subscriptionvalidator.services.MifeValidator;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorClassDTO;
 import com.wso2telco.dep.subscriptionvalidator.util.ValidatorDBUtils;
+import org.apache.synapse.MessageContext;
+import org.wso2.carbon.apimgt.api.APIManagementException;
 
 public abstract class AbstractHandler implements SMSHandler {
 	private static Map<String, String> mediatorConfMap;
@@ -25,9 +21,7 @@ public abstract class AbstractHandler implements SMSHandler {
 	@SuppressWarnings({ "deprecation", "static-access" })
 	protected AbstractHandler() throws ValidatorException, InstantiationException, IllegalAccessException, ClassNotFoundException {
 		if (mediatorConfMap == null) {
-			FileReader fileReader = new FileReader();
-			String file = CarbonUtils.getCarbonConfigDirPath() + File.separator+ FileNames.MEDIATOR_CONF_FILE.getFileName();
-			this.mediatorConfMap = fileReader.readPropertyFile(file);
+			mediatorConfMap = ConfigFileReader.getInstance().getMediatorConfigMap();
 		}
 		if(validatorList.isEmpty()){
 			validatorList = new ArrayList<ValidatorClassDTO>();
