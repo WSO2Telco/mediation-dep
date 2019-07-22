@@ -17,15 +17,15 @@
  */
 package com.wso2telco.dep.mediator.impl.smsmessaging.northbound;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
-import com.wso2telco.dep.mediator.entity.smsmessaging.CallbackReference;
 import com.wso2telco.dep.mediator.entity.smsmessaging.northbound.DestinationAddresses;
 import com.wso2telco.dep.mediator.entity.smsmessaging.northbound.NorthboundSubscribeRequest;
-import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.SouthboundSubscribeRequest;
-import com.wso2telco.dep.mediator.entity.smsmessaging.southbound.Subscription;
 import com.wso2telco.dep.mediator.impl.smsmessaging.SMSExecutor;
 import com.wso2telco.dep.mediator.impl.smsmessaging.SMSHandler;
 import com.wso2telco.dep.mediator.internal.ApiUtils;
@@ -33,27 +33,17 @@ import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.SMSMessagingService;
+import com.wso2telco.dep.mediator.util.ConfigFileReader;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
-import com.wso2telco.dep.mediator.util.FileNames;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
-import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.northbound.ValidateNBSubscription;
-import com.wso2telco.dep.operatorservice.model.OperatorSubscriptionDTO;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.json.JSONException;
 import org.json.JSONObject;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 public class SMSInboundSubscriptionsNorthboundHandler implements SMSHandler {
 
@@ -75,12 +65,6 @@ public class SMSInboundSubscriptionsNorthboundHandler implements SMSHandler {
 	/** The api utils. */
 	private ApiUtils apiUtils;
 
-	/** Configuration file */
-	private String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
-
-	/** Configuration Map */
-	private Map<String, String> mediatorConfMap;
-
 	/** JSON builder */
 	private Gson gson = new GsonBuilder().serializeNulls().create();
 
@@ -90,7 +74,6 @@ public class SMSInboundSubscriptionsNorthboundHandler implements SMSHandler {
 		occi = new OriginatingCountryCalculatorIDD();
 		smsMessagingService = new SMSMessagingService();
 		apiUtils = new ApiUtils();
-		mediatorConfMap = new FileReader().readPropertyFile(file);
 	}
 
 	@Override
@@ -150,10 +133,8 @@ public class SMSInboundSubscriptionsNorthboundHandler implements SMSHandler {
 
 		Integer moSubscriptionId = smsMessagingService.subscriptionEntry(
 				nbSubsrequst.getSubscription().getCallbackReference().getNotifyURL(), serviceProvider);
-
+		Map<String, String> mediatorConfMap = ConfigFileReader.getInstance().getMediatorConfigMap();
 		String subsEndpoint = mediatorConfMap.get("hubMOSubsGatewayEndpoint") + "/" + moSubscriptionId;
-//		jsondstaddr.getJSONObject("callbackReference").put("notifyURL", subsEndpoint);
-//		jsondstaddr.put("clientCorrelator", orgclientcl + ":" + requestid);
 
 		nbSubsrequst.getSubscription().getCallbackReference().setNotifyURL(subsEndpoint);
 
@@ -163,9 +144,6 @@ public class SMSInboundSubscriptionsNorthboundHandler implements SMSHandler {
 		log.debug("subscription northbound request body : " + gson.toJson(nbSubsrequst));
 
 		DestinationAddresses[] destinationAddresses = nbSubsrequst.getSubscription().getDestinationAddresses();
-
-//		List<OperatorSubscriptionDTO> domainsubs = new ArrayList<OperatorSubscriptionDTO>();
-//		SouthboundSubscribeRequest sbSubsresponse = null;
 
 		for (DestinationAddresses destinationAddressesObj : destinationAddresses) {
 
@@ -212,114 +190,4 @@ public class SMSInboundSubscriptionsNorthboundHandler implements SMSHandler {
 		return true;
 	}
 
-
-
-/*
-
-		for (OperatorEndpoint endpoint : endpoints) {
-
-			for (int i = 0; i < destinationAddresses.length; i++) {
-				if (destinationAddresses[i].getOperatorCode().equalsIgnoreCase(endpoint.getOperator())) {
-					log.debug("operator name: " + endpoint.getOperator());
-					SouthboundSubscribeRequest sbSubsrequst = new SouthboundSubscribeRequest();
-					Subscription sbrequest = new Subscription();
-					CallbackReference callbackReference = new CallbackReference();
-
-					callbackReference
-							.setCallbackData(nbSubsrequst.getSubscription().getCallbackReference().getCallbackData());
-					callbackReference.setNotifyURL(subsEndpoint);
-					sbrequest.setCallbackReference(callbackReference);
-					sbrequest.setClientCorrelator(orgclientcl + ":" + requestid);
-					sbrequest.setNotificationFormat(nbSubsrequst.getSubscription().getNotificationFormat());
-					sbrequest.setCriteria(destinationAddresses[i].getCriteria());
-					sbrequest.setDestinationAddress(destinationAddresses[i].getDestinationAddress());
-					sbSubsrequst.setSubscription(sbrequest);
-
-					String sbRequestBody = removeResourceURL(gson.toJson(sbSubsrequst));
-					log.debug("subscription southbound request body of " + endpoint.getOperator() + " operator: "
-							+ sbRequestBody);
-
-					String notifyres = executor.makeRequest(endpoint, endpoint.getEndpointref().getAddress(),
-							sbRequestBody, true, context,false);
-
-					log.debug("subscription southbound response body of " + endpoint.getOperator() + " operator: "
-							+ notifyres);
-
-					if (notifyres == null) {
-						destinationAddresses[i].setStatus("Failed");
-
-					} else {
-						// plugin exception handling
-						sbSubsresponse = gson.fromJson(notifyres, SouthboundSubscribeRequest.class);
-						if (sbSubsresponse.getSubscription() == null) {
-
-							destinationAddresses[i].setStatus("NotCreated");
-						} else {
-							domainsubs.add(new OperatorSubscriptionDTO(endpoint.getOperator(),
-									sbSubsresponse.getSubscription().getResourceURL()));
-							destinationAddresses[i].setStatus("Created");
-						}
-					}
-					break;
-				}
-			}
-		}
-
-		smsMessagingService.operatorSubsEntry(domainsubs, moSubscriptionId);
-
-		String ResourceUrlPrefix = mediatorConfMap.get("hubGateway");
-
-		DestinationAddresses[] responseDestinationAddresses = new DestinationAddresses[destinationAddresses.length];
-		int destinationAddressesCount = 0;
-		int successResultCount = 0;
-		for (DestinationAddresses destinationAddressesResult : destinationAddresses) {
-			String subscriptionStatus = destinationAddressesResult.getStatus();
-			if (subscriptionStatus == null) {
-				destinationAddressesResult.setStatus("Failed");
-			} else if (subscriptionStatus.equals("Created")) {
-				successResultCount++;
-			}
-			responseDestinationAddresses[destinationAddressesCount] = destinationAddressesResult;
-			destinationAddressesCount++;
-		}
-
-		if (successResultCount == 0) {
-			throw new CustomException("POL0299", "", new String[] { "Error registering subscription" });
-		}
-
-		nbSubsrequst.getSubscription().setDestinationAddresses(responseDestinationAddresses);
-		nbSubsrequst.getSubscription()
-				.setResourceURL(ResourceUrlPrefix + executor.getResourceUrl() + "/" + moSubscriptionId);
-		nbSubsrequst.getSubscription().setClientCorrelator(orgclientcl);
-		nbSubsrequst.getSubscription().getCallbackReference().setNotifyURL(origNotiUrl);
-
-		String nbResponseBody = gson.toJson(nbSubsrequst);
-
-		log.debug("subscription northbound response body : " + nbResponseBody);
-
-		executor.removeHeaders(context);
-		((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 201);
-		executor.setResponse(context, nbResponseBody.toString());
-
-*/
-
-	/*private String removeResourceURL(String request) {
-
-		String sbrequestString = "";
-
-		try {
-
-			JSONObject objJSONObject = new JSONObject(request);
-			JSONObject objSubscriptionRequest = (JSONObject) objJSONObject.get("subscription");
-			objSubscriptionRequest.remove("resourceURL");
-
-			sbrequestString = objSubscriptionRequest.toString();
-		} catch (JSONException ex) {
-
-			log.error("error in removeResourceURL" + ex.getMessage());
-			throw new CustomException("POL0299", "", new String[] { "Error registering subscription" });
-		}
-
-		return "{\"subscription\":" + sbrequestString + "}";
-	}*/
 }

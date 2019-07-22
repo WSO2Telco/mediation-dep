@@ -17,7 +17,10 @@
  */
 package com.wso2telco.dep.mediator.impl.payment;
 
-import com.wso2telco.core.dbutils.fileutils.FileReader;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
@@ -27,7 +30,10 @@ import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.PaymentService;
-import com.wso2telco.dep.mediator.util.*;
+import com.wso2telco.dep.mediator.util.APIType;
+import com.wso2telco.dep.mediator.util.ConfigFileReader;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
+import com.wso2telco.dep.mediator.util.ValidationUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.payment.ValidatePaymentCharge;
@@ -38,12 +44,6 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -84,9 +84,7 @@ public class AmountChargeHandler implements PaymentHandler {
 
 		String requestResourceURL = executor.getResourceUrl();
 
-        FileReader fileReader = new FileReader();
-        String file = CarbonUtils.getCarbonConfigDirPath() + File.separator + FileNames.MEDIATOR_CONF_FILE.getFileName();
- 		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
+		Map<String, String> mediatorConfMap = ConfigFileReader.getInstance().getMediatorConfigMap();
 
         String hub_gateway_id = mediatorConfMap.get("hub_gateway_id");
         if (log.isDebugEnabled()) {
@@ -192,12 +190,12 @@ public class AmountChargeHandler implements PaymentHandler {
 		// set information to the message context, to be used in the sequence
         HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
         HandlerUtils.setEndpointProperty(context, sending_add);
-        HandlerUtils.setGatewayHost(context);
         HandlerUtils.setAuthorizationHeader(context, executor, endpoint);
         context.setProperty("operator", endpoint.getOperator());
         context.setProperty("requestResourceUrl", requestResourceURL);
         context.setProperty("requestID", requestId);
         context.setProperty("clientCorrelator", clientCorrelator);
+        context.setProperty("hubGateway",mediatorConfMap.get("hubGateway"));
 		context.setProperty("OPERATOR_NAME", endpoint.getOperator());
 		context.setProperty("OPERATOR_ID", endpoint.getOperatorId());
 
@@ -225,7 +223,7 @@ public class AmountChargeHandler implements PaymentHandler {
 
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
-		ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody());
+		ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody(), APIType.PAYMENT);
 		return true;
 	}
 

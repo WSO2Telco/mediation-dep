@@ -17,36 +17,6 @@
  */
 package com.wso2telco.dep.mediator.impl.smsmessaging;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import com.wso2telco.core.dbutils.fileutils.FileReader;
-import com.wso2telco.dep.mediator.MSISDNConstants;
-import com.wso2telco.dep.mediator.OperatorEndpoint;
-import com.wso2telco.dep.mediator.ResponseHandler;
-import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
-import com.wso2telco.dep.mediator.entity.smsmessaging.QuerySMSStatusResponse;
-import com.wso2telco.dep.mediator.internal.UID;
-import com.wso2telco.dep.mediator.internal.Util;
-import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
-import com.wso2telco.dep.mediator.service.SMSMessagingService;
-import com.wso2telco.dep.mediator.util.APIType;
-import com.wso2telco.dep.mediator.util.DataPublisherConstants;
-import com.wso2telco.dep.mediator.util.FileNames;
-import com.wso2telco.dep.mediator.util.HandlerUtils;
-import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
-import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
-import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.ValidateDeliveryStatus;
-import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-import org.apache.synapse.MessageContext;
-import org.apache.synapse.core.axis2.Axis2MessageContext;
-import org.json.JSONObject;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -54,6 +24,28 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import com.wso2telco.dep.mediator.MSISDNConstants;
+import com.wso2telco.dep.mediator.OperatorEndpoint;
+import com.wso2telco.dep.mediator.ResponseHandler;
+import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
+import com.wso2telco.dep.mediator.entity.smsmessaging.QuerySMSStatusResponse;
+import com.wso2telco.dep.mediator.internal.UID;
+import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
+import com.wso2telco.dep.mediator.service.SMSMessagingService;
+import com.wso2telco.dep.mediator.util.APIType;
+import com.wso2telco.dep.mediator.util.ConfigFileReader;
+import com.wso2telco.dep.mediator.util.DataPublisherConstants;
+import com.wso2telco.dep.mediator.util.HandlerUtils;
+import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
+import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
+import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.ValidateDeliveryStatus;
+import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
+import org.apache.synapse.MessageContext;
+import org.apache.synapse.core.axis2.Axis2MessageContext;
+import org.json.JSONObject;
 
 // TODO: Auto-generated Javadoc
 
@@ -206,13 +198,8 @@ public class QuerySMSStatusHandler implements SMSHandler {
 	 * @return send sms resource url
 	 */
 	private String getSendSMSResourceUrlFromFile(MessageContext mc, String senderAddress){
-		FileReader fileReader = new FileReader();
-		String file = CarbonUtils.getCarbonConfigDirPath() + File.separator
-				+ FileNames.MEDIATOR_CONF_FILE.getFileName();
 
-		Map<String, String> mediatorConfMap = fileReader.readPropertyFile(file);
-
-		String resourceURL = mediatorConfMap.get("sendSMSResourceURL");
+		String resourceURL = ConfigFileReader.getInstance().getMediatorConfigMap().get("sendSMSResourceURL");
 		if (resourceURL != null && !resourceURL.isEmpty()) {
 			resourceURL = resourceURL + senderAddress;
 		} else {
@@ -220,7 +207,6 @@ public class QuerySMSStatusHandler implements SMSHandler {
 			resourceURL = resourceURL.substring(0, resourceURL.indexOf("/requests"));
 		}
 		return resourceURL;
-
 	}
 
 

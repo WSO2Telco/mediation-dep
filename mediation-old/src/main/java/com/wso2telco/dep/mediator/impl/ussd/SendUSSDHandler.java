@@ -17,7 +17,6 @@
  */
 package com.wso2telco.dep.mediator.impl.ussd;
 
-import com.wso2telco.core.dbutils.fileutils.FileReader;
 import com.wso2telco.dep.mediator.MSISDNConstants;
 import com.wso2telco.dep.mediator.OperatorEndpoint;
 import com.wso2telco.dep.mediator.entity.OparatorEndPointSearchDTO;
@@ -27,9 +26,10 @@ import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.USSDService;
 import com.wso2telco.dep.mediator.util.APIType;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
-import com.wso2telco.dep.mediator.util.FileNames;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
+import com.wso2telco.dep.mediator.util.ValidationUtils;
 import com.wso2telco.dep.oneapi.constant.ussd.USSDKeyConstants;
+import com.wso2telco.dep.oneapi.constant.ussd.USSDValueConstants;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.ussd.ValidateUssdSend;
@@ -40,10 +40,6 @@ import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
-import org.wso2.carbon.utils.CarbonUtils;
-
-import java.io.File;
-import java.util.Map;
 
 // TODO: Auto-generated Javadoc
 
@@ -55,9 +51,6 @@ public class SendUSSDHandler implements USSDHandler {
 	/** The log. */
 	private Log log = LogFactory.getLog(SendUSSDHandler.class);
 
-	/** The Constant API_TYPE. */
-	private static final String API_TYPE = "ussd";
-
 	/** The occi. */
 	private OriginatingCountryCalculatorIDD occi;
 
@@ -66,12 +59,6 @@ public class SendUSSDHandler implements USSDHandler {
 
 	/** The ussdDAO. */
 	private USSDService ussdService;
-
-	/** Configuration file */
-	private String file = CarbonUtils.getCarbonConfigDirPath() + File.separator	+ FileNames.MEDIATOR_CONF_FILE.getFileName();
-
-	/** Loaded configurations */
-	private Map<String, String> mediatorConfMap;
 
 	/**
 	 * Instantiates a new send ussd handler.
@@ -83,7 +70,6 @@ public class SendUSSDHandler implements USSDHandler {
 		occi = new OriginatingCountryCalculatorIDD();
 		this.executor = executor;
 		ussdService = new USSDService();
-		mediatorConfMap = new FileReader().readPropertyFile(file);
 	}
 
 	/*
@@ -96,8 +82,8 @@ public class SendUSSDHandler implements USSDHandler {
 	@Override
 	public boolean handle(MessageContext context) throws CustomException, AxisFault, Exception {
 
-		String requestid = UID.getUniqueID(Type.SEND_USSD.getCode(), context, executor.getApplicationid());
-		JSONObject jsonBody = executor.getJsonBody();
+        String requestid = UID.getUniqueID(Type.SEND_USSD.getCode(), context, executor.getApplicationid());
+        JSONObject jsonBody = executor.getJsonBody();
 
 		String address = jsonBody.getJSONObject(USSDKeyConstants.OUT_BOUND_USSD_MESSAGE_REQUEST)
 				.getString(USSDKeyConstants.ADDRESS);
@@ -135,17 +121,17 @@ public class SendUSSDHandler implements USSDHandler {
 
 		if (!jsonBody.getJSONObject(USSDKeyConstants.OUT_BOUND_USSD_MESSAGE_REQUEST)
 				.isNull(USSDKeyConstants.RESPONSE_REQUEST)) {
-      
+
 			JSONObject responseRequest = jsonBody.getJSONObject(USSDKeyConstants.OUT_BOUND_USSD_MESSAGE_REQUEST)
 					.getJSONObject(USSDKeyConstants.RESPONSE_REQUEST);
 			if (!responseRequest.isNull(USSDKeyConstants.NOTIFY_URL)) {
-        
+
 				String notifyUrl = responseRequest.getString(USSDKeyConstants.NOTIFY_URL).trim();
 				if (!notifyUrl.isEmpty()) {
 					Integer subscriptionId = ussdService.ussdRequestEntry(notifyUrl, consumerKey, endpoint.getOperator(), userId);
 					log.info("created subscriptionId  -  " + subscriptionId + " Request ID: " + UID.getRequestID(context));
 
-					String subsEndpoint = mediatorConfMap.get("ussdGatewayEndpoint") + subscriptionId;
+					String subsEndpoint = ConfigFileReader.getInstance().getMediatorConfigMap().get("ussdGatewayEndpoint") + subscriptionId;
 					log.info("Subsendpoint - " + subsEndpoint + " Request ID: " + UID.getRequestID(context));
 					context.setProperty("subsEndPoint", subsEndpoint);
 				}
@@ -189,11 +175,10 @@ public class SendUSSDHandler implements USSDHandler {
 			throw new Exception("Method not allowed");
 		}
 
-		IServiceValidate validator;
-
-		validator = new ValidateUssdSend();
+        IServiceValidate validator = new ValidateUssdSend();
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
+		ValidationUtils.compareMsisdn(requestPath, jsonBody, APIType.USSD);
 
 		return true;
 	}

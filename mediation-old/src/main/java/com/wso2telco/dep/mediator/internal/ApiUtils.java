@@ -17,6 +17,15 @@
  */
 package com.wso2telco.dep.mediator.internal;
 
+import java.security.MessageDigest;
+import java.util.ArrayList;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.Hashtable;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+
 import com.wso2telco.dep.mediator.entity.smsmessaging.northbound.InboundSMSMessage;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import org.apache.commons.logging.Log;
@@ -26,14 +35,6 @@ import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
-
-import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
 
 // TODO: Auto-generated Javadoc
 
@@ -246,7 +247,7 @@ public class ApiUtils {
 				Map headersMap = (Map) headers;
 				String jwtparam = (String) headersMap.get("x-jwt-assertion");
 				String[] jwttoken = jwtparam.split("\\.");
-				String jwtbody = Base64Coder.decodeString(jwttoken[1]);
+				String jwtbody = new String(Base64.getMimeDecoder().decode(jwttoken[1]));
 				JSONObject jwtobj = new JSONObject(jwtbody);
 				jwtDetails.put("applicationid", jwtobj
 						.getString("http://wso2.org/claims/applicationid"));
