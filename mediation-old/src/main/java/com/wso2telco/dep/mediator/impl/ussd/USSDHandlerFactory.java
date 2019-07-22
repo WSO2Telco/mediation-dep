@@ -49,7 +49,13 @@ public class USSDHandlerFactory {
         USSDHandler handler = null;
 
 		if (ResourceURL.toLowerCase().contains(moUssdSubsciption.toLowerCase())) {
-			if ((!lastWord.equals(subscriptions))) {
+        /**
+         * adding dirty fix for EXTGW-323
+         * Need to refactor based on a proper logic to create handlers. all of these are based only on the URL pattern
+         * At the moment only stop subscriptions has HTTP.DELETE
+         * Reported an improvement EXTGW-375
+         */
+			if (!lastWord.equals(subscriptions) || executor.getHttpMethod().equalsIgnoreCase("DELETE")) {
 				handler = new SouthBoundStopMOUSSDSubscriptionHandler(executor);
 			} else {
 				try {
