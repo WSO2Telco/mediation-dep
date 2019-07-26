@@ -196,7 +196,8 @@ public class AmountRefundHandler implements PaymentHandler {
 
             JSONObject paymentAmount = objAmountTransaction.getJSONObject("paymentAmount");
 
-            if (paymentAmount.has("chargingMetaData")) {
+            if (paymentAmount.has("chargingMetaData") &&
+                    !objAmountTransaction.getJSONObject("paymentAmount").isNull("chargingMetaData")) {
 
                 JSONObject chargingMetaData = paymentAmount.getJSONObject("chargingMetaData");
                 boolean isAggregator = PaymentUtil.isAggregator(context);
