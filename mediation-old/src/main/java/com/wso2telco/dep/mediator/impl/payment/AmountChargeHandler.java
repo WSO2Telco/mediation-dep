@@ -159,7 +159,7 @@ public class AmountChargeHandler implements PaymentHandler {
             }
 
             sendingAddress = PaymentUtil.decodeSendingAddressIfMasked(executor, context, sendingAddress);
-            JSONObject objAmountTransaction = jsonBody.getJSONObject("amountTransaction");
+            JSONObject objAmountTransaction = jsonBody.getJSONObject(AttributeConstants.AMOUNT_TRANSACTION);
             if (!objAmountTransaction.isNull(AttributeConstants.CLIENT_CORRELATOR)) {
                 clientCorrelator = nullOrTrimmed(objAmountTransaction.get(AttributeConstants.CLIENT_CORRELATOR).toString());
             }
@@ -183,10 +183,11 @@ public class AmountChargeHandler implements PaymentHandler {
                 clientCorrelator = clientCorrelator + ":" + hubGatewayId + ":" + appId;
             }
 
-            if (objAmountTransaction.getJSONObject("paymentAmount").has("chargingMetaData") &&
-                    !objAmountTransaction.getJSONObject("paymentAmount").isNull("chargingMetaData")) {
+            JSONObject paymentAmount = objAmountTransaction.getJSONObject(AttributeConstants.PAYMENT_AMOUNT);
+            if (paymentAmount.has(AttributeConstants.CHARGING_META_DATA) &&
+                    !paymentAmount.isNull(AttributeConstants.CHARGING_META_DATA)) {
 
-                JSONObject chargingMeta = objAmountTransaction.getJSONObject("paymentAmount").getJSONObject("chargingMetaData");
+                JSONObject chargingMeta = paymentAmount.getJSONObject(AttributeConstants.CHARGING_META_DATA);
 
                 boolean isAggregator = PaymentUtil.isAggregator(context);
 

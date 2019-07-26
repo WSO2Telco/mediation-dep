@@ -29,14 +29,11 @@ import com.wso2telco.dep.mediator.internal.AggregatorValidator;
 import com.wso2telco.dep.mediator.internal.ApiUtils;
 import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
-import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.PaymentService;
 import com.wso2telco.dep.mediator.util.*;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.payment.ValidateRefund;
-import com.wso2telco.dep.subscriptionvalidator.util.ValidatorUtils;
-import com.wso2telco.dep.user.masking.configuration.UserMaskingConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.http.HttpStatus;
@@ -45,7 +42,6 @@ import org.apache.synapse.MessageContext;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONException;
 import org.json.JSONObject;
-import org.wso2.carbon.utils.CarbonUtils;
 
 import java.io.File;
 import java.util.HashMap;
@@ -194,12 +190,12 @@ public class AmountRefundHandler implements PaymentHandler {
                 clientCorrelator = clientCorrelator + ":" + hubGatewayId + ":" + appId;
             }
 
-            JSONObject paymentAmount = objAmountTransaction.getJSONObject("paymentAmount");
+            JSONObject paymentAmount = objAmountTransaction.getJSONObject(AttributeConstants.PAYMENT_AMOUNT);
 
-            if (paymentAmount.has("chargingMetaData") &&
-                    !objAmountTransaction.getJSONObject("paymentAmount").isNull("chargingMetaData")) {
+            if (paymentAmount.has(AttributeConstants.CHARGING_META_DATA) &&
+                    !paymentAmount.isNull(AttributeConstants.CHARGING_META_DATA)) {
 
-                JSONObject chargingMetaData = paymentAmount.getJSONObject("chargingMetaData");
+                JSONObject chargingMetaData = paymentAmount.getJSONObject(AttributeConstants.CHARGING_META_DATA);
                 boolean isAggregator = PaymentUtil.isAggregator(context);
 
                 if (isAggregator && !chargingMetaData.isNull("onBehalfOf")) {

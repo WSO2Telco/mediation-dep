@@ -22,5 +22,7 @@ public class AttributeConstants {
     public static final String AMOUNT_TRANSACTION = "amountTransaction";
     public static final String CLIENT_CORRELATOR = "clientCorrelator";
     public static final String PURCHASE_CATEGORY_CODE = "purchaseCategoryCode";
+    public static final String CHARGING_META_DATA = "chargingMetaData";
+    public static final String PAYMENT_AMOUNT = "paymentAmount";
 
 }
