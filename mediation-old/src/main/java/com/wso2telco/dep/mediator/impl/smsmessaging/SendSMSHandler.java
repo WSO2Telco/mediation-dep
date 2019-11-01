@@ -226,7 +226,7 @@ public class SendSMSHandler extends AbstractHandler{
 
 		if(subsrequest.getOutboundSMSMessageRequest().getReceiptRequest() != null){
 			String notifyURL = subsrequest.getOutboundSMSMessageRequest().getReceiptRequest().getNotifyURL();
-			if(notifyURL != null && !(notifyURL.equals("")) && !notifyURL.isEmpty()) {
+			if(notifyURL != null && !notifyURL.isEmpty()) {
 				HashMap<String, String> jwtDetails = apiUtils.getJwtTokenDetails(context);
 				String serviceProvider = jwtDetails.get("subscriber");
 				log.debug("Subscriber Name : " + serviceProvider);
