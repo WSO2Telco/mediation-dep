@@ -224,16 +224,18 @@ public class SendSMSHandler extends AbstractHandler{
 			encodedSenderAddress = senderAddress;
 		}
 
-		String notifyURL = subsrequest.getOutboundSMSMessageRequest().getReceiptRequest().getNotifyURL();
-		if(notifyURL != null && !(notifyURL.equals("")) && !notifyURL.isEmpty()) {
-			HashMap<String, String> jwtDetails = apiUtils.getJwtTokenDetails(context);
-			String serviceProvider = jwtDetails.get("subscriber");
-			log.debug("Subscriber Name : " + serviceProvider);
-			String hubDNSubsGatewayEndpoint = mediatorConfMap.get("hubSubsGatewayEndpoint");
-			log.debug("Hub / Gateway DN Notify URL : " + hubDNSubsGatewayEndpoint);
-			int dnSubscriptionId = smsMessagingService.outboundSubscriptionEntry(notifyURL, serviceProvider);
-	        String subsEndpoint = hubDNSubsGatewayEndpoint + "/" + dnSubscriptionId;
-			context.setProperty("notifyURL", subsEndpoint);
+		if(subsrequest.getOutboundSMSMessageRequest().getReceiptRequest() != null){
+			String notifyURL = subsrequest.getOutboundSMSMessageRequest().getReceiptRequest().getNotifyURL();
+			if(notifyURL != null && !(notifyURL.equals("")) && !notifyURL.isEmpty()) {
+				HashMap<String, String> jwtDetails = apiUtils.getJwtTokenDetails(context);
+				String serviceProvider = jwtDetails.get("subscriber");
+				log.debug("Subscriber Name : " + serviceProvider);
+				String hubDNSubsGatewayEndpoint = mediatorConfMap.get("hubSubsGatewayEndpoint");
+				log.debug("Hub / Gateway DN Notify URL : " + hubDNSubsGatewayEndpoint);
+				int dnSubscriptionId = smsMessagingService.outboundSubscriptionEntry(notifyURL, serviceProvider);
+				String subsEndpoint = hubDNSubsGatewayEndpoint + "/" + dnSubscriptionId;
+				context.setProperty("notifyURL", subsEndpoint);
+			}
 		}
 
 		context.setProperty("SEND_SMS_RESOURCE_URL_PREFIX", sendSmsResourceUrlPrefix);
