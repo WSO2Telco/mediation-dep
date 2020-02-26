@@ -129,7 +129,7 @@ public class QuerySMSStatusHandler implements SMSHandler {
 		String encodedSenderAddress = URLEncoder.encode(senderAddress, "UTF-8");
 		Map<String, String> requestIdMap = smsMessagingService.getSMSRequestIds(requestId, senderAddress);
 		if (requestIdMap.keySet().isEmpty()) {
-            throw new CustomException("SVC0001", "", new String[]{"Could not complete querying SMS statuses"});
+            throw new CustomException("SVC0001", "", new String[]{"Invalid request-id and/or sender-address"});
 		}else {
 			sendStatusQueries(context, requestIdMap, encodedSenderAddress);
 		}
