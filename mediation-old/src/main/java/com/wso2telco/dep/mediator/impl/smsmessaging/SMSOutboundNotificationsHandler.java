@@ -31,6 +31,7 @@ import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.service.SMSMessagingService;
 import com.wso2telco.dep.mediator.util.ConfigFileReader;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
+import com.wso2telco.dep.mediator.util.ErrorType;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
@@ -93,9 +94,14 @@ public class SMSOutboundNotificationsHandler implements SMSHandler {
 		String moSubscriptionId = requestPath.substring(requestPath.lastIndexOf("/") + 1);
 
 		Map<String, String> mediatorConfMap = ConfigFileReader.getInstance().getMediatorConfigMap();
-
+		Integer moSubscriptionIdInt = null;
+		try{
+			moSubscriptionIdInt = Integer.valueOf(moSubscriptionId);
+		} catch (NumberFormatException e) {
+			throw new CustomException("SVC0001", "", new String[]{ErrorType.INVALID_DN_SUBSCRIPTION_ID.getMessage()});
+		}
 		HashMap<String, String> dnSubscriptionDetails = (HashMap<String, String>) smsMessagingService
-				.subscriptionDNNotifiMap(Integer.valueOf(moSubscriptionId));
+				.subscriptionDNNotifiMap(moSubscriptionIdInt);
 		String notifyurl = dnSubscriptionDetails.get("notifyurl");
 		String serviceProvider = dnSubscriptionDetails.get("serviceProvider");
 
