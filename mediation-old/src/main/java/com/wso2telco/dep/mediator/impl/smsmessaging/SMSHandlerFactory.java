@@ -162,7 +162,7 @@ public class SMSHandlerFactory {
 			JSONObject objJSONObject = executor.getJsonBody();
 			JSONObject objSubscription = objJSONObject.getJSONObject("subscription");
 
-			if (!objSubscription.isNull("destinationAddress")) {
+			if (!objSubscription.has("destinationAddresses")) {
 
 				handler = new SMSInboundSubscriptionsSouthboundHandler(executor);
 				log.debug("invoking sms inbound subscriptions handler");
