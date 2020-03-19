@@ -41,27 +41,41 @@ public final class ValidationUtils {
 	 * This method extracts userId from payload and resource url and passed to
 	 * validate whether they are same
 	 */
-	public static void compareMsisdn(String resourcePath, JSONObject jsonBody) {
+		public static void compareMsisdn(String resourcePath, JSONObject jsonBody) {
 		String urlmsisdn = null;
-		try {
-			urlmsisdn = URLDecoder.decode(resourcePath.substring(1,
-					resourcePath.indexOf("transactions") - 1), "UTF-8");
+		String payloadMsisdn = null;
 
+		try {
+			if (resourcePath.contains("transactions")) {
+				urlmsisdn = URLDecoder.decode(resourcePath.substring(1,
+						resourcePath.indexOf("transactions") - 1), "UTF-8");
+				payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId");
+
+				/*payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId")
+						.substring(5);*/
+			} else if (resourcePath.contains("outbound")) {
+				urlmsisdn = URLDecoder.decode(resourcePath.substring(
+						resourcePath.indexOf("tel"),resourcePath.indexOf("requests") - 1), "UTF-8");
+				payloadMsisdn = jsonBody.getJSONObject("outboundSMSMessageRequest").getString("senderAddress");
+			}
 		} catch (UnsupportedEncodingException e) {
 			log.debug("Url MSISDN can not be decoded ");
 		}
 		// This validation assumes that userID should be with the prefix "tel:+" and back end
 		// still does not support with other prefixes for this API.
 		// Therefore below line should be modified in future depending on requirements
-		String payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId")
-					.substring(5);
+		/*String payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId")
+					.substring(5);*/
 		
-		if(urlmsisdn != null){
-			urlmsisdn = getMsisdnNumber(urlmsisdn);
-        } else {
+		if(urlmsisdn == null){
+
+			//urlmsisdn = getMsisdnNumber(urlmsisdn);
+			log.debug("Not valid msisdn in resourceURL");
+			throw new CustomException(MSISDNConstants.SVC0002, "", new String[] {"Not valid msisdn in URL"});
+        } /*else {
            log.debug("Not valid msisdn in resourceURL");
             throw new CustomException(MSISDNConstants.SVC0002, "", new String[] {"Not valid msisdn in URL"});
-        }
+        }*/
 
         if(payloadMsisdn.equalsIgnoreCase(urlmsisdn.trim()) ){
             log.debug("msisdn in resourceURL and payload msisdn are same");
@@ -71,7 +85,6 @@ public final class ValidationUtils {
         }
 
 	}
-	
 
     /**
      * Returns array of MSISDNs without "tel:+" prefix
