@@ -43,6 +43,7 @@ import com.wso2telco.dep.mediator.service.SMSMessagingService;
 import com.wso2telco.dep.mediator.util.ConfigFileReader;
 import com.wso2telco.dep.mediator.util.DataPublisherConstants;
 import com.wso2telco.dep.mediator.util.HandlerUtils;
+import com.wso2telco.dep.mediator.util.ValidationUtils;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
 import com.wso2telco.dep.oneapivalidation.service.IServiceValidate;
 import com.wso2telco.dep.oneapivalidation.service.impl.smsmessaging.ValidateSendSms;
@@ -297,7 +298,7 @@ public class SendSMSHandler extends AbstractHandler{
 	 * java.lang.String, org.json.JSONObject, org.apache.synapse.MessageContext)
 	 */
 	@Override
-	public boolean validate(String httpMethod, String requestPath, JSONObject jsonBody, MessageContext context) throws Exception {
+		public boolean validate(String httpMethod, String requestPath, JSONObject jsonBody, MessageContext context) throws Exception {
 		if (!httpMethod.equalsIgnoreCase("POST")) {
 			((Axis2MessageContext) context).getAxis2MessageContext().setProperty("HTTP_SC", 405);
 			throw new Exception("Method not allowed");
@@ -308,6 +309,7 @@ public class SendSMSHandler extends AbstractHandler{
 		IServiceValidate validator = new ValidateSendSms();
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
+		ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody());
 
 		String senderName = jsonBody.getJSONObject("outboundSMSMessageRequest").optString("senderName");
 
