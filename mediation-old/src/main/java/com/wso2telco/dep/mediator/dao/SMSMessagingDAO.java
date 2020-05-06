@@ -271,7 +271,7 @@ public class SMSMessagingDAO {
 	/**
 	 * Gets the sms request ids.
 	 *
-	 * @param requestID
+	 * @param requestId
 	 *            the request id
 	 * @param senderAddress
 	 *            the sender address
@@ -291,12 +291,12 @@ public class SMSMessagingDAO {
 			StringBuilder queryString = new StringBuilder("SELECT delivery_address, plugin_requestid ");
 			queryString.append("FROM ");
 			queryString.append(DatabaseTables.SEND_SMS_REQID.getTableName());
-			queryString.append(" WHERE hub_requestid = ? AND sender_address = ?");
+			queryString.append(" WHERE hub_requestid = ? AND sender_address LIKE ?");
 
 			ps = con.prepareStatement(queryString.toString());
 
 			ps.setString(1, requestId);
-			ps.setString(2, senderAddress);
+			ps.setString(2, "%" + senderAddress);
 			
 			log.debug("sql query in getSMSRequestIds : " + ps);
 			

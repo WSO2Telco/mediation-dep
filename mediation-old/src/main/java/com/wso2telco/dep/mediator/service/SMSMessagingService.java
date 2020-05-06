@@ -21,6 +21,7 @@ import com.wso2telco.core.dbutils.exception.BusinessException;
 import com.wso2telco.core.dbutils.exception.GenaralError;
 import com.wso2telco.dep.mediator.dao.SMSMessagingDAO;
 import com.wso2telco.dep.mediator.util.ErrorType;
+import com.wso2telco.dep.mediator.util.ValidationUtils;
 import com.wso2telco.dep.operatorservice.model.OperatorSubscriptionDTO;
 import com.wso2telco.dep.operatorservice.util.OparatorError;
 import edu.emory.mathcs.backport.java.util.Collections;
@@ -104,8 +105,8 @@ public class SMSMessagingService {
 		Map<String, String> gatewayRequestIds = null;
 
 		try {
-
-			gatewayRequestIds = smsMessagingDAO.getSMSRequestIds(requestId, senderAddress);
+			String stripPrefixSenderAddress = ValidationUtils.getMsisdnNumber(senderAddress);
+			gatewayRequestIds = smsMessagingDAO.getSMSRequestIds(requestId, stripPrefixSenderAddress);
 		} catch (Exception e) {
 
 			throw new BusinessException(GenaralError.INTERNAL_SERVER_ERROR);
