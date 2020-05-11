@@ -144,12 +144,6 @@ public class StopInboundSMSSubscriptionsHandler implements SMSHandler {
 				);
 			}
 
-			DeleteSubscriptionRequest deleteSubscriptionRequest = new DeleteSubscriptionRequest(new DeleteSubscriptionRequestDTO(deleteOperators));
-
-			String payload = gson.toJson(deleteSubscriptionRequest);
-
-			JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), payload, true, true);
-
 			//pick the first record since this is gateway
 			OperatorSubscriptionDTO sub = domainSubs.get(0);
 
@@ -159,6 +153,9 @@ public class StopInboundSMSSubscriptionsHandler implements SMSHandler {
 					new OperatorEndpoint(new EndpointReference(sub.getDomain()), sub.getOperator()));
 			context.setProperty("subscriptionId", moSubscriptionId);
 			context.setProperty("responseResourceURL", ConfigFileReader.getInstance().getMediatorConfigMap().get("hubGateway") + executor.getApiContext()+ "/" + executor.getApiVersion() + executor.getSubResourcePath());
+			if (log.isDebugEnabled()) {
+                log.debug("StopInboundSMSSubscriptionsHandler subscriptionId: " + moSubscriptionId);
+            }
 		} else {
 			throw new CustomException("POL0001", "", new String[] { "SMS Receipt Subscription Not Found: " + moSubscriptionId });
 		}
