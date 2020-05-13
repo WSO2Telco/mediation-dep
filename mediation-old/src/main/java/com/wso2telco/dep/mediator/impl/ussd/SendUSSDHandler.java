@@ -164,11 +164,12 @@ public class SendUSSDHandler implements USSDHandler {
 			throw new Exception("Method not allowed");
 		}
 
-		IServiceValidate validator;
+		ValidateUssdSend validator;
 
 		validator = new ValidateUssdSend();
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
+		validator.compareMsisdn(requestPath, jsonBody);
 
 		return true;
 	}
