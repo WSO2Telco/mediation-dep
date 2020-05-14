@@ -87,7 +87,7 @@ public class SendUSSDHandler implements USSDHandler {
 
 		String address = jsonBody.getJSONObject(USSDKeyConstants.OUT_BOUND_USSD_MESSAGE_REQUEST)
 				.getString(USSDKeyConstants.ADDRESS);
-        String msisdn = address.substring(5);
+        String msisdn = address.startsWith("tel:")?address.substring(5):address;
 
 		String consumerKey = "";
 		String userId = "";
