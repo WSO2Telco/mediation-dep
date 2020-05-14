@@ -59,159 +59,176 @@ import java.util.Map;
  */
 public class SMSInboundNotificationsHandler implements SMSHandler {
 
-	/** The smsMessagingDAO. */
-	private SMSMessagingService smsMessagingService;
+    /**
+     * The smsMessagingDAO.
+     */
+    private SMSMessagingService smsMessagingService;
 
-	/** The executor. */
-	private SMSExecutor executor;
+    /**
+     * The executor.
+     */
+    private SMSExecutor executor;
 
-	/** The mnc queryclient. */
-	MNCQueryClient mncQueryclient = null;
+    /**
+     * The mnc queryclient.
+     */
+    MNCQueryClient mncQueryclient = null;
 
-	private static Log log = LogFactory.getLog(SMSInboundNotificationsHandler.class);
+    private static Log log = LogFactory.getLog(SMSInboundNotificationsHandler.class);
 
-	/** The Constant API_TYPE. */
-	private static final String API_TYPE = "smsmessaging";
+    /**
+     * The Constant API_TYPE.
+     */
+    private static final String API_TYPE = "smsmessaging";
 
-	private List<OperatorEndPointDTO> operatorEndpoints;
+    private List<OperatorEndPointDTO> operatorEndpoints;
 
-	/**
-	 * Instantiates a new SMS inbound notifications handler.
-	 *
-	 * @param executor
-	 *            the executor
-	 */
-	public SMSInboundNotificationsHandler(SMSExecutor executor) {
+    /**
+     * Instantiates a new SMS inbound notifications handler.
+     *
+     * @param executor the executor
+     */
+    public SMSInboundNotificationsHandler(SMSExecutor executor) {
 
-		this.executor = executor;
-		smsMessagingService = new SMSMessagingService();
-		mncQueryclient = new MNCQueryClient();
+        this.executor = executor;
+        smsMessagingService = new SMSMessagingService();
+        mncQueryclient = new MNCQueryClient();
 
-		try {
-			operatorEndpoints = new OparatorService().getOperatorEndpoints();
-		} catch (BusinessException e) {
-			log.warn("Error while retrieving operator endpoints", e);
-		}
-	}
+        try {
+            operatorEndpoints = new OparatorService().getOperatorEndpoints();
+        } catch (BusinessException e) {
+            log.warn("Error while retrieving operator endpoints", e);
+        }
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.wso2telco.mediator.impl.sms.SMSHandler#handle(org.apache.synapse.
-	 * MessageContext)
-	 */
-	@Override
-	public boolean handle(MessageContext context) throws CustomException, AxisFault, Exception {
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * com.wso2telco.mediator.impl.sms.SMSHandler#handle(org.apache.synapse.
+     * MessageContext)
+     */
+    @Override
+    public boolean handle(MessageContext context) throws CustomException, AxisFault, Exception {
 
-		String requestid = UID.getUniqueID(Type.ALERTINBOUND.getCode(), context, executor.getApplicationid());
-		log.info("Incoming MO Notification from Gateway : " + executor.getJsonBody().toString()
-                + " Request ID: " + UID.getRequestID(context));		String requestPath = executor.getSubResourcePath();
-		String moSubscriptionId = requestPath.substring(requestPath.lastIndexOf("/") + 1);
-		Map<String, String> mediatorConfMap = ConfigFileReader.getInstance().getMediatorConfigMap();
-		
-		HashMap<String, String> subscriptionDetails =(HashMap<String, String>) smsMessagingService
-				.subscriptionNotifiMap(Integer.valueOf(moSubscriptionId));
-		String notifyurl = subscriptionDetails.get("notifyurl");
-		String serviceProvider = subscriptionDetails.get("serviceProvider");
+        String requestid = UID.getUniqueID(Type.ALERTINBOUND.getCode(), context, executor.getApplicationid());
+        log.info("Incoming MO Notification from Gateway : " + executor.getJsonBody().toString()
+                + " Request ID: " + UID.getRequestID(context));
+        String requestPath = executor.getSubResourcePath();
 
-		String notifyurlRoute = notifyurl;
-		String requestRouterUrl = mediatorConfMap.get("requestRouterUrl");
-		if (requestRouterUrl != null) {
-			notifyurlRoute = requestRouterUrl + notifyurlRoute;
-		}
+        int moSubscriptionId = 0;
+        try {
+            moSubscriptionId = Integer.valueOf(requestPath.substring(requestPath.lastIndexOf("/") + 1));
+        } catch (NumberFormatException n) {
+            throw new CustomException("SVC0001", "", new String[] { "Invalid  subscription id" });
+        }
+        Map<String, String> mediatorConfMap = ConfigFileReader.getInstance().getMediatorConfigMap();
 
-		// Date Time issue
-		Gson gson = new GsonBuilder().serializeNulls().create();
-		InboundRequest inboundRequest = gson.fromJson(executor.getJsonBody().toString(), InboundRequest.class);
+        HashMap<String, String> subscriptionDetails = (HashMap<String, String>) smsMessagingService
+                .subscriptionNotifiMap(moSubscriptionId);
+        String notifyurl = subscriptionDetails.get("notifyurl");
+        if(notifyurl == null){
+            throw new CustomException("SVC0001", "", new String[] { "SMS Receipt Subscription Not Found: "+moSubscriptionId });
+        }
+        String serviceProvider = subscriptionDetails.get("serviceProvider");
 
-		DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		// get current date time with Date()
-		Date date = new Date();
-		String currentDate = dateFormat.format(date);
-		String formattedDate = currentDate.replace(' ', 'T');
+        String notifyurlRoute = notifyurl;
+        String requestRouterUrl = mediatorConfMap.get("requestRouterUrl");
+        if (requestRouterUrl != null) {
+            notifyurlRoute = requestRouterUrl + notifyurlRoute;
+        }
 
-		inboundRequest.getInboundSMSMessageRequest().getInboundSMSMessage().setdateTime(formattedDate);
-		String formattedString = gson.toJson(inboundRequest);
-		String mcc = null;
-		String operatormar = "+";
-		//String operator = mncQueryclient.QueryNetwork(mcc, operatormar.concat(inboundRequest.getInboundSMSMessageRequest().getInboundSMSMessage().getSenderAddress()));
-		
-		String msisdn = inboundRequest.getInboundSMSMessageRequest().getInboundSMSMessage().getSenderAddress();
-		context.setProperty(MSISDNConstants.MSISDN, msisdn);
-		if (msisdn.startsWith("tel:")) {
-			String[] params = inboundRequest.getInboundSMSMessageRequest().getInboundSMSMessage().getSenderAddress().split(":");
-			if (params[1].startsWith("+")) {
-				msisdn = params[1];
-			} else {
-				msisdn = operatormar.concat(params[1]);
-			}
-		}
-		String operator = mncQueryclient.QueryNetwork(mcc, msisdn);
+        // Date Time issue
+        Gson gson = new GsonBuilder().serializeNulls().create();
+        InboundRequest inboundRequest = gson.fromJson(executor.getJsonBody().toString(), InboundRequest.class);
+
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        // get current date time with Date()
+        Date date = new Date();
+        String currentDate = dateFormat.format(date);
+        String formattedDate = currentDate.replace(' ', 'T');
+
+        inboundRequest.getInboundSMSMessageRequest().getInboundSMSMessage().setdateTime(formattedDate);
+        String formattedString = gson.toJson(inboundRequest);
+        String mcc = null;
+        String operatormar = "+";
+        //String operator = mncQueryclient.QueryNetwork(mcc, operatormar.concat(inboundRequest.getInboundSMSMessageRequest().getInboundSMSMessage().getSenderAddress()));
+
+        String msisdn = inboundRequest.getInboundSMSMessageRequest().getInboundSMSMessage().getSenderAddress();
+        context.setProperty(MSISDNConstants.MSISDN, msisdn);
+        if (msisdn.startsWith("tel:")) {
+            String[] params = inboundRequest.getInboundSMSMessageRequest().getInboundSMSMessage().getSenderAddress().split(":");
+            if (params[1].startsWith("+")) {
+                msisdn = params[1];
+            } else {
+                msisdn = operatormar.concat(params[1]);
+            }
+        }
+        String operator = mncQueryclient.QueryNetwork(mcc, msisdn);
 //		context.setProperty(DataPublisherConstants.MSISDN, msisdn);
-		context.setProperty("MSISDN", msisdn);
+        context.setProperty("MSISDN", msisdn);
 
-		//context.setProperty(DataPublisherConstants.MSISDN,inboundRequest.getInboundSMSMessageRequest().getInboundSMSMessage().getSenderAddress());
-		context.setProperty(DataPublisherConstants.OPERATOR_ID, operator);
-		context.setProperty(APIMgtGatewayConstants.USER_ID, serviceProvider);
+        //context.setProperty(DataPublisherConstants.MSISDN,inboundRequest.getInboundSMSMessageRequest().getInboundSMSMessage().getSenderAddress());
+        context.setProperty(DataPublisherConstants.OPERATOR_ID, operator);
+        context.setProperty(APIMgtGatewayConstants.USER_ID, serviceProvider);
 
-		// set the modified payload to message context
-		JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), formattedString, true, true);
+        // set the modified payload to message context
+        JsonUtil.newJsonPayload(((Axis2MessageContext) context).getAxis2MessageContext(), formattedString, true, true);
 
-		// set auth header, endpoint and handler to message context
-		// TODO: check if this is the correct way to obtain a token for northbound call
-		HandlerUtils.setAuthorizationHeader(context, executor, new OperatorEndpoint(new EndpointReference(notifyurl), null));
-		HandlerUtils.setEndpointProperty(context, notifyurlRoute);
-		HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
+        // set auth header, endpoint and handler to message context
+        // TODO: check if this is the correct way to obtain a token for northbound call
+        HandlerUtils.setAuthorizationHeader(context, executor, new OperatorEndpoint(new EndpointReference(notifyurl), null));
+        HandlerUtils.setEndpointProperty(context, notifyurlRoute);
+        HandlerUtils.setHandlerProperty(context, this.getClass().getSimpleName());
 
-		int operatorId = getValidEndpoints(API_TYPE, operator).getOperatorid();
+        int operatorId = getValidEndpoints(API_TYPE, operator).getOperatorid();
 
-		context.setProperty("OPERATOR_NAME", operator);
-		context.setProperty("OPERATOR_ID", operatorId);
+        context.setProperty("OPERATOR_NAME", operator);
+        context.setProperty("OPERATOR_ID", operatorId);
 
-		return true;
-	}
+        return true;
+    }
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see
-	 * com.wso2telco.mediator.impl.sms.SMSHandler#validate(java.lang.String,
-	 * java.lang.String, org.json.JSONObject, org.apache.synapse.MessageContext)
-	 */
-	@Override
-	public boolean validate(String httpMethod, String requestPath, JSONObject jsonBody, MessageContext context) throws Exception {
+    /*
+     * (non-Javadoc)
+     *
+     * @see
+     * com.wso2telco.mediator.impl.sms.SMSHandler#validate(java.lang.String,
+     * java.lang.String, org.json.JSONObject, org.apache.synapse.MessageContext)
+     */
+    @Override
+    public boolean validate(String httpMethod, String requestPath, JSONObject jsonBody, MessageContext context) throws Exception {
 
-		if (!httpMethod.equalsIgnoreCase("POST")) {
-			((Axis2MessageContext) context).getAxis2MessageContext()
-			                               .setProperty("HTTP_SC", 405);
-			throw new Exception("Method not allowed");
-		}
+        if (!httpMethod.equalsIgnoreCase("POST")) {
+            ((Axis2MessageContext) context).getAxis2MessageContext()
+                    .setProperty("HTTP_SC", 405);
+            throw new Exception("Method not allowed");
+        }
 
-		IServiceValidate validator = new ValidateInboundSMSMessageNotification();
-		validator.validateUrl(requestPath);
-		validator.validate(jsonBody.toString());
-		return true;
-	}
+        IServiceValidate validator = new ValidateInboundSMSMessageNotification();
+        validator.validateUrl(requestPath);
+        validator.validate(jsonBody.toString());
+        return true;
+    }
 
-	/**
-	 * Gets the valid endpoints.
-	 *
-	 * @param api             the api
-	 * @param validoperator   the validoperator
-	 * @return the valid endpoints
-	 */
-	private OperatorEndPointDTO getValidEndpoints(String api, final String validoperator) {
+    /**
+     * Gets the valid endpoints.
+     *
+     * @param api           the api
+     * @param validoperator the validoperator
+     * @return the valid endpoints
+     */
+    private OperatorEndPointDTO getValidEndpoints(String api, final String validoperator) {
 
-		OperatorEndPointDTO validoperendpoint = null;
+        OperatorEndPointDTO validoperendpoint = null;
 
-		for (OperatorEndPointDTO d : operatorEndpoints) {
-			if ((d.getApi().equalsIgnoreCase(api)) && (validoperator.equalsIgnoreCase(d.getOperatorcode()) ) ) {
-				validoperendpoint = d;
-				break;
-			}
-		}
+        for (OperatorEndPointDTO d : operatorEndpoints) {
+            if ((d.getApi().equalsIgnoreCase(api)) && (validoperator.equalsIgnoreCase(d.getOperatorcode()))) {
+                validoperendpoint = d;
+                break;
+            }
+        }
 
-		return validoperendpoint;
-	}
+        return validoperendpoint;
+    }
 }
