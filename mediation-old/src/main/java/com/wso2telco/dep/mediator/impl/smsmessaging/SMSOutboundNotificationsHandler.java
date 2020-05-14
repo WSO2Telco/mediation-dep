@@ -103,6 +103,9 @@ public class SMSOutboundNotificationsHandler implements SMSHandler {
 		HashMap<String, String> dnSubscriptionDetails = (HashMap<String, String>) smsMessagingService
 				.subscriptionDNNotifiMap(moSubscriptionIdInt);
 		String notifyurl = dnSubscriptionDetails.get("notifyurl");
+		if(notifyurl == null){
+			throw new CustomException("SVC0001", "", new String[] { "SMS Receipt Subscription Not Found: "+moSubscriptionIdInt });
+		}
 		String serviceProvider = dnSubscriptionDetails.get("serviceProvider");
 
 		String notifyurlRoute = notifyurl;
