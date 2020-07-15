@@ -113,26 +113,9 @@ public class SouthBoundMOUSSDSubscribeHandler implements USSDHandler {
         context.setProperty("operator", endpoint.getOperator());
         context.setProperty("requestResourceUrl", executor.getResourceUrl());
         context.setProperty("subscriptionID", subscriptionId);
-
         
-        //==============SET OPERATOR ID & OPERATOR NAME
-        String address ="";//TODO        
-        //OperatorEndpoint endpoint = null;
-        
-		String filteredAddress = address.replace("etel:", "").replace("tel:", "");
-		if (!filteredAddress.startsWith("+")) {
-			filteredAddress = "+" + filteredAddress;
-		}
-		
-		if (ValidatorUtils.getValidatorForSubscriptionFromMessageContext(context).validate(context)) {
-			endpoint = occi.getAPIEndpointsByMSISDN(filteredAddress, API_TYPE,
-					executor.getSubResourcePath(), false, executor.getValidoperators(context));
-		}
-		context.setProperty("operator", endpoint.getOperator());
 		context.setProperty("OPERATOR_NAME", endpoint.getOperator());
-		context.setProperty("OPERATOR_ID", endpoint.getOperatorId());        
-		//==============SET OPERATOR ID & OPERATOR NAME            
-        
+		context.setProperty("OPERATOR_ID", endpoint.getOperatorId());
         
         return true;
     }
