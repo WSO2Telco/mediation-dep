@@ -55,9 +55,17 @@ public final class ValidationUtils {
 						.substring(5);*/
 			} else if (resourcePath.contains("outbound")) {
 				if (!resourcePath.contains("+")) {
-					urlmsisdn = URLDecoder.decode(resourcePath.substring(
-							resourcePath.indexOf("tel"),resourcePath.indexOf("requests") - 1), "UTF-8");
+					if (resourcePath.contains("tel")) {
+						//tel: | tel%3A%2B | tel%3A
+						urlmsisdn = URLDecoder.decode(resourcePath.substring(
+								resourcePath.indexOf("tel"),resourcePath.indexOf("requests") - 1), "UTF-8");
+					} else {
+						//without prefix
+						urlmsisdn = resourcePath.substring(
+								resourcePath.indexOf("outbound") + 9,resourcePath.indexOf("requests") - 1);
+					}
 				} else {
+					//tel:+
 					urlmsisdn = resourcePath.substring(
 							resourcePath.indexOf("tel"),resourcePath.indexOf("requests") - 1);
 				}
