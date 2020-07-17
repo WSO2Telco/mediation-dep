@@ -54,8 +54,13 @@ public final class ValidationUtils {
 				/*payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId")
 						.substring(5);*/
 			} else if (resourcePath.contains("outbound")) {
-				urlmsisdn = URLDecoder.decode(resourcePath.substring(
-						resourcePath.indexOf("tel"),resourcePath.indexOf("requests") - 1), "UTF-8");
+				if (!resourcePath.contains("+")) {
+					urlmsisdn = URLDecoder.decode(resourcePath.substring(
+							resourcePath.indexOf("tel"),resourcePath.indexOf("requests") - 1), "UTF-8");
+				} else {
+					urlmsisdn = resourcePath.substring(
+							resourcePath.indexOf("tel"),resourcePath.indexOf("requests") - 1);
+				}
 				payloadMsisdn = jsonBody.getJSONObject("outboundSMSMessageRequest").getString("senderAddress");
 			}
 		} catch (UnsupportedEncodingException e) {
