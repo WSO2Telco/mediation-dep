@@ -478,7 +478,7 @@ public class SendSMSHandler extends AbstractHandler{
 			int count = textMessage.length();
 			log.debug("Character count of text message : " + count);
 			if (count > 0) {
-				if (CharMatcher.ASCII.matchesAllOf(textMessage)) {
+				if (CharMatcher.ascii().matchesAllOf(textMessage)) {
 					log.debug("ASCII MESSAGE");
 					int tempSMSCount = count / asciiMessageLength;
 					int tempRem = count % asciiMessageLength;
