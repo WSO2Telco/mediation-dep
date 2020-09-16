@@ -54,22 +54,15 @@ public final class ValidationUtils {
 				/*payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId")
 						.substring(5);*/
 			} else if (resourcePath.contains("outbound")) {
-				if (!resourcePath.contains("+")) {
-					if (resourcePath.contains("tel")) {
-						//tel: | tel%3A%2B | tel%3A
-						urlmsisdn = URLDecoder.decode(resourcePath.substring(
-								resourcePath.indexOf("tel"),resourcePath.indexOf("requests") - 1), "UTF-8");
-					} else {
-						//without prefix
-						urlmsisdn = resourcePath.substring(
-								resourcePath.indexOf("outbound") + 9,resourcePath.indexOf("requests") - 1);
-					}
-				} else {
-					//tel:+
-					urlmsisdn = resourcePath.substring(
-							resourcePath.indexOf("tel"),resourcePath.indexOf("requests") - 1);
-				}
-				payloadMsisdn = jsonBody.getJSONObject("outboundSMSMessageRequest").getString("senderAddress");
+				//use regex matcher
+				String msisdnVal = resourcePath.substring(
+						resourcePath.indexOf("outbound") + 9,resourcePath.indexOf("requests") - 1);
+
+				urlmsisdn = validateMsisdn(msisdnVal);
+
+				payloadMsisdn = validateMsisdn(jsonBody.getJSONObject("outboundSMSMessageRequest").
+						getString("senderAddress"));
+
 			}
 		} catch (UnsupportedEncodingException e) {
 			log.debug("Url MSISDN can not be decoded ");
@@ -81,14 +74,9 @@ public final class ValidationUtils {
 					.substring(5);*/
 		
 		if(urlmsisdn == null){
-
-			//urlmsisdn = getMsisdnNumber(urlmsisdn);
 			log.debug("Not valid msisdn in resourceURL");
 			throw new CustomException(MSISDNConstants.SVC0002, "", new String[] {"Not valid msisdn in URL"});
-        } /*else {
-           log.debug("Not valid msisdn in resourceURL");
-            throw new CustomException(MSISDNConstants.SVC0002, "", new String[] {"Not valid msisdn in URL"});
-        }*/
+        }
 
         if(payloadMsisdn.equalsIgnoreCase(urlmsisdn.trim()) ){
             log.debug("msisdn in resourceURL and payload msisdn are same");
@@ -96,7 +84,17 @@ public final class ValidationUtils {
             log.debug("msisdn in resourceURL and payload msisdn are not same");
             throw new CustomException(MSISDNConstants.SVC0002, "", new String[] { "Two different endUserId provided" });
         }
+	}
 
+	public static String validateMsisdn(String msisdnVal) {
+		String urlmsisdn = null;
+		boolean msisdnMatcher = msisdnVal.matches("(?:tel:|tel:\\+|tel%3A%2B|tel%3A)\\d+");
+		if (msisdnMatcher) {
+			urlmsisdn = msisdnVal.split("(?:tel:\\+|tel:|tel%3A%2B|tel%3A)")[1];
+		} else if (msisdnVal.matches("^\\d+")) {
+			urlmsisdn = msisdnVal;
+		}
+		return urlmsisdn;
 	}
 
     /**
