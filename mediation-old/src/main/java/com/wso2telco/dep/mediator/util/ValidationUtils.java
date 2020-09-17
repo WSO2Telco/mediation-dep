@@ -40,10 +40,13 @@ public final class ValidationUtils {
     /**
 	 * This method extracts userId from payload and resource url and passed to
 	 * validate whether they are same
+	 * valid msisdn values as follow
+	 * 7755, tel:7755, tel:+7755, tel%3A%2B7755, tel%3A7755
 	 */
 		public static void compareMsisdn(String resourcePath, JSONObject jsonBody) {
 		String urlmsisdn = null;
 		String payloadMsisdn = null;
+		String msisdnVal = null;
 
 		try {
 			if (resourcePath.contains("transactions")) {
@@ -51,11 +54,9 @@ public final class ValidationUtils {
 						resourcePath.indexOf("transactions") - 1), "UTF-8");
 				payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId");
 
-				/*payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId")
-						.substring(5);*/
 			} else if (resourcePath.contains("outbound")) {
 				//use regex matcher
-				String msisdnVal = resourcePath.substring(
+				msisdnVal = resourcePath.substring(
 						resourcePath.indexOf("outbound") + 9,resourcePath.indexOf("requests") - 1);
 
 				urlmsisdn = validateMsisdn(msisdnVal);
@@ -67,15 +68,11 @@ public final class ValidationUtils {
 		} catch (UnsupportedEncodingException e) {
 			log.debug("Url MSISDN can not be decoded ");
 		}
-		// This validation assumes that userID should be with the prefix "tel:+" and back end
-		// still does not support with other prefixes for this API.
-		// Therefore below line should be modified in future depending on requirements
-		/*String payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId")
-					.substring(5);*/
-		
+
 		if(urlmsisdn == null){
 			log.debug("Not valid msisdn in resourceURL");
-			throw new CustomException(MSISDNConstants.SVC0002, "", new String[] {"Not valid msisdn in URL"});
+			throw new CustomException(MSISDNConstants.SVC0004, "Invalid id found in requested URL %1",
+					new String[] {msisdnVal});
         }
 
         if(payloadMsisdn.equalsIgnoreCase(urlmsisdn.trim()) ){
