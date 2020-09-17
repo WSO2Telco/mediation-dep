@@ -67,4 +67,7 @@ public final class MSISDNConstants {
     /** The Constant SVC0002 */
     public static final String SVC0002 = "SVC0002";
 
+    /** The Constant SVC0004*/
+    public static final String SVC0004 = "SVC0004";
+
 }
