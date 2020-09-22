@@ -55,15 +55,24 @@ public final class ValidationUtils {
 				payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId");
 
 			} else if (resourcePath.contains("outbound")) {
-				//use regex matcher
-				msisdnVal = resourcePath.substring(
-						resourcePath.indexOf("outbound") + 9,resourcePath.indexOf("requests") - 1);
+				if (resourcePath.contains("requests")) {
+					//use regex matcher
+					msisdnVal = resourcePath.substring(
+							resourcePath.indexOf("outbound") + 9,resourcePath.indexOf("requests") - 1);
 
-				urlmsisdn = validateMsisdn(msisdnVal);
+					urlmsisdn = validateMsisdn(msisdnVal);
 
-				payloadMsisdn = validateMsisdn(jsonBody.getJSONObject("outboundSMSMessageRequest").
-						getString("senderAddress"));
+					payloadMsisdn = validateMsisdn(jsonBody.getJSONObject("outboundSMSMessageRequest").
+							getString("senderAddress"));
+				} else {
+					msisdnVal = resourcePath.substring(
+							resourcePath.indexOf("outbound") + 9 );
 
+					urlmsisdn = validateMsisdn(msisdnVal);
+
+					payloadMsisdn = validateMsisdn(jsonBody.getJSONObject("outboundUSSDMessageRequest").
+							getString("address"));
+				}
 			}
 		} catch (UnsupportedEncodingException e) {
 			log.debug("Url MSISDN can not be decoded ");
