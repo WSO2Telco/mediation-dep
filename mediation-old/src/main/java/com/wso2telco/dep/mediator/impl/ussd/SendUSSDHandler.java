@@ -24,10 +24,7 @@ import com.wso2telco.dep.mediator.internal.Type;
 import com.wso2telco.dep.mediator.internal.UID;
 import com.wso2telco.dep.mediator.mediationrule.OriginatingCountryCalculatorIDD;
 import com.wso2telco.dep.mediator.service.USSDService;
-import com.wso2telco.dep.mediator.util.APIType;
-import com.wso2telco.dep.mediator.util.ConfigFileReader;
-import com.wso2telco.dep.mediator.util.DataPublisherConstants;
-import com.wso2telco.dep.mediator.util.HandlerUtils;
+import com.wso2telco.dep.mediator.util.*;
 import com.wso2telco.dep.oneapi.constant.ussd.USSDKeyConstants;
 import com.wso2telco.dep.oneapi.constant.ussd.USSDValueConstants;
 import com.wso2telco.dep.oneapivalidation.exceptions.CustomException;
@@ -169,7 +166,8 @@ public class SendUSSDHandler implements USSDHandler {
 		validator = new ValidateUssdSend();
 		validator.validateUrl(requestPath);
 		validator.validate(jsonBody.toString());
-		validator.compareMsisdn(requestPath, jsonBody);
+		//validator.compareMsisdn(requestPath, jsonBody);
+		ValidationUtils.compareMsisdn(executor.getSubResourcePath(), executor.getJsonBody());
 
 		return true;
 	}
