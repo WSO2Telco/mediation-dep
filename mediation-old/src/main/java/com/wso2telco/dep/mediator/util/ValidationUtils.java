@@ -48,34 +48,33 @@ public final class ValidationUtils {
 		String payloadMsisdn = null;
 		String msisdnVal = null;
 
-		try {
-			if (resourcePath.contains("transactions")) {
-				urlmsisdn = URLDecoder.decode(resourcePath.substring(1,
-						resourcePath.indexOf("transactions") - 1), "UTF-8");
-				payloadMsisdn = jsonBody.getJSONObject("amountTransaction").getString("endUserId");
+		if (resourcePath.contains("transactions")) {
+			msisdnVal = resourcePath.substring(1, resourcePath.indexOf("transactions") - 1);
 
-			} else if (resourcePath.contains("outbound")) {
-				if (resourcePath.contains("requests")) {
-					//use regex matcher
-					msisdnVal = resourcePath.substring(
-							resourcePath.indexOf("outbound") + 9,resourcePath.indexOf("requests") - 1);
+			urlmsisdn = validateMsisdn(msisdnVal);
 
-					urlmsisdn = validateMsisdn(msisdnVal);
+			payloadMsisdn = validateMsisdn(jsonBody.getJSONObject("amountTransaction").
+					getString("endUserId"));
 
-					payloadMsisdn = validateMsisdn(jsonBody.getJSONObject("outboundSMSMessageRequest").
-							getString("senderAddress"));
-				} else {
-					msisdnVal = resourcePath.substring(
-							resourcePath.indexOf("outbound") + 9 );
+		} else if (resourcePath.contains("outbound")) {
+			if (resourcePath.contains("requests")) {
+				//use regex matcher
+				msisdnVal = resourcePath.substring(
+						resourcePath.indexOf("outbound") + 9,resourcePath.indexOf("requests") - 1);
 
-					urlmsisdn = validateMsisdn(msisdnVal);
+				urlmsisdn = validateMsisdn(msisdnVal);
 
-					payloadMsisdn = validateMsisdn(jsonBody.getJSONObject("outboundUSSDMessageRequest").
-							getString("address"));
-				}
+				payloadMsisdn = validateMsisdn(jsonBody.getJSONObject("outboundSMSMessageRequest").
+						getString("senderAddress"));
+			} else {
+				msisdnVal = resourcePath.substring(
+						resourcePath.indexOf("outbound") + 9 );
+
+				urlmsisdn = validateMsisdn(msisdnVal);
+
+				payloadMsisdn = validateMsisdn(jsonBody.getJSONObject("outboundUSSDMessageRequest").
+						getString("address"));
 			}
-		} catch (UnsupportedEncodingException e) {
-			log.debug("Url MSISDN can not be decoded ");
 		}
 
 		if(urlmsisdn == null){
