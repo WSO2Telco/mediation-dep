@@ -35,6 +35,7 @@ import org.apache.axis2.AxisFault;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.synapse.MessageContext;
+import org.apache.synapse.commons.json.JsonUtil;
 import org.apache.synapse.core.axis2.Axis2MessageContext;
 import org.json.JSONObject;
 
@@ -129,6 +130,10 @@ public class SendUSSDHandler implements USSDHandler {
                     String subsEndpoint = ConfigFileReader.getInstance().getMediatorConfigMap().get("ussdGatewayEndpoint") + subscriptionId;
                     log.info("Subsendpoint - " + subsEndpoint + " Request ID: " + UID.getRequestID(context));
                     context.setProperty("subsEndPoint", subsEndpoint);
+
+					responseRequest.put("notifyURL", notifyUrl + "/" + subscriptionId);
+					org.apache.axis2.context.MessageContext axis2MessageContext = ((Axis2MessageContext) context).getAxis2MessageContext();
+					JsonUtil.newJsonPayload(axis2MessageContext, jsonBody.toString(), true, true);
 				}
 			}
 		}
