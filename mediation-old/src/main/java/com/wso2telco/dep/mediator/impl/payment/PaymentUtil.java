@@ -84,8 +84,11 @@ public class PaymentUtil {
 				String[] jwttoken = jwtparam.split("\\.");
 				String jwtbody = new String(Base64.getMimeDecoder().decode(jwttoken[1]));
 				JSONObject jwtobj = new JSONObject(jwtbody);
-				String claimaggr = jwtobj
-						.getString("http://wso2.org/claims/role");
+				String roleClaimsKey = "http://wso2.org/claims/role";
+				if (jwtobj.has("roles")) { //custom JWT enabled
+					roleClaimsKey = "roles";
+				}
+				String claimaggr = jwtobj.getString(roleClaimsKey);
 				if (claimaggr != null) {
 					String[] allowedRoles = claimaggr.split(",");
 					for (int i = 0; i < allowedRoles.length; i++) {
