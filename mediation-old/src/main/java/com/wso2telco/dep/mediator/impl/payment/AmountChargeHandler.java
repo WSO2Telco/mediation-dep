@@ -153,7 +153,7 @@ public class AmountChargeHandler implements PaymentHandler {
                 clientCorrelator = clientCorrelator + ":" + hub_gateway_id + ":" + appId;
             }
 
-            if (objAmountTransaction.has("chargingMetaData")) {
+            if (objAmountTransaction.getJSONObject("paymentAmount").has("chargingMetaData")) {
 
                 JSONObject chargingMeta = objAmountTransaction.getJSONObject("paymentAmount").getJSONObject("chargingMetaData");
 
