@@ -170,6 +170,46 @@ public class USSDDAO {
 		return ussdSPDetails;
 	}
 
+	public List<String> getUSSDNotifyURL(Integer subscriptionId, String consumerKey) throws Exception {
+		Connection con = DbUtils.getDbConnection(DataSourceNames.WSO2TELCO_DEP_DB);
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		List<String> ussdSPDetails = null;
+
+		try {
+			if (con == null) {
+				throw new Exception("Connection not found");
+			}
+			StringBuilder queryString = new StringBuilder("SELECT notifyurl, sp_consumerKey, operatorId, userId ");
+			queryString.append("FROM ");
+			queryString.append(DatabaseTables.USSD_REQUEST_ENTRY.getTableName());
+			queryString.append(" WHERE ussd_request_did = ? AND sp_consumerKey = ?");
+
+			ps = con.prepareStatement(queryString.toString());
+			ps.setInt(1, subscriptionId);
+			ps.setString(2, consumerKey);
+			log.debug("sql query in getUSSDNotifyURL : " + ps);
+			rs = ps.executeQuery();
+			if (rs.next()) {
+				ussdSPDetails = new ArrayList<String>();
+				ussdSPDetails.add(rs.getString("notifyurl"));
+				ussdSPDetails.add(rs.getString("sp_consumerKey"));
+				ussdSPDetails.add(rs.getString("operatorId"));
+				ussdSPDetails.add(rs.getString("userId"));
+			}
+		} catch (SQLException e) {
+			log.error("database operation error in getUSSDNotify : ", e);
+			throw e;
+		} catch (Exception e) {
+
+			log.error("error in getUSSDNotify : ", e);
+			throw e;
+		} finally {
+			DbUtils.closeAllConnections(ps, con, rs);
+		}
+		return ussdSPDetails;
+	}
+
 	/**
 	 * Ussd entry delete.
 	 *

@@ -92,7 +92,7 @@ public class USSDInboundHandler implements USSDHandler {
 		subscriptionId = subscriptionId.replaceAll("[^\\d.]", "");
 		log.debug("subscriptionId - " + subscriptionId);
 		
-		List<String> ussdSPDetails = ussdService.getUSSDNotify(Integer.valueOf(subscriptionId));
+		List<String> ussdSPDetails = ussdService.getUSSDNotify(Integer.valueOf(subscriptionId), (String) context.getProperty("CONSUMER_KEY"));
 
 		if (ussdSPDetails.isEmpty()) {
 			throw new CustomException("SVC0002", "", new String[] { "Invalid SubscriptionID" });

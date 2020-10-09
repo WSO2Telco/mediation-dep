@@ -97,6 +97,23 @@ public class USSDService {
 		return notifyurls;
 	}
 
+	public List<String> getUSSDNotify(Integer subscriptionId, String consumerKey) throws Exception {
+
+		if (subscriptionId == null || subscriptionId <= 0) {
+			throw new BusinessException(ErrorType.INVALID_USSD_REQUEST_DID);
+		}
+		List<String> notifyurls;
+		try {
+			notifyurls = ussdDAO.getUSSDNotifyURL(subscriptionId, consumerKey);
+		} catch (Exception e) {
+			throw new BusinessException(GenaralError.INTERNAL_SERVER_ERROR);
+		}
+		if (notifyurls==null){
+			notifyurls = Collections.emptyList();
+		}
+		return notifyurls;
+	}
+
 	public boolean ussdEntryDelete(Integer subscriptionId) throws BusinessException {
 
 		if (subscriptionId == null || subscriptionId <= 0) {
