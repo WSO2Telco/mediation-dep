@@ -180,6 +180,23 @@ public class USSDService {
 		}
 		
 	}
+
+	public List<OperatorSubscriptionDTO> moUssdSubscriptionQuery(Integer moSubscriptionId, String consumerKey) throws Exception {
+		if (moSubscriptionId == null || moSubscriptionId <= 0) {
+			throw new BusinessException(ErrorType.INVALID_MO_SUBSCRIPTION_ID);
+		}
+		List<OperatorSubscriptionDTO> domainsubs;
+		try {
+			domainsubs = ussdDAO.moUssdSubscriptionQuery(moSubscriptionId, consumerKey);
+		} catch (Exception e) {
+			throw new BusinessException(GenaralError.INTERNAL_SERVER_ERROR);
+		}
+		if (domainsubs != null) {
+			return domainsubs;
+		} else {
+			return Collections.emptyList();
+		}
+	}
 		
 	public void moUssdSubscriptionDelete(Integer moSubscriptionId) throws BusinessException {		
 

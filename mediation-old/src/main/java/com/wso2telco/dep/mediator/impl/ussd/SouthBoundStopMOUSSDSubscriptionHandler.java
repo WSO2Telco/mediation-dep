@@ -86,7 +86,7 @@ public class SouthBoundStopMOUSSDSubscriptionHandler implements USSDHandler {
         }catch (NumberFormatException ex){
             throw new CustomException(MSISDNConstants.SVC0002, "", new String[] {ErrorConstants.INVALID_SUBSCRIPTION_ID});
         }
-        List<OperatorSubscriptionDTO> domainsubs = (dbService.moUssdSubscriptionQuery(Integer.valueOf(subscriptionId)));
+        List<OperatorSubscriptionDTO> domainsubs = dbService.moUssdSubscriptionQuery(Integer.valueOf(subscriptionId), (String) context.getProperty("CONSUMER_KEY"));
 
         if (!domainsubs.isEmpty() && domainsubs != null) {
 

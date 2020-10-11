@@ -360,6 +360,45 @@ public class USSDDAO {
 		return domainsubs;
 
 }
+
+	public List<OperatorSubscriptionDTO> moUssdSubscriptionQuery(Integer moSubscriptionId, String consumerKey) throws Exception {
+		Connection con = DbUtils.getDbConnection(DataSourceNames.WSO2TELCO_DEP_DB);
+		PreparedStatement ps = null;
+		ResultSet rs = null;
+		List<OperatorSubscriptionDTO> domainsubs = new ArrayList<>();
+		try {
+			if (con == null) {
+				throw new Exception("Connection not found");
+			}
+
+			StringBuilder queryString = new StringBuilder("SELECT domainurl, operator ");
+			queryString.append("FROM ");
+			queryString.append(DatabaseTables.MO_USSD_SUBSCRIPTIONS.getTableName());
+			queryString.append(" WHERE ussd_request_did = ");
+			queryString.append("(SELECT ussd_request_did FROM ");
+			queryString.append(DatabaseTables.USSD_REQUEST_ENTRY.getTableName());
+			queryString.append(" WHERE ussd_request_did = ? and sp_consumerKey = ?)");
+
+			ps = con.prepareStatement(queryString.toString());
+			ps.setInt(1, moSubscriptionId);
+			ps.setString(2, consumerKey);
+			log.debug("sql query in subscriptionQuery : " + ps);
+
+			rs = ps.executeQuery();
+			while (rs.next()) {
+				domainsubs.add(new OperatorSubscriptionDTO(rs.getString("operator"), rs.getString("domainurl")));
+			}
+		} catch (SQLException e) {
+			log.error("database operation error in moUssdSubscriptionQuery : ", e);
+			throw e;
+		} catch (Exception e) {
+			log.error("error in moUssdSubscriptionQuery : ", e);
+			throw e;
+		} finally {
+			DbUtils.closeAllConnections(ps, con, rs);
+		}
+		return domainsubs;
+	}
 	
 	
 	public void moUssdSubscriptionDelete(Integer moSubscriptionId) throws SQLException, Exception {
