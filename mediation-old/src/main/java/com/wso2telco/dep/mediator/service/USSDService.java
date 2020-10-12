@@ -102,6 +102,9 @@ public class USSDService {
 		if (subscriptionId == null || subscriptionId <= 0) {
 			throw new BusinessException(ErrorType.INVALID_USSD_REQUEST_DID);
 		}
+		if (consumerKey == null || consumerKey.trim().length() <= 0) {
+			throw new BusinessException(ErrorType.INVALID_CONSUMER_KEY);
+		}
 		List<String> notifyurls;
 		try {
 			notifyurls = ussdDAO.getUSSDNotifyURL(subscriptionId, consumerKey);
@@ -184,6 +187,9 @@ public class USSDService {
 	public List<OperatorSubscriptionDTO> moUssdSubscriptionQuery(Integer moSubscriptionId, String consumerKey) throws Exception {
 		if (moSubscriptionId == null || moSubscriptionId <= 0) {
 			throw new BusinessException(ErrorType.INVALID_MO_SUBSCRIPTION_ID);
+		}
+		if (consumerKey == null || consumerKey.trim().length() <= 0) {
+			throw new BusinessException(ErrorType.INVALID_CONSUMER_KEY);
 		}
 		List<OperatorSubscriptionDTO> domainsubs;
 		try {
