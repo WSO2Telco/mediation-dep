@@ -43,10 +43,11 @@ public final class ValidationUtils {
 	 * valid msisdn values as follow
 	 * 7755, tel:7755, tel:+7755, tel%3A%2B7755, tel%3A7755
 	 */
-		public static void compareMsisdn(String resourcePath, JSONObject jsonBody) {
+    public static void compareMsisdn(String resourcePath, JSONObject jsonBody) {
 		String urlmsisdn = null;
 		String payloadMsisdn = null;
 		String msisdnVal = null;
+		boolean isSendSMS = false;
 
 		if (resourcePath.contains("transactions")) {
 			msisdnVal = resourcePath.substring(1, resourcePath.indexOf("transactions") - 1);
@@ -58,6 +59,7 @@ public final class ValidationUtils {
 
 		} else if (resourcePath.contains("outbound")) {
 			if (resourcePath.contains("requests")) {
+				isSendSMS = true;
 				//use regex matcher
 				msisdnVal = resourcePath.substring(
 						resourcePath.indexOf("outbound") + 9,resourcePath.indexOf("requests") - 1);
@@ -86,8 +88,13 @@ public final class ValidationUtils {
         if(payloadMsisdn.equalsIgnoreCase(urlmsisdn.trim()) ){
             log.debug("msisdn in resourceURL and payload msisdn are same");
         } else {
-            log.debug("msisdn in resourceURL and payload msisdn are not same");
-            throw new CustomException(MSISDNConstants.SVC0002, "", new String[] { "Two different endUserId provided" });
+        	if (isSendSMS) {
+				log.debug("msisdn in resourceURL and payload msisdn are not same");
+				throw new CustomException(MSISDNConstants.SVC0002, "", new String[]{"Two different senderAddress provided"});
+			} else {
+				log.debug("msisdn in resourceURL and payload msisdn are not same");
+				throw new CustomException(MSISDNConstants.SVC0002, "", new String[]{"Two different endUserId provided"});
+			}
         }
 	}
 
